@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "/generated/auth/";
+
+service AuthService {
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+}
+
+message AuthenticateRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticateResponse {
+  string user_id = 1;
+  string role = 2;
+  string token = 3;
+}
+
+message AuthorizeRequest {
+  string token = 1;
+  string required_role = 2;
+}
+
+message AuthorizeResponse {
+  bool authorized = 1;
+}
