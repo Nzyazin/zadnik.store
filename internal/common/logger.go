@@ -8,6 +8,10 @@ type Logger interface {
 	Warnf(format string, args ...interface{})
 }
 
+func NewSimpleLogger() *SimpleLogger {
+	return &SimpleLogger{}
+}
+
 type SimpleLogger struct {
 }
 

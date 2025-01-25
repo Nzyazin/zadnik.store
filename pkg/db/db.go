@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/Nzyazin/zadnik.store/internal/auth/config"
 	"time"
 )
 
 type Config struct {
 	Host     string
-	Port     int
+	Port     string
 	User     string
 	Password string
 	DBName   string
@@ -18,6 +19,19 @@ type Config struct {
 
 type Database struct {
 	*sql.DB
+}
+
+func NewFromAuthConfig(authConfig *config.Config) (*Database, error) {
+	cfg := Config{
+		Host:     authConfig.DBHost,
+		Port:     authConfig.DBPort,
+		User:     authConfig.DBUser,
+		Password: authConfig.DBPass,
+		DBName:   authConfig.DBName,
+		SSLMode:  "disable",
+	}
+
+	return New(cfg)
 }
 
 func New(cfg Config) (*Database, error) {
