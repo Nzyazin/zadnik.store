@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/Nzyazin/zadnik.store/internal/auth/config"
+	_ "github.com/lib/pq"
 	"time"
 )
 
@@ -35,7 +36,7 @@ func NewFromAuthConfig(authConfig *config.Config) (*Database, error) {
 }
 
 func New(cfg Config) (*Database, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode)
 
 	db, err := sql.Open("postgres", psqlInfo)
