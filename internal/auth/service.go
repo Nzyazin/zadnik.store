@@ -33,7 +33,7 @@ func (s *service) Authenticate(ctx context.Context, username, password string) (
 
 	if !common.CheckPasswordHash(password, user.Password) {
 		s.logger.Warnf("Invalid password for user: %s", username)
-		return nil, "", errors.New("invalid username or password")
+		return nil, "", errors.New("invalid password hash")
 	}
 
 	token, err := common.GenerateToken(user.ID, user.Role)
