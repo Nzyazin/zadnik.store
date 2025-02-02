@@ -15,14 +15,36 @@ proto:
 # Migration commands
 migrate-up:
 	@echo "==> Running migrations up..."
-	migrate -path migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable" up
+	@if [ "$(SERVICE)" = "auth" ]; then \
+		set -a && . ./internal/auth/config/.env-auth && set +a && \
+		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" up; \
+	elif [ "$(SERVICE)" = "product" ]; then \
+		set -a && . ./internal/product/config/.env-product && set +a && \
+		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" up; \
+	else \
+		echo "Please specify SERVICE=auth or SERVICE=product"; \
+		exit 1; \
+	fi
 
 migrate-down:
 	@echo "==> Running migrations down..."
-	migrate -path migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable" down
+	@if [ "$(SERVICE)" = "auth" ]; then \
+		set -a && . ./internal/auth/config/.env-auth && set +a && \
+		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" down; \
+	elif [ "$(SERVICE)" = "product" ]; then \
+		set -a && . ./internal/product/config/.env-product && set +a && \
+		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" down; \
+	else \
+		echo "Please specify SERVICE=auth or SERVICE=product"; \
+		exit 1; \
+	fi
 
 migrate-create:
+	@if [ -z "$(SERVICE)" ]; then \
+		echo "Please specify SERVICE=auth or SERVICE=product"; \
+		exit 1; \
+	fi
 	@read -p "Enter migration name: " name; \
-	migrate create -ext sql -dir migrations -seq $$name
+	migrate create -ext sql -dir migrations/$(SERVICE) -seq $$name
 
 .PHONY: proto migrate-up migrate-down migrate-create
