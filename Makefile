@@ -68,4 +68,10 @@ drop-db:
 		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "DROP DATABASE IF EXISTS $$DB_NAME;"; \
 	fi
 
-.PHONY: proto migrate-up migrate-down migrate-create migrate-history create-db drop-db
+# Service commands
+run-auth:
+	@echo "==> Starting auth service..."
+	@set -a && . ./internal/auth/config/.env-auth && set +a && \
+	go run ./cmd/auth/main.go
+
+.PHONY: proto migrate-up migrate-down migrate-create migrate-history create-db drop-db run-auth
