@@ -17,7 +17,7 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	err := godotenv.Load("internal/auth/config/.env-auth")
+	err := godotenv.Load("../../internal/auth/config/.env-auth")
 	if err != nil {
 		return nil, fmt.Errorf("unable to load .env-auth file: %w", err)
 	}
