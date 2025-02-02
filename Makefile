@@ -47,4 +47,25 @@ migrate-create:
 	@read -p "Enter migration name: " name; \
 	migrate create -ext sql -dir migrations/$(SERVICE) -seq $$name
 
-.PHONY: proto migrate-up migrate-down migrate-create
+# Database commands
+create-db:
+	@echo "==> Creating database..."
+	@if [ "$(SERVICE)" = "auth" ]; then \
+		set -a && . ./internal/auth/config/.env-auth && set +a && \
+		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "CREATE DATABASE $$DB_NAME;"; \
+	elif [ "$(SERVICE)" = "product" ]; then \
+		set -a && . ./internal/product/config/.env-product && set +a && \
+		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "CREATE DATABASE $$DB_NAME;"; \
+	fi
+
+drop-db:
+	@echo "==> Dropping database..."
+	@if [ "$(SERVICE)" = "auth" ]; then \
+		set -a && . ./internal/auth/config/.env-auth && set +a && \
+		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "DROP DATABASE IF EXISTS $$DB_NAME;"; \
+	elif [ "$(SERVICE)" = "product" ]; then \
+		set -a && . ./internal/product/config/.env-product && set +a && \
+		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "DROP DATABASE IF EXISTS $$DB_NAME;"; \
+	fi
+
+.PHONY: proto migrate-up migrate-down migrate-create migrate-history create-db drop-db
