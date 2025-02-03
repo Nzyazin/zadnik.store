@@ -2,49 +2,62 @@ package auth
 
 import (
 	"context"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
+	"github.com/Nzyazin/zadnik.store/internal/common"
 )
 
-type GRPCServer struct {
+type GRPCHandler struct {
 	pb.UnimplementedAuthServiceServer
 	service Service
+	logger  common.Logger
 }
 
-func NewGRPCServer(service Service) *GRPCServer {
-	return &GRPCServer{service: service}
+func NewGRPCHandler(service Service, logger common.Logger) pb.AuthServiceServer {
+	return &GRPCHandler{
+		service: service,
+		logger:  logger,
+	}
 }
 
-func (s *GRPCServer) Authenticate(ctx context.Context, req *pb.AuthenticateRequest) (*pb.AuthenticateResponse, error) {
-	user, token, err := s.service.Authenticate(ctx, req.Username, req.Password)
+func (h *GRPCHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	h.logger.Infof("Login request received for user: %s", req.Username)
+	
+	tokens, err := h.service.Login(ctx, req.Username, req.Password)
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid username or password: %v", err)
+		h.logger.Errorf("Login failed: %v", err)
+		return nil, err
 	}
 
-	return &pb.AuthenticateResponse{
-		UserId: user.Username,
-		Role:   user.Role,
-		Token:  token,
+	return &pb.LoginResponse{
+		UserId:       "1", // Для единственного админа всегда будет 1
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
 	}, nil
 }
 
-func (s *GRPCServer) Authorize(ctx context.Context, req *pb.AuthorizeRequest) (*pb.AuthorizeResponse, error) {
-	tokenStr := req.GetToken()
-	if tokenStr == "" {
-		return nil, status.Errorf(codes.Unauthenticated, "missing token")
-	}
-
-	isAuthorized, err := s.service.Authorize(ctx, tokenStr, "admin")
+func (h *GRPCHandler) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
+	h.logger.Infof("RefreshToken request received")
+	
+	tokens, err := h.service.RefreshTokens(ctx, req.RefreshToken)
 	if err != nil {
-		if err.Error() == "forbidden" {
-			return nil, status.Errorf(codes.PermissionDenied, "insufficient privileges")
-		}
-		return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
+		h.logger.Errorf("Token refresh failed: %v", err)
+		return nil, err
 	}
 
-	return &pb.AuthorizeResponse{
-		Authorized: isAuthorized,
+	return &pb.RefreshTokenResponse{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
 	}, nil
+}
+
+func (h *GRPCHandler) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
+	h.logger.Infof("Logout request received")
+	
+	err := h.service.Logout(ctx, req.RefreshToken)
+	if err != nil {
+		h.logger.Errorf("Logout failed: %v", err)
+		return &pb.LogoutResponse{Success: false}, err
+	}
+
+	return &pb.LogoutResponse{Success: true}, nil
 }

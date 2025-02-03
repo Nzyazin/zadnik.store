@@ -1,34 +1,41 @@
 package config
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
-	DBHost             string
-	DBPort             string
-	DBUser             string
-	DBPass             string
-	DBName             string
-	JWTSecret          string
+	DB                *DBConfig
 	AuthServiceAddress string
+	JWTSecret         string
 }
 
-func LoadConfig() (*Config, error) {
-	err := godotenv.Load("internal/auth/config/.env-auth")
+type DBConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Name     string
+}
+
+func Load() (*Config, error) {
+	// Загружаем .env файл
+	err := godotenv.Load(filepath.Join("internal", "auth", "config", ".env-auth"))
 	if err != nil {
-		return nil, fmt.Errorf("unable to load .env-auth file: %w", err)
+		return nil, err
 	}
 
 	return &Config{
-		DBHost:             os.Getenv("DB_HOST"),
-		DBPort:             os.Getenv("DB_PORT"),
-		DBUser:             os.Getenv("DB_USER"),
-		DBPass:             os.Getenv("DB_PASSWORD"),
-		DBName:             os.Getenv("DB_NAME"),
-		JWTSecret:          os.Getenv("JWT_SECRET"),
+		DB: &DBConfig{
+			Host:     os.Getenv("DB_HOST"),
+			Port:     os.Getenv("DB_PORT"),
+			User:     os.Getenv("DB_USER"),
+			Password: os.Getenv("DB_PASSWORD"),
+			Name:     os.Getenv("DB_NAME"),
+		},
 		AuthServiceAddress: os.Getenv("AUTH_SERVICE_ADDRESS"),
+		JWTSecret:         os.Getenv("JWT_SECRET"),
 	}, nil
 }

@@ -9,37 +9,21 @@ import (
 	"time"
 )
 
-type Config struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	DBName   string
-	SSLMode  string
-}
-
 type Database struct {
 	*sql.DB
 }
 
-func NewFromAuthConfig(authConfig *config.Config) (*Database, error) {
-	cfg := Config{
-		Host:     authConfig.DBHost,
-		Port:     authConfig.DBPort,
-		User:     authConfig.DBUser,
-		Password: authConfig.DBPass,
-		DBName:   authConfig.DBName,
-		SSLMode:  "disable",
-	}
+func NewDatabase(cfg *config.DBConfig) (*Database, error) {
+	connStr := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		cfg.Host,
+		cfg.Port,
+		cfg.User,
+		cfg.Password,
+		cfg.Name,
+	)
 
-	return New(cfg)
-}
-
-func New(cfg Config) (*Database, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode)
-
-	db, err := sql.Open("postgres", psqlInfo)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, fmt.Errorf("error opening database: %w", err)
 	}
@@ -48,9 +32,10 @@ func New(cfg Config) (*Database, error) {
 	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
-		return nil, fmt.Errorf("error pinging database: %w", err)
+		return nil, fmt.Errorf("error connecting to the database: %w", err)
 	}
 
+	// Настраиваем пул соединений
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(5 * time.Minute)
