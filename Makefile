@@ -62,10 +62,15 @@ drop-db:
 	@echo "==> Dropping database..."
 	@if [ "$(SERVICE)" = "auth" ]; then \
 		set -a && . ./internal/auth/config/.env-auth && set +a && \
+		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$$DB_NAME';" && \
 		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "DROP DATABASE IF EXISTS $$DB_NAME;"; \
 	elif [ "$(SERVICE)" = "product" ]; then \
 		set -a && . ./internal/product/config/.env-product && set +a && \
+		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$$DB_NAME';" && \
 		PGPASSWORD=$$DB_PASSWORD psql -h $$DB_HOST -p $$DB_PORT -U $$DB_USER -d postgres -c "DROP DATABASE IF EXISTS $$DB_NAME;"; \
+	else \
+		echo "Please specify SERVICE=auth or SERVICE=product"; \
+		exit 1; \
 	fi
 
 # Service commands
@@ -74,4 +79,4 @@ run-auth:
 	@set -a && . ./internal/auth/config/.env-auth && set +a && \
 	go run ./cmd/auth/main.go
 
-.PHONY: proto migrate-up migrate-down migrate-create migrate-history create-db drop-db run-auth
+.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth
