@@ -17,7 +17,7 @@ migrate-up:
 	@echo "==> Running migrations up..."
 	@if [ "$(SERVICE)" = "auth" ]; then \
 		set -a && . ./internal/auth/config/.env-auth && set +a && \
-		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" up; \
+		migrate -path migrations/auth -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" up; \
 	elif [ "$(SERVICE)" = "product" ]; then \
 		set -a && . ./internal/product/config/.env-product && set +a && \
 		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" up; \
@@ -30,7 +30,7 @@ migrate-down:
 	@echo "==> Running migrations down..."
 	@if [ "$(SERVICE)" = "auth" ]; then \
 		set -a && . ./internal/auth/config/.env-auth && set +a && \
-		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" down; \
+		migrate -path migrations/auth -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" down; \
 	elif [ "$(SERVICE)" = "product" ]; then \
 		set -a && . ./internal/product/config/.env-product && set +a && \
 		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" down; \
