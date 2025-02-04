@@ -1,0 +1,92 @@
+.index-cap
+  margin-bottom: 100px
+  @include media(1240)
+    margin-bottom: 48px
+
+.index-cap__cont
+  display: flex
+  flex-direction: row-reverse
+  justify-content: space-between
+  gap: 17px
+  @include media(950)
+    display: block
+
+.index-cap__picture
+  flex-shrink: 0
+  width: 583px
+  @include media(1240)
+    width: 455px
+  @include media(950)
+    width: 100%
+    margin-bottom: 3px
+  @include media(700)
+    width: 468px
+  @include media(520)
+    position: relative
+    width: 100%
+    padding-top: 75%
+
+.index-cap__image
+  height: 437px
+  @include media(1240)
+    height: 341px
+  @include media(950)
+    height: 486px
+  @include media(700)
+    height: 351px
+  @include media(520)
+    position: absolute
+    top: 0
+    left: 0
+    bottom: 0
+    right: 0
+    height: auto
+
+.index-cap__info
+  display: flex
+  flex-direction: column
+  @include media(1240)
+    padding-left: unset
+  @include media(700)
+    width: 100%
+
+.index-cap__caption
+  margin-top: 30px
+  margin-bottom: 24px
+  font-size: 48px
+  line-height: 58px
+  font-weight: 400
+  span
+    color: $orange
+  @include media(1240)
+    margin-bottom: 20px
+    max-width: 600px
+    font-size: 30px
+    line-height: 36px
+  @include media(520)
+    max-width: unset
+
+.index-cap__offer-block
+  display: flex
+  justify-content: space-between
+  flex-direction: column
+  @include media(1240)
+    display: block
+
+.index-cap__offer-info
+  position: relative
+  color: $dark
+  max-width: 360px
+  margin-bottom: 48px
+  @include media(1240)
+    margin-bottom: 31px
+  @include media(520)
+    max-width: unset
+
+.index-cap__offer-button
+  flex-shrink: 0
+  padding: 16px 16px 14px
+  max-width: 230px
+  width: 100%
+  @include media(700)
+    max-width: unset

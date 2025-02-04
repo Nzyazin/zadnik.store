@@ -1,0 +1,27 @@
+include ../_variables
+
+if !PRODUCTION
+  doctype html
+  html(lang='ru')
+    head
+      meta(charset='UTF-8')
+      meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=2.5, minimum-scale=1.0')
+      meta(http-equiv='X-UA-Compatible', content='ie=edge')
+      title Карта сайта
+    body
+      main.wrapper
+        div(style="padding-top: 20px; padding-left: 10px")
+          .cont
+            each page in pages
+              div: a(href=`${page.view}.html`, style="text-decoration: none") #{page.view}.html - #{page.name}
+else
+  <?xml version="1.0" encoding="UTF-8"?>
+  urlset(xmlns="http://www.sitemaps.org/schemas/sitemap/0.9", xmlns:image="http://www.google.com/schemas/sitemap-image/1.1", xmlns:news="http://www.google.com/schemas/sitemap-news/0.9")
+    - const date = (new Date()).toISOString().split('T')[0]
+    each page in pages
+      if page.priority
+        url
+          loc #{URL}#{page.link}
+          lastmod= date
+          changefreq daily
+          priority= page.priority

@@ -1,0 +1,53 @@
+.assortment
+  margin-bottom: 102px
+  @include media(1240)
+    margin-bottom: 48px
+
+//.assortment__cont
+
+.assortment__title
+  margin-bottom: 23px
+  @include media(1240)
+    margin-bottom: 21px
+
+.assortment__text
+  margin-bottom: 40px
+  width: 702px
+  @include media(1240)
+    margin-bottom: 31px
+  @include media(950)
+    width: unset
+
+.assortment__picture
+  width: 576px
+  @include media(1240)
+    width: 414px
+  @include media(950)
+    width: 318px
+  @include media(700)
+    width: 468px
+  @include media(520)
+    position: relative
+    width: 100%
+
+.assortment__list
+  display: flex
+  flex-wrap: wrap
+  column-gap: 24px
+  row-gap: 23px
+  @include media(950)
+    column-gap: 12px
+    row-gap: 12px
+  @include media(700)
+    column-gap: unset
+
+.assortment__image
+  height: 576px
+  @include media(1240)
+    height: 414px
+  @include media(950)
+    height: 318px
+  @include media(700)
+    height: 468px
+  @include media(520)
+    height: auto

@@ -1,0 +1,60 @@
+.footer
+  background-color: $gray-light
+  @include media(950)
+    padding-top: 20px
+    padding-bottom: 32px
+
+.footer__cont
+  display: flex
+  align-items: center
+  justify-content: space-between
+  @include media(950)
+    flex-direction: column
+    align-items: flex-start
+
+.footer__logo
+  display: block
+  padding: 48px 16px
+  margin-left: -16px
+  margin-right: 61px
+  @include media(1240)
+    padding: 32px 16px
+  @include media(950)
+    margin-right: 0
+    margin-bottom: 1px
+    padding: 12px 16px
+
+.footer__image
+  width: 162px
+  height: 35px
+
+a.footer__logo
+  @include hover
+    transition-property: opacity
+    transition-duration: .2s
+  &:hover
+    @include hover
+      opacity: 0.8
+
+.footer__policy-link
+  position: relative
+  display: inline-block
+  vertical-align: top
+  padding: 38px 0
+  @include media(950)
+    margin-bottom: 3px
+    padding: 12px 0
+  &::before
+    @include media(1240)
+      position: absolute
+      content: ''
+      left: 0
+      right: 0
+      bottom: 39px
+      height: 1px
+      background-color: $dark
+    @include media(950)
+      bottom: 15px
+
+.footer__copyright
+  display: block

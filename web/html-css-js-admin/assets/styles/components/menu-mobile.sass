@@ -1,0 +1,88 @@
+.menu-mobile
+  position: fixed
+  z-index: 10
+  pointer-events: none
+  top: 0
+  bottom: 0
+  right: 0
+  left: 0
+
+.menu-mobile_show
+  display: block
+  pointer-events: auto
+  .menu-mobile__overlay
+    opacity: 1
+  .menu-mobile__wrapper
+    animation: menu-mobile_show 0.2s forwards
+
+.menu-mobile_hide
+  .menu-mobile__wrapper
+    animation: menu-mobile_hide 0.2s forwards
+
+@keyframes menu-mobile_show
+  0%
+    transform: translateY(-100%)
+  100%
+    transform: translateY(0)
+
+@keyframes menu-mobile_hide
+  0%
+    transform: translateY(0)
+  100%
+    transform: translateY(-100%)
+
+.menu-mobile__overlay
+  position: fixed
+  top: 0
+  bottom: 0
+  left: 0
+  right: 0
+  opacity: 0
+  background-color: rgba($black, 0.3)
+  transition-property: opacity
+  transition-duration: .2s
+
+.menu-mobile__wrapper
+  position: relative
+  z-index: 1
+  top: 0
+  padding-top: 60px
+  width: 100%
+  background-color: $white
+  transform: translateY(-100%)
+
+.menu-mobile__cont
+  display: flex
+  flex-direction: column
+  align-items: center
+  padding: 21px 16px 48px
+  width: 100%
+  min-width: 320px
+
+.menu-mobile__list
+  margin-top: 12px
+  margin-bottom: 41px
+  width: 100%
+
+.menu-mobile__item
+  margin-bottom: 5px
+  text-align: center
+
+.menu-mobile__link
+  position: relative
+  display: inline-block
+  padding: 6px 16px
+  font-weight: 500
+  font-size: 20px
+  line-height: 28px
+  &::before
+    content: ''
+    position: absolute
+    bottom: 5px
+    display: block
+    width: calc(100% - 32px)
+    border-bottom: 1px dashed $dark
+
+
+.header__phone-link_mobile
+  font-weight: 700

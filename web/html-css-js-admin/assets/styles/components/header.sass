@@ -1,0 +1,82 @@
+.header
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  z-index: 100
+  background-color: $white
+
+.header__cont
+  display: flex
+  align-items: center
+  justify-content: space-between
+
+.header__logo
+  display: block
+  margin-left: -16px
+  padding: 35px 16px
+  @include media(1240)
+    padding: 20px 16px
+
+a.header__logo
+  @include hover
+    transition-property: opacity
+    transition-duration: .2s
+  &:hover
+    @include hover
+      opacity: .8
+
+.header__image
+  width: 162px
+  height: 35px
+
+.header__phone-link
+  padding: 38px 16px
+  margin-right: -16px
+  font-weight: 700
+  @include media(1240)
+    padding: 25px 16px
+  @include media(950)
+    display: none
+
+.header__menu
+  margin-left: 5px
+  display: flex
+  @include media(950)
+    display: none
+
+//.header__menu-item
+
+.header__menu-link
+  position: relative
+  display: inline-block
+  padding: 10px 16px
+  &::before
+    content: ''
+    position: absolute
+    bottom: 10px
+    display: block
+    width: calc(100% - 32px)
+    border-bottom: 1px dashed $dark
+    @include hover
+      transition-duration: .1s
+  @include hover
+    &:hover::before
+      border-bottom: 1px dashed $orange_hover
+
+.header__burger
+  display: none
+  @include media(950)
+    display: block
+    margin-right: -12px
+    margin-top: -1px
+    padding: 30px 19px
+    width: 58px
+    height: 74px
+    +bgIcon('ic_burger.svg', 32px, 32px)
+    transition-property: background-color
+    transition-duration: .2s
+
+.header__burger_close
+  @include media(950)
+    +bgIcon('ic_burger_close.svg', 32px, 32px)

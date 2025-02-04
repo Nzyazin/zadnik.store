@@ -1,0 +1,85 @@
+.orders
+  margin-bottom: 56px
+  @include media(1240)
+    margin-bottom: 31px
+
+//.orders__cont
+
+.orders__title
+  display: block
+  margin-bottom: 40px
+  @include media(1240)
+    margin-bottom: 26px
+
+.orders__list
+  counter-reset: numbers
+  display: flex
+  margin: 0 -12px
+  @include media(1240)
+    display: block
+    margin: 0
+
+.orders__item
+  position: relative
+  width: 25%
+  margin: 0 12px
+  padding-top: 64px
+  padding-right: 15px
+  counter-increment: numbers
+  @include media(1240)
+    margin: 0
+    padding-top: 0
+    padding-left: 47px
+    width: 100%
+  &::before
+    content: counter(numbers)
+    position: absolute
+    top: 0
+    left: 0
+    width: 40px
+    height: 40px
+    text-align: center
+    font-size: 20px
+    line-height: 40px
+    font-weight: 700
+    color: $white
+    background-color: $orange
+    @include media(1240)
+      top: -6px
+      width: 35px
+      height: 35px
+      font-size: 16px
+      line-height: 38px
+  &:not(&:last-child)
+    @include media(1240)
+      padding-bottom: 25px
+    &::after
+      position: absolute
+      z-index: -1
+      content: ''
+      top: 20px
+      right: 0
+      height: 1px
+      left: 0
+      width: calc(100% + 24px)
+      background-color: rgba($orange, 0.2)
+      @include media(1240)
+        width: 1px
+        height: 100%
+        top: 0
+        right: auto
+        left: 17px
+
+.orders__headline
+  display: block
+  margin-bottom: 12px
+  font-size: 20px
+  line-height: 28px
+  font-weight: bold
+  @include media(1240)
+    margin-bottom: 6px
+    font-size: 18px
+    line-height: 25px
+
+.orders__text
+  color: rgba($dark, 0.8)

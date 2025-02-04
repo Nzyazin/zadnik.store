@@ -1,8 +1,0 @@
-.page {
-    &--login {
-        background-color: $background-color;
-        min-height: 100vh;
-        @include flex(row, center, center);
-        padding: $spacing-unit * 2;
-    }
-}

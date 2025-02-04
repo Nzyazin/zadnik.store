@@ -1,0 +1,103 @@
+.reviews
+  margin-bottom: 100px
+  @include media(1240)
+    margin-bottom: 48px
+
+.reviews__cont
+  position: relative
+
+.reviews__title
+  margin-bottom: 40px
+  @include media(1240)
+    margin-bottom: 19px
+
+.reviews__area
+  position: relative
+
+.reviews__button
+  position: absolute
+  top: 0
+  bottom: 0
+  z-index: 2
+  display: none
+  border: none
+  width: 110px
+  opacity: 0
+  transition-property: opacity
+  transition-duration: .2s
+  cursor: pointer
+  @include media(1240)
+    display: none !important
+  &::before
+    content: ''
+    position: absolute
+    top: 115px
+    display: block
+    border-radius: 50%
+    width: 32px
+    height: 32px
+    opacity: .6
+    background-color: $orange
+  @include hover
+    &:hover::before
+      opacity: 1
+
+.reviews__button_show
+  opacity: 1
+  display: block
+  &::before
+    opacity: .6
+    transition-property: opacity
+    transition-duration: .2s
+
+
+.reviews__button_prev
+  @extend .reviews__button
+  left: 0
+  background: linear-gradient(to right, $white 0%, rgba($white, 0) 100%)
+  &::before
+    left: 0
+    +bgIcon('ic_arrow-left_white.svg', 9px, 14px)
+    background-position: 10px
+
+.reviews__button_next
+  @extend .reviews__button
+  right: 0
+  background: linear-gradient(to left, $white 0%, rgba($white, 0) 100%)
+  &::before
+    right: 0
+    +bgIcon('ic_arrow-right_white.svg', 9px, 14px)
+    background-position: 13px
+
+.reviews__list
+  position: relative
+  display: flex
+  gap: 20px
+  overflow-x: hidden
+  @include media(1240)
+    margin-bottom: 16px
+    overflow-x: scroll
+    gap: 12px
+  &::-webkit-scrollbar
+    height: 0
+    width: 0
+
+.reviews__item
+  flex-shrink: 0
+  position: relative
+  display: block
+
+.reviews__modal
+  position: relative
+  display: block
+
+.reviews__picture
+  width: 524px
+  overflow: hidden
+  @include media(700)
+    width: 208px
+
+.reviews__image
+  height: 262px
+  @include media(700)
+    height: 104px

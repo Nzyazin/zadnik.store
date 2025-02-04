@@ -1,0 +1,75 @@
+.packaging
+  margin-bottom: 100px
+  @include media(1240)
+    margin-bottom: 48px
+
+//.packaging__cont
+
+.packaging__box
+  display: flex
+  background-color: $gray-light
+  width: 1176px
+  height: 355px
+  padding: 32px 24px
+  column-gap: 52px
+  @include media(1240)
+    width: 100%
+    height: auto
+    column-gap: 33px
+  @include media(950)
+    padding: unset
+    flex-direction: column
+    align-items: center
+    padding: 21px
+  @include media(700)
+    padding: 16px 12px
+
+.packaging__text-cont
+  @include media(950)
+    margin-bottom: 31px
+
+//.packaging__text
+
+.packaging__picture
+  width: 548px
+  flex-shrink: 0
+  @include media(1240)
+    width: 407px
+  @include media(950)
+    width: 606px
+  @include media(700)
+    width: 444px
+  @include media(520)
+    position: relative
+    padding-top: 53.03%
+    width: 100%
+
+.packaging__image
+  height: 291px
+  @include media(1240)
+    height: 216px
+  @include media(950)
+    height: 321px
+  @include media(700)
+    height: 235px
+  @include media(520)
+    position: absolute
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+    height: auto
+
+.packaging__picture-cont
+  @include media(1240)
+    padding: 23px 21px 23px 0
+  @include media(950)
+    display: flex
+    justify-content: center
+    padding: unset
+
+.packaging__title
+  margin-bottom: 24px
+  display: block
+  @include media(1240)
+    margin-bottom: 21px

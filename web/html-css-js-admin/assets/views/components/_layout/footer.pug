@@ -1,0 +1,13 @@
+footer.footer
+  .footer__cont.cont
+    if VIEW === 'index'
+      span.footer__logo
+        img.footer__image(src=`${pathImage}/logo.svg`, alt="Логотип")
+    else
+      a.footer__logo(href=getPage('index').link)
+        img.footer__image(src=`${pathImage}/logo.svg`, alt="Логотип")
+    if VIEW === 'policy'
+      span.footer__policy-link.text Политика конфиденциальности
+    else
+      a.footer__policy-link.link-dark.text(href=getPage('policy').link) Политика конфиденциальности
+    span.footer__copyright.text © #{new Date().getFullYear()} Все права защищены

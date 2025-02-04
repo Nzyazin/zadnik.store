@@ -1,0 +1,12 @@
+.
+  ErrorDocument 404 /404.php
+  AddDefaultCharset UTF-8
+  Options +FollowSymLinks
+  IndexIgnore */*
+  RewriteEngine on
+  RewriteCond %{HTTP_HOST} ^www\.(.*)$
+  RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+  RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /index\.html\ HTTP/
+  RewriteRule ^index\.html$ #{URL}/ [R=301,L]
+  Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT"
+| #{'\n'}

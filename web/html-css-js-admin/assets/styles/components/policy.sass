@@ -1,0 +1,74 @@
+.policy
+  margin-top: 68px
+  margin-bottom: 68px
+  @include media(1240)
+    margin-top: 40px
+    margin-bottom: 47px
+
+//.policy__cont
+
+.policy__caption
+  margin-bottom: 24px
+  @include media(1240)
+    margin-bottom: 20px
+
+.policy__text
+  margin-bottom: 16px
+
+.policy__content
+  h2
+    margin-top: 64px
+    margin-bottom: 24px
+    font-size: 40px
+    line-height: 48px
+    font-weight: 400
+    @include media(1240)
+      margin-top: 48px
+      margin-bottom: 12px
+      font-size: 28px
+      line-height: 34px
+  p
+    margin-bottom: 16px
+    font-size: 20px
+    line-height: 28px
+    @include media(1240)
+      margin-bottom: 12px
+      font-size: 16px
+      line-height: 22px
+  li
+    position: relative
+    padding-left: 16px
+    margin-bottom: 16px
+    font-size: 20px
+    line-height: 28px
+    @include media(1240)
+      margin-bottom: 12px
+      font-size: 16px
+      line-height: 22px
+    &::before
+      position: absolute
+      content: ''
+      width: 8px
+      height: 8px
+      top: 11px
+      left: 0
+      border-radius: 50%
+      background-color: $orange
+      @include media(1240)
+        top: 8px
+  a
+    color: $orange
+    white-space: nowrap
+    transition-property: color
+    transition-duration: .2s
+    @include hover
+      &:hover
+        color: $orange_hover
+  span
+    color: $orange
+    white-space: nowrap
+
+.policy__date
+  margin-top: 64px
+  @include media(1240)
+    margin-top: 32px

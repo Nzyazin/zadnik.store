@@ -1,0 +1,87 @@
+.order-form
+  margin-bottom: 100px
+  @include media(1240)
+    margin-bottom: 48px
+
+//.order-form__cont
+
+.order-form__wrapper
+  padding: 60px 100px
+  background-color: $dark
+  +bgImg('order-form/order-form-1_1176.jpg')
+  background-size: cover
+  @include media(1240)
+    +bgImg('order-form/order-form-1_852.jpg')
+  @include media(950)
+    padding: 32px 12px
+    +bgImg('order-form/order-form-1_648.jpg')
+  @include media(700)
+    +bgImg('order-form/order-form-1_468.jpg')
+  @include media(520)
+    +bgImg('order-form/order-form-1_392.jpg')
+  @include media(360)
+    +bgImg('order-form/order-form-1_328.jpg')
+
+.order-form__title
+  margin-bottom: 24px
+  color: $white
+  @include media(1240)
+    margin-bottom: 17px
+  @include media(520)
+    width: 210px
+
+.order-form__title-price
+  color: $orange
+
+.order-form__text
+  margin-bottom: 40px
+  color: rgba($white, 0.8)
+  @include media(1240)
+    margin-bottom: 23px
+    font-size: 16px
+    line-height: 22px
+
+.order-form__form
+  display: flex
+  @include media(1240)
+    display: block
+
+.order-form__input-box
+  flex-shrink: 0
+  margin-right: 16px
+  @include media(1240)
+    margin-right: 0
+    margin-bottom: 12px
+
+.order-form__input
+  padding: 14px 16px
+
+.order-form__input_name
+  width: 340px
+  @include media(1240)
+    width: 100%
+
+.order-form__input_phone
+  width: 335px
+  @include media(1240)
+    width: 100%
+
+//.order-form__btn-box
+
+.order-form__button
+  margin-bottom: 5px
+  width: 100%
+  padding: 15px 50px
+
+.order-form__policy
+  color: rgba($white, 0.8)
+
+.order-form__policy-link
+  border-bottom: 1px solid rgba($white, 0.8)
+  @include hover
+    transition-duration: .2s
+    transition-property: border-color, color
+  &:hover
+    @include hover
+      color: $white
+      border-bottom: 1px solid rgba($white, 0.8)
