@@ -1,0 +1,25 @@
+{
+  "name": "zadnik-store-admin",
+  "version": "1.0.0",
+  "description": "Admin panel for Zadnik Store",
+  "scripts": {
+    "build": "npm run build:sass && npm run build:js",
+    "build:sass": "sass src/styles/main.scss static/css/main.css --style compressed",
+    "watch:sass": "sass --watch src/styles/main.scss:static/css/main.css",
+    "build:js": "webpack --mode production",
+    "watch:js": "webpack --watch --mode development",
+    "dev": "concurrently \"npm run watch:sass\" \"npm run watch:js\""
+  },
+  "dependencies": {
+    "normalize.css": "^8.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "babel-loader": "^9.1.2",
+    "sass": "^1.32.8",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^4.10.0",
+    "concurrently": "^7.0.0"
+  }
+}

@@ -1,0 +1,6 @@
+.auth-layout {
+    min-height: 100vh;
+    @include flex(row, center, center);
+    background-color: $background-color;
+    padding: $spacing-unit * 2;
+}

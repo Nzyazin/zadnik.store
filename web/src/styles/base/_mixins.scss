@@ -1,0 +1,21 @@
+@mixin respond-to($breakpoint) {
+    @if $breakpoint == "sm" {
+        @media (min-width: $breakpoint-sm) { @content; }
+    }
+    @if $breakpoint == "md" {
+        @media (min-width: $breakpoint-md) { @content; }
+    }
+    @if $breakpoint == "lg" {
+        @media (min-width: $breakpoint-lg) { @content; }
+    }
+    @if $breakpoint == "xl" {
+        @media (min-width: $breakpoint-xl) { @content; }
+    }
+}
+
+@mixin flex($direction: row, $justify: flex-start, $align: stretch) {
+    display: flex;
+    flex-direction: $direction;
+    justify-content: $justify;
+    align-items: $align;
+}

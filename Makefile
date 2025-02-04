@@ -79,4 +79,29 @@ run-auth:
 	@set -a && . ./internal/auth/config/.env-auth && set +a && \
 	go run ./cmd/auth/main.go
 
-.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth
+# Frontend
+.PHONY: install-frontend
+install-frontend:
+	cd web && npm install
+
+.PHONY: build-frontend
+build-frontend:
+	cd web && npm run build
+
+.PHONY: dev-frontend
+dev-frontend:
+	cd web && npm run dev
+
+# Gateway
+.PHONY: run-gateway
+run-gateway:
+	@echo "==> Starting gateway service..."
+	go run ./cmd/gateway/main.go
+
+# Combined
+.PHONY: run-all
+run-all:
+	@echo "==> Starting all services..."
+	make run-auth & make run-gateway & make dev-frontend
+
+.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all
