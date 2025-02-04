@@ -22,7 +22,6 @@ func main() {
 	// Создаем конфигурацию
 	cfg := &gateway.ServerConfig{
 		AuthServiceAddr: os.Getenv("AUTH_SERVICE_ADDRESS"),
-		JWTSecret:      os.Getenv("JWT_SECRET"),
 		Development:    os.Getenv("DEVELOPMENT") == "true",
 	}
 

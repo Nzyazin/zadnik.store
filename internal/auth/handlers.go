@@ -61,3 +61,18 @@ func (h *GRPCHandler) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.Lo
 
 	return &pb.LogoutResponse{Success: true}, nil
 }
+
+func (h *GRPCHandler) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
+	h.logger.Infof("ValidateToken request received")
+	
+	userId, err := h.service.ValidateAccessToken(ctx, req.AccessToken)
+	if err != nil {
+		h.logger.Errorf("Token validation failed: %v", err)
+		return &pb.ValidateTokenResponse{Valid: false}, nil
+	}
+
+	return &pb.ValidateTokenResponse{
+		Valid:  true,
+		UserId: userId,
+	}, nil
+}

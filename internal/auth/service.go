@@ -20,6 +20,7 @@ type Service interface {
 	Login(ctx context.Context, username, password string) (*TokenPair, error)
 	RefreshTokens(ctx context.Context, refreshToken string) (*TokenPair, error)
 	Logout(ctx context.Context, refreshToken string) error
+	ValidateAccessToken(ctx context.Context, accessToken string) (string, error)
 }
 
 type service struct {
@@ -121,6 +122,35 @@ func (s *service) Logout(ctx context.Context, refreshToken string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *service) ValidateAccessToken(ctx context.Context, accessToken string) (string, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(s.secret), nil
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("invalid token: %w", err)
+	}
+
+	if !token.Valid {
+		return "", errors.New("token is not valid")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", errors.New("invalid token claims")
+	}
+
+	userId, ok := claims["user_id"].(string)
+	if !ok {
+		return "", errors.New("user_id not found in token")
+	}
+
+	return userId, nil
 }
 
 func (s *service) generateAccessToken(userID int64) (string, error) {

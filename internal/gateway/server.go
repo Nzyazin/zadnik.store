@@ -8,27 +8,25 @@ import (
 
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Server struct {
 	router      *gin.Engine
 	authClient  pb.AuthServiceClient
 	templates   *template.Template
-	jwtSecret   string
 	development bool
 }
 
 type ServerConfig struct {
 	AuthServiceAddr string
-	JWTSecret      string
 	Development    bool
 }
 
 func NewServer(cfg *ServerConfig) (*Server, error) {
 	// Подключаемся к сервису auth
-	conn, err := grpc.Dial(cfg.AuthServiceAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(cfg.AuthServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +42,6 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		router:      gin.Default(),
 		authClient:  pb.NewAuthServiceClient(conn),
 		templates:   tmpl,
-		jwtSecret:   cfg.JWTSecret,
 		development: cfg.Development,
 	}
 
@@ -164,12 +161,12 @@ func (s *Server) authMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Проверяем JWT token
-		_, err = jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-			return []byte(s.jwtSecret), nil
+		// Проверяем токен через auth сервис
+		resp, err := s.authClient.ValidateToken(context.Background(), &pb.ValidateTokenRequest{
+			AccessToken: token,
 		})
 
-		if err != nil {
+		if err != nil || !resp.Valid {
 			// Пробуем обновить токен
 			refreshToken, err := c.Cookie("refresh_token")
 			if err != nil {
@@ -178,7 +175,7 @@ func (s *Server) authMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			resp, err := s.authClient.RefreshToken(context.Background(), &pb.RefreshTokenRequest{
+			refreshResp, err := s.authClient.RefreshToken(context.Background(), &pb.RefreshTokenRequest{
 				RefreshToken: refreshToken,
 			})
 
@@ -191,7 +188,7 @@ func (s *Server) authMiddleware() gin.HandlerFunc {
 			// Устанавливаем новые куки
 			c.SetCookie(
 				"access_token",
-				resp.AccessToken,
+				refreshResp.AccessToken,
 				int(time.Hour.Seconds()*24),
 				"/",
 				"",
@@ -201,13 +198,18 @@ func (s *Server) authMiddleware() gin.HandlerFunc {
 
 			c.SetCookie(
 				"refresh_token",
-				resp.RefreshToken,
+				refreshResp.RefreshToken,
 				int(time.Hour.Seconds()*24*30),
 				"/",
 				"",
 				!s.development,
 				true,
 			)
+		}
+
+		// Сохраняем user_id в контексте
+		if resp != nil && resp.Valid {
+			c.Set("user_id", resp.UserId)
 		}
 
 		c.Next()
