@@ -1,0 +1,18 @@
+.auth
+  .auth__cont.cont
+    .auth__box
+      h2.auth__title.title Вход в систему
+    
+    form.auth__form(action="/admin/login" method="POST")
+      if error
+        .auth__alert.text-big= error
+      
+      .auth__group
+        label.auth__label.text-big(for="username") Имя пользователя
+        input#username.auth__input(type="text" name="username" required)
+      
+      .auth__group
+        label.auth__label.text-big(for="password") Пароль
+        input#password.auth__input(type="password" name="password" required)
+      
+      button.auth__button.button-orange.text(type="submit") Войти

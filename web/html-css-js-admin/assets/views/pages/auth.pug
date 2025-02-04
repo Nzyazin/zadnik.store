@@ -1,0 +1,12 @@
+extends ../components/_layout/layout
+
+block variables
+  - const title = 'Авторизация'
+  - const bodyClass = 'page-auth'
+
+block head
+  +title(title)
+  +description('')
+
+block body
+  include ../components/auth/auth

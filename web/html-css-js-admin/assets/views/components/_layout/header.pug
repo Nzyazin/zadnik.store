@@ -1,14 +1,2 @@
 header.header(data-element="header")
   .header__cont.cont
-    if VIEW === 'index'
-      span.header__logo
-        img.header__image(src=`${pathImage}/logo.svg`, alt="Логотип")
-    else
-      a.header__logo(href=getPage('index').link)
-        img.header__image(src=`${pathImage}/logo.svg`, alt="Логотип")
-    ul.header__menu
-      each item in menuList
-        li.header__menu-item
-          a.header__menu-link.link-dark.text-big(href=item.link, data-role="scroll-to-anchor")= item.text
-    .header__burger(role="button", aria-label="Открыть/закрыть меню", data-element="header__burger")
-    a.header__phone-link.link-dark.text-big(href=phone.mask)= phone.mask

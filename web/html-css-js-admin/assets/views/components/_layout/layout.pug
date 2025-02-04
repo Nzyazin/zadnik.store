@@ -1,3 +1,4 @@
+block variables
 include ../../_variables
 include _connect-style
 include _title
@@ -8,10 +9,10 @@ html(lang='ru')
   head
     include _head
     block head
-  body
-    include header
+  body(class=bodyClass)
+    if !hideHeader
+      include header
     .wrapper
       block body
     include scripts
-    each style in prefetchStyle()
-      link(rel="prefetch", href=`${pathStatics}/styles/${style}${PRODUCTION ? `-${HASH}` : ''}.css`, as="style")
+    link(rel='stylesheet', href=`${pathStatics}/styles/main.css`)
