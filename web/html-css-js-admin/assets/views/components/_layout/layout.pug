@@ -15,4 +15,5 @@ html(lang='ru')
     .wrapper
       block body
     include scripts
-    link(rel='stylesheet', href=`${pathStatics}/styles/main.css`)
+    each style in prefetchStyle()
+      link(rel="prefetch", href=`${pathStatics}/styles/${style}${PRODUCTION ? `-${HASH}` : ''}.css`, as="style")
