@@ -1,0 +1,45 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="products-index">
+    <div class="products-index__header">
+        <h1 class="page-title">{{.Title}}</h1>
+        <a class="btn btn-primary" href="/admin/products/create">
+            <i class="icon-plus"></i>
+            <span>Добавить товар</span>
+        </a>
+    </div>
+
+    {{if .Error}}
+    <div class="alert alert-danger">{{.Error}}</div>
+    {{end}}
+
+    <div class="products-index__table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Название</th>
+                    <th>Цена</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $index, $product := .Products}}
+                <tr>
+                    <td>{{add $index 1}}</td>
+                    <td>{{$product.Name}}</td>
+                    <td>{{$product.Price}} ₽</td>
+                    <td>
+                        <a class="btn btn-edit" href="/admin/products/{{$product.ID}}/edit">
+                            <i class="icon-edit"></i>
+                            <span>Редактировать</span>
+                        </a>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{end}}
