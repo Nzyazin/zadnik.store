@@ -100,8 +100,10 @@ setup-static: build-frontend
 	@mkdir -p bin/static/js
 	@mkdir -p bin/static/css
 	@mkdir -p bin/static/images
+	@mkdir -p bin/static/fonts
 	@cp web/html-css-js-admin/build/statics/scripts/script-*.js bin/static/js/main.js
 	@cp web/html-css-js-admin/build/statics/styles/auth-*.css bin/static/css/main.css
+	@cp web/html-css-js-admin/build/statics/fonts/* bin/static/fonts/
 	@cp -r web/html-css-js-admin/build/statics/images/* bin/static/images/
 	@git rev-parse --short HEAD > bin/static/hash.txt
 
@@ -125,10 +127,20 @@ run-gateway: setup-static
 	@echo "==> Starting gateway service..."
 	go run ./cmd/gateway/main.go
 
+# Run commands
+.PHONY: run-services
+run-services:
+	@echo "==> Starting auth service..."
+	@./bin/auth.exe &
+	@echo "==> Waiting for auth service to start..."
+	@sleep 2
+	@echo "==> Starting gateway service..."
+	@./bin/gateway.exe
+
 # Combined
 .PHONY: run-all
 run-all:
 	@echo "==> Starting all services..."
 	make run-auth & make run-gateway & make dev-frontend
 
-.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all
+.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services
