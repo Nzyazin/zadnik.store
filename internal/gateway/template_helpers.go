@@ -10,7 +10,7 @@ var staticHash string
 
 func init() {
 	// Читаем хеш из файла при инициализации
-	hashBytes, err := os.ReadFile("bin/statics/hash.txt")
+	hashBytes, err := os.ReadFile("bin/static/hash.txt")
 	if err == nil {
 		staticHash = strings.TrimSpace(string(hashBytes))
 	}
@@ -19,7 +19,15 @@ func init() {
 // StaticWithHash добавляет хеш к пути статического файла
 func StaticWithHash(path string) string {
 	if staticHash == "" {
+		hashBytes, err := os.ReadFile("bin/static/hash.txt")
+		if err == nil {
+			staticHash = strings.TrimSpace(string(hashBytes))
+		}
+	}
+
+	if staticHash == "" {
 		return path
 	}
+
 	return fmt.Sprintf("%s?hash=%s", path, staticHash)
 }

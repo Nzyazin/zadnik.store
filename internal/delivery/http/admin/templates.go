@@ -2,8 +2,11 @@ package admin
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"io"
+	"os"
+	"strings"
 )
 
 //go:embed templates/*
@@ -41,11 +44,38 @@ func parse(file string) *template.Template {
 	)
 }
 
+var staticHash string
+
+func init() {
+	// Читаем хеш из файла при инициализации
+	hashBytes, err := os.ReadFile("bin/static/hash.txt")
+	if err == nil {
+		staticHash = strings.TrimSpace(string(hashBytes))
+	}
+}
+
+// StaticWithHash добавляет хеш к пути статического файла
+func StaticWithHash(path string) string {
+	if staticHash == "" {
+		hashBytes, err := os.ReadFile("bin/static/hash.txt")
+		if err == nil {
+			staticHash = strings.TrimSpace(string(hashBytes))
+		}
+	}
+
+	if staticHash == "" {
+		return path
+	}
+
+	return fmt.Sprintf("%s?hash=%s", path, staticHash)
+}
+
 // Template functions
 var templateFuncs = template.FuncMap{
 	"add": func(a, b int) int {
 		return a + b
 	},
+	"staticWithHash": StaticWithHash,
 }
 
 // Template render functions

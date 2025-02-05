@@ -31,7 +31,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	s.router.Use(gin.Recovery())
 
 	// Static files
-	s.router.Static("/statics", "./bin/statics")
+	s.router.Static("/static", "./bin/static")
 
 	// Добавляем функции в шаблоны
 	s.router.SetFuncMap(template.FuncMap{

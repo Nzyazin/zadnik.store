@@ -1,5 +1,5 @@
 # Имя бинарного файла
-BINARY_NAME=app
+BINARY_NAME=app.exe
 
 # Переменные для protobuf
 PROTO_DIR=api
@@ -82,37 +82,42 @@ run-auth:
 # Frontend
 .PHONY: install-frontend
 install-frontend:
-	cd web && npm install
+	cd web/html-css-js-admin && npm install
 
 .PHONY: build-frontend
 build-frontend:
-	cd web && npm run build
+	cd web/html-css-js-admin && npm run build
 
 .PHONY: dev-frontend
 dev-frontend:
-	cd web && npm run dev
+	cd web/html-css-js-admin && npm run dev
 
 # Static files
 .PHONY: setup-static
-setup-static:
+setup-static: build-frontend
 	@echo "==> Setting up static files..."
-	@mkdir -p bin/statics/js
-	@mkdir -p bin/statics/css
-	@mkdir -p bin/statics/images
-	@cp -r web/html-css-js-admin/assets/js/* bin/statics/js/
-	@cp -r web/html-css-js-admin/assets/css/* bin/statics/css/
-	@cp -r web/html-css-js-admin/assets/images/* bin/statics/images/
-	@git rev-parse --short HEAD > bin/statics/hash.txt
+	@rm -rf bin/static
+	@mkdir -p bin/static/js
+	@mkdir -p bin/static/css
+	@mkdir -p bin/static/images
+	@cp web/html-css-js-admin/build/statics/scripts/script-*.js bin/static/js/main.js
+	@cp web/html-css-js-admin/build/statics/styles/auth-*.css bin/static/css/main.css
+	@cp -r web/html-css-js-admin/build/statics/images/* bin/static/images/
+	@git rev-parse --short HEAD > bin/static/hash.txt
 
 # Build commands
-.PHONY: build
-build: setup-static
-	@echo "==> Building gateway..."
-	@go build -o bin/gateway ./cmd/gateway
+.PHONY: build-auth
+build-auth:
 	@echo "==> Building auth service..."
-	@go build -o bin/auth ./cmd/auth
-	@echo "==> Building product service..."
-	@go build -o bin/product ./cmd/product
+	@go build -o bin/auth.exe ./cmd/auth
+
+.PHONY: build-gateway
+build-gateway: setup-static
+	@echo "==> Building gateway service..."
+	@go build -o bin/gateway.exe ./cmd/gateway
+
+.PHONY: build
+build: build-auth build-gateway
 
 # Gateway
 .PHONY: run-gateway
