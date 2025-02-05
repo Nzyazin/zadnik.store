@@ -12,7 +12,10 @@ html(lang='ru')
   body(class=bodyClass)
     if !hideHeader
       include header
-    .wrapper
+    if !hideWrapper
+      .wrapper
+        block body
+    else
       block body
     include scripts
     each style in prefetchStyle()

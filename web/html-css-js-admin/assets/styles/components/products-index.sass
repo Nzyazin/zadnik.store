@@ -1,0 +1,108 @@
+.products-index
+  padding: 20px
+  
+  &__header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    margin-bottom: 30px
+    gap: 20px
+
+    @include media(520px)
+      flex-direction: column
+      align-items: stretch
+
+    .page-title
+      margin: 0
+      font-size: 24px
+      font-weight: 500
+
+      @include media(520px)
+        text-align: center
+
+    .btn-primary
+      display: inline-flex
+      align-items: center
+      gap: 8px
+      padding: 12px 20px
+      font-size: 14px
+      color: $white
+      background: $orange
+      border-radius: 8px
+      transition: all 0.2s ease
+      white-space: nowrap
+      
+      &:hover
+        background: $orange_hover
+      
+      i
+        font-size: 16px
+
+  &__table
+    background: $white
+    border-radius: 10px
+    box-shadow: 0 2px 8px rgba($black, 0.1)
+    overflow-x: auto
+
+    .table
+      width: 100%
+      min-width: 600px
+      border-collapse: collapse
+      
+      th, td
+        padding: 15px 20px
+        text-align: left
+        border-bottom: 1px solid $gray-light
+
+        @include media(700px)
+          padding: 12px 15px
+      
+      th
+        font-weight: 600
+        color: $dark
+        background: $gray-light
+        
+        &:first-child
+          width: 60px
+        
+        &:last-child
+          width: 150px
+
+          @include media(700px)
+            width: 120px
+      
+      td
+        color: $dark
+        
+        &:last-child
+          text-align: right
+      
+      tbody tr
+        &:hover
+          background: $gray-lighter
+        
+        &:last-child td
+          border-bottom: none
+
+    .btn-edit
+      display: inline-flex
+      align-items: center
+      gap: 8px
+      padding: 8px 12px
+      font-size: 14px
+      color: $blue
+      background: rgba($blue, 0.1)
+      border-radius: 6px
+      transition: all 0.2s ease
+      
+      @include media(700px)
+        padding: 6px 10px
+        
+        span
+          display: none
+      
+      &:hover
+        background: rgba($blue, 0.2)
+      
+      i
+        font-size: 16px
