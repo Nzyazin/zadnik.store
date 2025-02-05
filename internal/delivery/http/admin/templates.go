@@ -28,8 +28,8 @@ type ProductsIndexParams struct {
 
 // Parsed templates
 var (
-	authTemplate          = parse("pages/auth.html")
-	productsIndexTemplate = parse("pages/products-index.html")
+	authTemplate          = parse("templates/pages/auth.html")
+	productsIndexTemplate = parse("templates/pages/products-index.html")
 )
 
 // Helper function to parse templates with layout
@@ -37,7 +37,7 @@ func parse(file string) *template.Template {
 	return template.Must(
 		template.New("base.html").
 			Funcs(templateFuncs).
-			ParseFS(files, "layout/base.html", file),
+			ParseFS(files, "templates/layout/base.html", file),
 	)
 }
 

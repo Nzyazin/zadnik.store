@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}} - Админ панель</title>
-    <link rel="stylesheet" href="{{staticWithHash "/statics/css/main.css"}}">
+    <link rel="stylesheet" href="/admin/assets/css/main.css">
 </head>
 <body>
     {{if not .HideHeader}}
@@ -24,6 +24,6 @@
         {{block "content" .}}{{end}}
     </main>
 
-    <script src="{{staticWithHash "/statics/js/main.js"}}"></script>
+    <script src="/statics/js/main.js"></script>
 </body>
 </html>

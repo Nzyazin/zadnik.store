@@ -92,9 +92,31 @@ build-frontend:
 dev-frontend:
 	cd web && npm run dev
 
+# Static files
+.PHONY: setup-static
+setup-static:
+	@echo "==> Setting up static files..."
+	@mkdir -p bin/statics/js
+	@mkdir -p bin/statics/css
+	@mkdir -p bin/statics/images
+	@cp -r web/html-css-js-admin/assets/js/* bin/statics/js/
+	@cp -r web/html-css-js-admin/assets/css/* bin/statics/css/
+	@cp -r web/html-css-js-admin/assets/images/* bin/statics/images/
+	@git rev-parse --short HEAD > bin/statics/hash.txt
+
+# Build commands
+.PHONY: build
+build: setup-static
+	@echo "==> Building gateway..."
+	@go build -o bin/gateway ./cmd/gateway
+	@echo "==> Building auth service..."
+	@go build -o bin/auth ./cmd/auth
+	@echo "==> Building product service..."
+	@go build -o bin/product ./cmd/product
+
 # Gateway
 .PHONY: run-gateway
-run-gateway:
+run-gateway: setup-static
 	@echo "==> Starting gateway service..."
 	go run ./cmd/gateway/main.go
 
