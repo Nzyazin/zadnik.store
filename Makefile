@@ -82,15 +82,15 @@ run-auth:
 # Frontend
 .PHONY: install-frontend
 install-frontend:
-	cd web/html-css-js-admin && npm install
+	cd web/frontend-admin && npm install
 
 .PHONY: build-frontend
 build-frontend:
-	cd web/html-css-js-admin && npm run build
+	cd web/frontend-admin && npm run build
 
 .PHONY: dev-frontend
 dev-frontend:
-	cd web/html-css-js-admin && npm run dev
+	cd web/frontend-admin && npm run dev
 
 # Static files
 .PHONY: setup-static
@@ -101,10 +101,10 @@ setup-static: build-frontend
 	@mkdir -p bin/static/css
 	@mkdir -p bin/static/images
 	@mkdir -p bin/static/fonts
-	@cp web/html-css-js-admin/build/statics/scripts/script-*.js bin/static/js/main.js
-	@cp web/html-css-js-admin/build/statics/styles/auth-*.css bin/static/css/main.css
-	@cp web/html-css-js-admin/build/statics/fonts/* bin/static/fonts/
-	@cp -r web/html-css-js-admin/build/statics/images/* bin/static/images/
+	@cp web/frontend-admin/build/statics/scripts/script-*.js bin/static/js/main.js
+	@cp web/frontend-admin/build/statics/styles/auth-*.css bin/static/css/main.css
+	@cp web/frontend-admin/build/statics/fonts/* bin/static/fonts/
+	@cp -r web/frontend-admin/build/statics/images/* bin/static/images/
 	@git rev-parse --short HEAD > bin/static/hash.txt
 
 # Build commands
