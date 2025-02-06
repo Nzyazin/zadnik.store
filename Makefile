@@ -123,7 +123,7 @@ build: build-auth build-gateway
 
 # Gateway
 .PHONY: run-gateway
-run-gateway: setup-static
+run-gateway:
 	@echo "==> Starting gateway service..."
 	go run ./cmd/gateway/main.go
 
