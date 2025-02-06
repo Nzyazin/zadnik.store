@@ -141,6 +141,6 @@ run-services:
 .PHONY: run-all
 run-all:
 	@echo "==> Starting all services..."
-	make run-auth & make run-gateway & make dev-frontend
+	make run-auth & make run-gateway
 
 .PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services
