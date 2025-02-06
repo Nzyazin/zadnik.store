@@ -101,8 +101,8 @@ setup-static: build-frontend
 	@mkdir -p bin/static/css
 	@mkdir -p bin/static/images
 	@mkdir -p bin/static/fonts
-	@cp web/frontend-admin/build/statics/scripts/script-*.js bin/static/js/main.js
-	@cp web/frontend-admin/build/statics/styles/auth-*.css bin/static/css/main.css
+	@cp web/frontend-admin/build/statics/scripts/*.js bin/static/js/
+	@cp web/frontend-admin/build/statics/styles/*.css bin/static/css/
 	@cp web/frontend-admin/build/statics/fonts/* bin/static/fonts/
 	@cp -r web/frontend-admin/build/statics/images/* bin/static/images/
 	@git rev-parse --short HEAD > bin/static/hash.txt
