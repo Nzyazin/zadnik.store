@@ -145,11 +145,13 @@ func (s *service) ValidateAccessToken(ctx context.Context, accessToken string) (
 		return "", errors.New("invalid token claims")
 	}
 
-	userId, ok := claims["user_id"].(string)
+	userIdFloat, ok := claims["user_id"].(float64)
 	if !ok {
 		return "", errors.New("user_id not found in token")
 	}
 
+	// Конвертируем float64 в string
+	userId := fmt.Sprintf("%.0f", userIdFloat)
 	return userId, nil
 }
 
