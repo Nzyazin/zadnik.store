@@ -6,129 +6,128 @@
   top: 0
   z-index: 100
 
-  &__cont
-    max-width: 1200px
-    margin: 0 auto
+.header__cont
+  max-width: 1200px
+  margin: 0 auto
+  display: flex
+  align-items: center
+  justify-content: space-between
+
+.header__logo
+  display: block
+  text-decoration: none
+
+.header__logo img
+  height: 40px
+  width: auto
+
+.header__nav
+  display: flex
+  align-items: center
+  gap: 10px
+
+.header__nav-link
+  display: inline-flex
+  align-items: center
+  gap: 8px
+  padding: 8px 16px
+  border-radius: 6px
+  color: $dark
+  font-size: 14px
+  transition: all 0.2s ease
+
+.header__nav-link i
+  font-size: 18px
+
+.header__nav-link:hover
+  background: $gray-light
+
+.header__nav-link.active
+  background: $orange
+  color: $white
+
+.header__nav-link.active:hover
+  background: $orange_hover
+
+.header__menu
+  display: none
+  list-style: none
+  margin: 0
+  padding: 0
+  
+  @media (min-width: 768px)
     display: flex
-    align-items: center
-    justify-content: space-between
+    gap: 2rem
 
-  &__logo
-    display: block
-    text-decoration: none
-    
-    img
-      height: 40px
-      width: auto
+.header__menu-item
+  position: relative
 
-  &__nav
-    display: flex
-    align-items: center
-    gap: 10px
+.header__menu-link
+  color: $dark
+  text-decoration: none
+  font-weight: 500
+  padding: 0.5rem 0
+  transition: color 0.3s ease
 
-  &__nav-link
-    display: inline-flex
-    align-items: center
-    gap: 8px
-    padding: 8px 16px
-    border-radius: 6px
-    color: $dark
-    font-size: 14px
-    transition: all 0.2s ease
+.header__menu-link:hover
+  color: $orange_hover
 
-    i
-      font-size: 18px
+.header__menu-link.active
+  color: $orange_hover
 
-    &:hover
-      background: $gray-light
+.header__menu-link.active:after
+  content: ''
+  position: absolute
+  bottom: -2px
+  left: 0
+  width: 100%
+  height: 2px
+  background-color: $orange_hover
 
-    &.active
-      background: $orange
-      color: $white
-
-      &:hover
-        background: $orange_hover
-
-  &__menu
+.header__burger
+  width: 30px
+  height: 30px
+  position: relative
+  cursor: pointer
+  display: block
+  
+  @media (min-width: 768px)
     display: none
-    list-style: none
-    margin: 0
-    padding: 0
-    
-    @media (min-width: 768px)
-      display: flex
-      gap: 2rem
 
-  &__menu-item
-    position: relative
+.header__burger:before,
+.header__burger:after
+  content: ''
+  position: absolute
+  width: 100%
+  height: 2px
+  background-color: $dark
+  transition: all 0.3s ease
 
-  &__menu-link
-    color: $dark
-    text-decoration: none
-    font-weight: 500
-    padding: 0.5rem 0
-    transition: color 0.3s ease
+.header__burger:before
+  top: 8px
 
-    &:hover
-      color: $orange_hover
+.header__burger:after
+  bottom: 8px
 
-    &.active
-      color: $orange_hover
-      
-      &:after
-        content: ''
-        position: absolute
-        bottom: -2px
-        left: 0
-        width: 100%
-        height: 2px
-        background-color: $orange_hover
+.header__burger span
+  position: absolute
+  top: 50%
+  transform: translateY(-50%)
+  width: 100%
+  height: 2px
+  background-color: $dark
+  transition: all 0.3s ease
 
-  &__burger
-    width: 30px
-    height: 30px
-    position: relative
-    cursor: pointer
-    display: block
-    
-    @media (min-width: 768px)
-      display: none
+.header__burger.active:before
+  transform: rotate(45deg)
+  top: 14px
 
-    &:before,
-    &:after
-      content: ''
-      position: absolute
-      width: 100%
-      height: 2px
-      background-color: $dark
-      transition: all 0.3s ease
+.header__burger.active:after
+  transform: rotate(-45deg)
+  bottom: 14px
 
-    &:before
-      top: 8px
-
-    &:after
-      bottom: 8px
-
-    span
-      position: absolute
-      top: 50%
-      transform: translateY(-50%)
-      width: 100%
-      height: 2px
-      background-color: $dark
-      transition: all 0.3s ease
-
-    &.active
-      &:before
-        transform: rotate(45deg)
-        top: 14px
-
-      &:after
-        transform: rotate(-45deg)
-        bottom: 14px
-
-      span
-        opacity: 0
+.header__burger.active span
+  opacity: 0
 
 // Mobile menu
 .menu-mobile
