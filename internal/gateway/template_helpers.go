@@ -16,18 +16,37 @@ func init() {
 	}
 }
 
+const (
+	staticBasePath    = "bin/static"
+	staticUrlPrefix   = "/static/"
+)
+
 // StaticWithHash добавляет хеш к пути статического файла
 func StaticWithHash(path string) string {
-	if staticHash == "" {
-		hashBytes, err := os.ReadFile("bin/static/hash.txt")
-		if err == nil {
-			staticHash = strings.TrimSpace(string(hashBytes))
-		}
+	dir := staticBasePath
+	if strings.HasPrefix(path, staticUrlPrefix) {
+		dir = "bin" + path[:strings.LastIndex(path, "/")]
 	}
 
-	if staticHash == "" {
+	// Получаем базовое имя файла без расширения
+	base := path[strings.LastIndex(path, "/")+1:]
+	ext := path[strings.LastIndex(path, "."):]
+	name := base[:len(base)-len(ext)]
+
+	// Читаем содержимое директории
+	files, err := os.ReadDir(dir)
+	if err != nil {
 		return path
 	}
 
-	return fmt.Sprintf("%s?hash=%s", path, staticHash)
+	// Ищем файл с нужным префиксом
+	prefix := name + "-"
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), prefix) && strings.HasSuffix(file.Name(), ext) {
+			// Возвращаем путь с найденным файлом
+			return path[:strings.LastIndex(path, "/")+1] + file.Name()
+		}
+	}
+
+	return path
 }

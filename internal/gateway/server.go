@@ -2,12 +2,14 @@ package gateway
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
-	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
-	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
+	"html/template"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"html/template"
+	"github.com/gin-gonic/gin"
+	
+	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
+	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 )
 
 type ServerConfig struct {
