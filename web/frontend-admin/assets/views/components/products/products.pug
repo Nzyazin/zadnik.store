@@ -14,7 +14,7 @@
 .products-index
   .products-index__header
     h1.page-title= title
-    a.btn.btn-primary(href="/admin/products/create") 
+    a.btn.btn-primary(href="#") 
       i.icon-plus
       span Добавить товар
   
@@ -36,6 +36,6 @@
             td= product.name
             td #{product.price} ₽
             td
-              a.btn.btn-edit(href=`/admin/products/${product.id}/edit`)
+              a.btn.btn-edit(href=`#`)
                 i.icon-edit
                 span Редактировать
