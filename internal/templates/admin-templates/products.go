@@ -1,4 +1,4 @@
-package admin
+package admin_templates
 
 type Product struct {
 	ID    string

@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/Nzyazin/zadnik.store/internal/delivery/http/admin"
+	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 )
 
 type Handler struct {
 	authService AuthService
+	templates   *admin_templates.Templates
 }
 
 type AuthService interface {
@@ -19,9 +20,10 @@ type AuthService interface {
 	ValidateToken(ctx context.Context, token string) (*pb.ValidateTokenResponse, error)
 }
 
-func NewHandler(authService AuthService) *Handler {
+func NewHandler(authService AuthService, templates *admin_templates.Templates) *Handler {
 	return &Handler{
 		authService: authService,
+		templates:  templates,
 	}
 }
 
@@ -42,11 +44,11 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 }
 
 func (h *Handler) loginPage(c *gin.Context) {
-	params := admin.AuthParams{
+	params := admin_templates.AuthParams{
 		Error: c.Query("error"),
 	}
 	
-	if err := admin.RenderAuth(c.Writer, params); err != nil {
+	if err := h.templates.RenderAuth(c.Writer, params); err != nil {
 		c.String(http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
@@ -58,10 +60,10 @@ func (h *Handler) login(c *gin.Context) {
 
 	resp, err := h.authService.Login(c.Request.Context(), username, password)
 	if err != nil {
-		params := admin.AuthParams{
+		params := admin_templates.AuthParams{
 			Error: "Неверное имя пользователя или пароль",
 		}
-		admin.RenderAuth(c.Writer, params)
+		h.templates.RenderAuth(c.Writer, params)
 		return
 	}
 
@@ -102,13 +104,13 @@ func (h *Handler) authMiddleware() gin.HandlerFunc {
 
 func (h *Handler) productsIndex(c *gin.Context) {
 	// TODO: Получение продуктов через gRPC
-	products := []admin.Product{} // пока пустой список
+	products := []admin_templates.Product{} // пока пустой список
 
-	params := admin.ProductsIndexParams{
+	params := admin_templates.ProductsIndexParams{
 		Products: products,
 	}
 	
-	if err := admin.RenderProductsIndex(c.Writer, params); err != nil {
+	if err := h.templates.RenderProductsIndex(c.Writer, params); err != nil {
 		c.String(http.StatusInternalServerError, "Internal Server Error")
 		return
 	}

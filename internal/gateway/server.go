@@ -4,12 +4,13 @@ import (
 	"context"
 	"html/template"
 
+	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"github.com/gin-gonic/gin"
-	
-	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
+
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
+	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
+	"github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 )
 
 type ServerConfig struct {
@@ -51,7 +52,13 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	authService := NewAuthService(authClient)
 
 	// Инициализация хендлеров
-	adminHandler := admin.NewHandler(authService)
+	templates, err := admin_templates.NewTemplates(admin_templates.TemplateFunctions{
+		StaticWithHash: StaticWithHash,
+	})
+	if err != nil {
+		return nil, err
+	}
+	adminHandler := admin.NewHandler(authService, templates)
 	adminHandler.RegisterRoutes(s.router)
 
 	return s, nil
@@ -70,14 +77,9 @@ func NewAuthService(client pb.AuthServiceClient) *AuthService {
 }
 
 func (s *AuthService) Login(ctx context.Context, username, password string) (*pb.LoginResponse, error) {
-	return s.client.Login(ctx, &pb.LoginRequest{
-		Username: username,
-		Password: password,
-	})
+	return s.client.Login(ctx, &pb.LoginRequest{Username: username, Password: password})
 }
 
 func (s *AuthService) ValidateToken(ctx context.Context, token string) (*pb.ValidateTokenResponse, error) {
-	return s.client.ValidateToken(ctx, &pb.ValidateTokenRequest{
-		AccessToken: token,
-	})
+	return s.client.ValidateToken(ctx, &pb.ValidateTokenRequest{AccessToken: token})
 }
