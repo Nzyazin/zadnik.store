@@ -17,7 +17,7 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  string user_id = 1;
+  int64 user_id = 1;
   string access_token = 2;  // JWT token, не хранится в БД
   string refresh_token = 3; // Хранится в БД
 }
@@ -45,5 +45,5 @@ message ValidateTokenRequest {
 
 message ValidateTokenResponse {
   bool valid = 1;
-  string user_id = 2;
+  int64 user_id = 2;
 }

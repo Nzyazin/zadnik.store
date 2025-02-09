@@ -16,13 +16,13 @@ type SimpleLogger struct {
 }
 
 func (s *SimpleLogger) Infof(format string, args ...interface{}) {
-	log.Printf("[INFO] "+format, args...)
+	log.Printf("[INFO] " + format, args...)
 }
 
 func (l *SimpleLogger) Warnf(format string, args ...interface{}) {
-	log.Printf("[WARN] "+format, args...)
+	log.Printf("[WARN] " + format, args...)
 }
 
 func (l *SimpleLogger) Errorf(format string, args ...interface{}) {
-	log.Printf("[ERROR] "+format, args...)
+	log.Printf("[ERROR] " + format, args...)
 }

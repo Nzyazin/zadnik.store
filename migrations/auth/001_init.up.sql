@@ -9,7 +9,7 @@ CREATE TABLE users (
 
 -- Create refresh tokens table
 CREATE TABLE refresh_tokens (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     user_id INTEGER NOT NULL,
     token VARCHAR(255) UNIQUE NOT NULL,
     is_revoked BOOLEAN DEFAULT false,

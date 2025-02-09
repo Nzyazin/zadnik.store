@@ -8,6 +8,6 @@ DROP FUNCTION IF EXISTS update_updated_at_column();
 DROP INDEX IF EXISTS idx_tokens_user_id;
 DROP INDEX IF EXISTS idx_tokens_token;
 
--- Drop tables
-DROP TABLE IF EXISTS tokens;
+-- Drop tables in correct order (child tables first)
+DROP TABLE IF EXISTS refresh_tokens;
 DROP TABLE IF EXISTS users;

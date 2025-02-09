@@ -4,7 +4,6 @@ import (
 	"context"
 
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
-	"github.com/Nzyazin/zadnik.store/internal/auth/domain"
 	"github.com/Nzyazin/zadnik.store/internal/auth/usecase"
 	"github.com/Nzyazin/zadnik.store/internal/common"
 )
@@ -24,16 +23,16 @@ func NewAuthHandler(authUseCase usecase.AuthUseCase, logger common.Logger) *Auth
 }
 
 func (h *AuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	h.logger.Infof("Login request received for user: %s", req.Username)
+	
 	tokens, err := h.authUseCase.Login(ctx, req.Username, req.Password)
 	if err != nil {
-		if err == domain.ErrInvalidCredentials {
-			return nil, domain.ErrInvalidCredentials
-		}
-		h.logger.Errorf("Login error", "error", err)
+		h.logger.Errorf("Login failed: %v", err)
 		return nil, err
 	}
 
 	return &pb.LoginResponse{
+		UserId:       1, // Для единственного админа всегда будет 1
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
 	}, nil
@@ -42,7 +41,7 @@ func (h *AuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 func (h *AuthHandler) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
 	tokens, err := h.authUseCase.RefreshTokens(ctx, req.RefreshToken)
 	if err != nil {
-		h.logger.Errorf("Refresh token error", "error", err)
+		h.logger.Errorf("Refresh token error %s", err)
 		return nil, err
 	}
 
@@ -55,7 +54,7 @@ func (h *AuthHandler) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequ
 func (h *AuthHandler) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
 	err := h.authUseCase.Logout(ctx, req.RefreshToken)
 	if err != nil {
-		h.logger.Errorf("Logout error", "error", err)
+		h.logger.Errorf("Logout error %s", err)
 		return nil, err
 	}
 
@@ -63,13 +62,16 @@ func (h *AuthHandler) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.Lo
 }
 
 func (h *AuthHandler) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
+	h.logger.Infof("ValidateToken request received")
+	
 	userID, err := h.authUseCase.ValidateAccessToken(ctx, req.AccessToken)
 	if err != nil {
-		h.logger.Errorf("Token validation error", "error", err)
-		return nil, err
+		h.logger.Errorf("Token validation failed: %v", err)
+		return &pb.ValidateTokenResponse{Valid: false}, nil
 	}
 
 	return &pb.ValidateTokenResponse{
+		Valid:  true,
 		UserId: userID,
 	}, nil
 }

@@ -20,7 +20,7 @@ type AuthUseCase interface {
 	Login(ctx context.Context, username, password string) (*domain.TokenPair, error)
 	RefreshTokens(ctx context.Context, refreshToken string) (*domain.TokenPair, error)
 	Logout(ctx context.Context, refreshToken string) error
-	ValidateAccessToken(ctx context.Context, accessToken string) (string, error)
+	ValidateAccessToken(ctx context.Context, accessToken string) (int64, error)
 }
 
 type authUseCase struct {
@@ -71,6 +71,7 @@ func (a *authUseCase) Login(ctx context.Context, username, password string) (*do
 		Token:     refreshToken,
 		ExpiresAt: time.Now().Add(RefreshTokenDuration),
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -127,18 +128,18 @@ func (a *authUseCase) Logout(ctx context.Context, refreshToken string) error {
 	return a.tokenRepo.DeleteRefreshToken(refreshToken)
 }
 
-func (a *authUseCase) ValidateAccessToken(ctx context.Context, accessToken string) (string, error) {
+func (a *authUseCase) ValidateAccessToken(ctx context.Context, accessToken string) (int64, error) {
 	claims, err := common.ValidateJWT(accessToken)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
-	userID, ok := claims["user_id"].(string)
+	userID, ok := claims["user_id"].(float64) // JWT преобразует числа в float64
 	if !ok {
-		return "", errors.New("invalid token claims")
+		return 0, errors.New("invalid token claims")
 	}
 
-	return userID, nil
+	return int64(userID), nil
 }
 
 func (a *authUseCase) generateAccessToken(userID int64) (string, error) {
