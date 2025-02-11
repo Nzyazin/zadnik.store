@@ -97,7 +97,7 @@ func TestAuthUseCase_RefreshTokens(t *testing.T) {
 	useCase := NewAuthUseCase(userRepo, tokenRepo, logger, secret)
 
 	refreshToken := "valid-refresh-token"
-	user := &domain.User{ID: 1, Username: "testuser"}
+	user := &domain.User{ID: 1}
 	storedToken := &domain.RefreshToken{
 		Token:     refreshToken,
 		UserID:    user.ID,
