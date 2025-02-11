@@ -52,22 +52,9 @@ func (r *tokenRepository) GetRefreshToken(token string) (*domain.RefreshToken, e
 }
 
 func (r *tokenRepository) DeleteRefreshToken(token string) error {
-	result, err := r.db.Exec(
+	_, err := r.db.Exec(
 		"DELETE FROM refresh_tokens WHERE token = $1",
 		token,
 	)
-	if err != nil {
-		return err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
-		return errors.New("refresh token not found")
-	}
-
-	return nil
+	return err
 }
