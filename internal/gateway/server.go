@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
@@ -35,6 +36,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	// Static files
 	s.router.Static("/static", "./bin/static")
+	s.router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Добавляем функции в шаблоны
 	s.router.SetFuncMap(template.FuncMap{
