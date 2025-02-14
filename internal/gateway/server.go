@@ -12,6 +12,7 @@ import (
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
 	"github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
+	"github.com/Nzyazin/zadnik.store/internal/gateway/middleware"
 )
 
 type ServerConfig struct {
@@ -33,6 +34,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	// Middleware
 	s.router.Use(gin.Logger())
 	s.router.Use(gin.Recovery())
+	s.router.Use(middleware.PrometheusMiddleware())
 
 	// Static files
 	s.router.Static("/static", "./bin/static")
