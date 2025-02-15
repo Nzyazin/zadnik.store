@@ -14,7 +14,7 @@ var (
 type User struct {
 	ID        int64
 	Username  string
-	Password  string
+	PasswordHash  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

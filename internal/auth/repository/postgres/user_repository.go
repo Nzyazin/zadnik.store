@@ -19,13 +19,13 @@ func NewUserRepository(db *sql.DB) domain.UserRepository {
 func (r *userRepository) GetByID(id int64) (*domain.User, error) {
 	user := &domain.User{}
 	err := r.db.QueryRow(
-		`SELECT id, username, password, created_at, updated_at 
+		`SELECT id, username, password_hash, created_at, updated_at 
 		FROM users WHERE id = $1`,
 		id,
 	).Scan(
 		&user.ID,
 		&user.Username,
-		&user.Password,
+		&user.PasswordHash,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -43,13 +43,13 @@ func (r *userRepository) GetByID(id int64) (*domain.User, error) {
 func (r *userRepository) GetByUsername(username string) (*domain.User, error) {
 	user := &domain.User{}
 	err := r.db.QueryRow(
-		`SELECT id, username, password, created_at, updated_at 
+		`SELECT id, username, password_hash, created_at, updated_at 
 		FROM users WHERE username = $1`,
 		username,
 	).Scan(
 		&user.ID,
 		&user.Username,
-		&user.Password,
+		&user.PasswordHash,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -66,21 +66,21 @@ func (r *userRepository) GetByUsername(username string) (*domain.User, error) {
 
 func (r *userRepository) Create(user *domain.User) error {
 	return r.db.QueryRow(
-		`INSERT INTO users (username, password, created_at, updated_at)
+		`INSERT INTO users (username, password_hash, created_at, updated_at)
 		VALUES ($1, $2, NOW(), NOW())
 		RETURNING id, created_at, updated_at`,
 		user.Username,
-		user.Password,
+		user.PasswordHash,
 	).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 }
 
 func (r *userRepository) Update(user *domain.User) error {
 	result, err := r.db.Exec(
 		`UPDATE users 
-		SET username = $1, password = $2, updated_at = NOW()
+		SET username = $1, password_hash = $2, updated_at = NOW()
 		WHERE id = $3`,
 		user.Username,
-		user.Password,
+		user.PasswordHash,
 		user.ID,
 	)
 	if err != nil {
