@@ -54,7 +54,7 @@ func (a *authUseCase) Login(ctx context.Context, username, password string) (*do
 		return nil, err
 	}
 
-	if !common.CheckPasswordHash(password, user.Password) {
+	if !common.CheckPasswordHash(password, user.PasswordHash) {
 		return nil, domain.ErrInvalidCredentials
 	}
 

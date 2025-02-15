@@ -137,6 +137,11 @@ run-services:
 	@echo "==> Starting gateway service..."
 	@./bin/gateway.exe
 
+migrate-force:
+	@echo "==> Forcing migration version..."
+	migrate -database "postgres://postgres:postgres@localhost:5432/$(SERVICE)?sslmode=disable" \
+		-path migrations/$(SERVICE) force $(VERSION)
+
 # Combined
 .PHONY: run-all
 run-all:
