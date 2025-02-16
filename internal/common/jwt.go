@@ -5,7 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var JWTSecret = []byte("supersecretkey252")
+var JWTSecret = []byte("supersecretkey252") //TODO: env файл
 
 func GenerateToken(claims jwt.MapClaims, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

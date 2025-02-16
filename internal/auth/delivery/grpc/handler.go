@@ -25,39 +25,19 @@ func NewAuthHandler(authUseCase usecase.AuthUseCase, logger common.Logger) *Auth
 func (h *AuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	h.logger.Infof("Login request received for user: %s", req.Username)
 	
-	tokens, err := h.authUseCase.Login(ctx, req.Username, req.Password)
+	accessToken, err := h.authUseCase.Login(ctx, req.Username, req.Password)
 	if err != nil {
 		h.logger.Errorf("Login failed: %v", err)
 		return nil, err
 	}
 
 	return &pb.LoginResponse{
-		UserId:       1, // Для единственного админа всегда будет 1
-		AccessToken:  tokens.AccessToken,
-		RefreshToken: tokens.RefreshToken,
-	}, nil
-}
-
-func (h *AuthHandler) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
-	tokens, err := h.authUseCase.RefreshTokens(ctx, req.RefreshToken)
-	if err != nil {
-		h.logger.Errorf("Refresh token error %s", err)
-		return nil, err
-	}
-
-	return &pb.RefreshTokenResponse{
-		AccessToken:  tokens.AccessToken,
-		RefreshToken: tokens.RefreshToken,
+		UserId:      1, // Для единственного админа всегда будет 1
+		AccessToken: accessToken,
 	}, nil
 }
 
 func (h *AuthHandler) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutResponse, error) {
-	err := h.authUseCase.Logout(ctx, req.RefreshToken)
-	if err != nil {
-		h.logger.Errorf("Logout error %s", err)
-		return nil, err
-	}
-
 	return &pb.LogoutResponse{}, nil
 }
 

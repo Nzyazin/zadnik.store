@@ -33,10 +33,9 @@ func main() {
 
 	// Инициализируем репозитории
 	userRepo := postgres.NewUserRepository(database.DB)
-	tokenRepo := postgres.NewTokenRepository(database.DB)
 
 	// Инициализируем use case
-	authUseCase := usecase.NewAuthUseCase(userRepo, tokenRepo, logger, cfg.JWTSecret)
+	authUseCase := usecase.NewAuthUseCase(userRepo, logger, cfg.JWTSecret)
 
 	// Инициализируем gRPC handler
 	authHandler := authgrpc.NewAuthHandler(authUseCase, logger)

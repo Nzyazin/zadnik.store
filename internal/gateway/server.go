@@ -9,9 +9,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	"github.com/Nzyazin/zadnik.store/internal/gateway/auth" 
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
-	"github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
+	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/middleware"
 )
 
@@ -55,7 +56,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	// Инициализация сервисов
 	authService := NewAuthService(authClient)
 
-	// Инициализация хендлеров
+	
 	templates, err := admin_templates.NewTemplates(admin_templates.TemplateFunctions{
 		StaticWithHash: StaticWithHash,
 	})
@@ -72,18 +73,18 @@ func (s *Server) Run(addr string) error {
 	return s.router.Run(addr)
 }
 
-type AuthService struct {
+type authService struct {
 	client pb.AuthServiceClient
 }
 
-func NewAuthService(client pb.AuthServiceClient) *AuthService {
-	return &AuthService{client: client}
+func NewAuthService(client pb.AuthServiceClient) auth.AuthService {
+	return &authService{client: client}
 }
 
-func (s *AuthService) Login(ctx context.Context, username, password string) (*pb.LoginResponse, error) {
+func (s *authService) Login(ctx context.Context, username, password string) (*pb.LoginResponse, error) {
 	return s.client.Login(ctx, &pb.LoginRequest{Username: username, Password: password})
 }
 
-func (s *AuthService) ValidateToken(ctx context.Context, token string) (*pb.ValidateTokenResponse, error) {
+func (s *authService) ValidateToken(ctx context.Context, token string) (*pb.ValidateTokenResponse, error) {
 	return s.client.ValidateToken(ctx, &pb.ValidateTokenRequest{AccessToken: token})
 }

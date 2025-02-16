@@ -1,26 +1,20 @@
 package admin
 
 import (
-	"context"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
-	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 )
 
 type Handler struct {
-	authService AuthService
+	authService auth.AuthService
 	templates   *admin_templates.Templates
 }
 
-type AuthService interface {
-	Login(ctx context.Context, username, password string) (*pb.LoginResponse, error)
-	ValidateToken(ctx context.Context, token string) (*pb.ValidateTokenResponse, error)
-}
-
-func NewHandler(authService AuthService, templates *admin_templates.Templates) *Handler {
+func NewHandler(authService auth.AuthService, templates *admin_templates.Templates) *Handler {
 	return &Handler{
 		authService: authService,
 		templates:  templates,
@@ -71,7 +65,7 @@ func (h *Handler) login(c *gin.Context) {
 	c.SetCookie(
 		"access_token",
 		resp.AccessToken,
-		int(time.Hour.Seconds()*24), // 24 часа
+		int(24 * time.Hour.Seconds()),
 		"/",
 		"",
 		false, // secure
@@ -79,6 +73,20 @@ func (h *Handler) login(c *gin.Context) {
 	)
 
 	c.Redirect(http.StatusFound, "/admin/products")
+}
+
+func (h *Handler) logout(c * gin.Context) {
+	c.SetCookie(
+		"access_token",
+		"",
+		-1,
+		"/",
+		"",
+		false,
+		true,
+	)
+
+	c.Redirect(http.StatusFound, "/admin/login")
 }
 
 func (h *Handler) authMiddleware() gin.HandlerFunc {
