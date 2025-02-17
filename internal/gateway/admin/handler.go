@@ -27,6 +27,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 		// Публичные роуты
 		adminGroup.GET("/login", h.loginPage)
 		adminGroup.POST("/login", h.login)
+		adminGroup.GET("/logout", h.logout)
 
 		// Защищенные роуты
 		authorized := adminGroup.Group("/")
