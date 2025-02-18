@@ -13,5 +13,6 @@ type Product struct {
 }
 
 type ProductRepository interface {
-	GetList(ctx context.Context) ([]Product, error)
+	GetAll(ctx context.Context) ([]*Product, error)
 }
+
