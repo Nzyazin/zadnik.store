@@ -6,10 +6,10 @@ import (
 
 type Product struct {
 	ID int
+	Price string
 	Name string
 	Slug string
 	Description string
-	Price string
 }
 
 type ProductRepository interface {
