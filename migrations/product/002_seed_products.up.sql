@@ -1,5 +1,3 @@
--- Insert admin user with bcrypt hashed password
--- Default password: admin123 (you should change this in production)
 INSERT INTO products (name, slug, description, price)
 VALUES 
     ('Первый', 'prevyi', 'Описание первого товара', 10000),

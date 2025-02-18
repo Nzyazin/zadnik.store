@@ -13,14 +13,15 @@ proto:
 	protoc --go_out=. --go-grpc_out=. *.proto
 
 # Migration commands
-migrate-up:
-	@echo "==> Running migrations up..."
+migrate-up:	
 	@if [ "$(SERVICE)" = "auth" ]; then \
+		echo "==> Running migrations up 'auth'" && \
 		set -a && . ./internal/auth/config/.env-auth && set +a && \
 		migrate -path migrations/auth -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" up; \
 	elif [ "$(SERVICE)" = "product" ]; then \
+		echo "==> Running migrations up 'product'" && \
 		set -a && . ./internal/product/config/.env-product && set +a && \
-		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" up; \
+		migrate -path migrations/product -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" up; \
 	else \
 		echo "Please specify SERVICE=auth or SERVICE=product"; \
 		exit 1; \
@@ -33,7 +34,7 @@ migrate-down:
 		migrate -path migrations/auth -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" down; \
 	elif [ "$(SERVICE)" = "product" ]; then \
 		set -a && . ./internal/product/config/.env-product && set +a && \
-		migrate -path migrations -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" down; \
+		migrate -path migrations/product -database "postgres://$$DB_USER:$$DB_PASSWORD@$$DB_HOST:$$DB_PORT/$$DB_NAME?sslmode=disable" down; \
 	else \
 		echo "Please specify SERVICE=auth or SERVICE=product"; \
 		exit 1; \
@@ -46,6 +47,27 @@ migrate-create:
 	fi
 	@read -p "Enter migration name: " name; \
 	migrate create -ext sql -dir migrations/$(SERVICE) -seq $$name
+
+migrate-clean:
+	@if [ "$(SERVICE)" = "auth" ]; then \
+		echo "==> Cleaning migrations state for 'auth'" && \
+		PGPASSWORD=postgres psql -U postgres -d auth -c "DROP TABLE IF EXISTS schema_migrations;" && \
+		PGPASSWORD=postgres psql -U postgres -d auth -c "DROP TABLE IF EXISTS users;" && \
+		make migrate-up SERVICE=auth; \
+	elif [ "$(SERVICE)" = "product" ]; then \
+		echo "==> Cleaning migrations state for 'product'" && \
+		PGPASSWORD=postgres psql -U postgres -d product -c "DROP TABLE IF EXISTS schema_migrations;" && \
+		PGPASSWORD=postgres psql -U postgres -d product -c "DROP TABLE IF EXISTS products;" && \
+		make migrate-up SERVICE=product; \
+	else \
+		echo "Please specify SERVICE=auth or SERVICE=product"; \
+		exit 1; \
+	fi
+
+migrate-force:
+	@echo "==> Forcing migration version..."
+	migrate -database "postgres://postgres:postgres@localhost:5432/$(SERVICE)?sslmode=disable" \
+		-path migrations/$(SERVICE) force $(VERSION)
 
 # Database commands
 create-db:
@@ -137,15 +159,10 @@ run-services:
 	@echo "==> Starting gateway service..."
 	@./bin/gateway.exe
 
-migrate-force:
-	@echo "==> Forcing migration version..."
-	migrate -database "postgres://postgres:postgres@localhost:5432/$(SERVICE)?sslmode=disable" \
-		-path migrations/$(SERVICE) force $(VERSION)
-
 # Combined
 .PHONY: run-all
 run-all:
 	@echo "==> Starting all services..."
 	make run-auth & make run-gateway
 
-.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services
+.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services migrate-clean migrate-force
