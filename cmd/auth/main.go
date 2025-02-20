@@ -49,7 +49,7 @@ func main() {
 	server := grpc.NewServer()
 	pb.RegisterAuthServiceServer(server, authHandler)
 
-	logger.Infof("Starting gRPC server on %s", cfg.AuthServiceAddress)
+	logger.Infof("Starting gRPC server  for authserivce on %s", cfg.AuthServiceAddress)
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}

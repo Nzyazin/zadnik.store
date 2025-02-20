@@ -18,6 +18,6 @@ func NewProductRepository(db *sqlx.DB) domain.ProductRepository {
 func (r *productRepository) GetAll(ctx context.Context) ([]*domain.Product, error) {
 	products := []*domain.Product{}
 	query := `SELECT * FROM products`
-	err := r.db.Select(&products, query)
+	err := r.db.SelectContext(ctx, &products, query)
 	return products, err
 }

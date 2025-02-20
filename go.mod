@@ -15,6 +15,8 @@ require (
 	google.golang.org/protobuf v1.36.4
 )
 
+require github.com/gorilla/mux v1.8.1 // indirect
+
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.12.8 // indirect

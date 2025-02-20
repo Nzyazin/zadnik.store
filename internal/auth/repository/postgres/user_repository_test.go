@@ -17,7 +17,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 	// Создаем тестового пользователя
 	user := &domain.User{
 		Username:  "testuser",
-		Password:  "hashedpassword",
+		PasswordHash:  "hashedpassword",
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -27,7 +27,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 	err := db.QueryRow(
 		`INSERT INTO users (username, password, created_at, updated_at)
 		VALUES ($1, $2, $3, $4) RETURNING id`,
-		user.Username, user.Password, user.CreatedAt, user.UpdatedAt,
+		user.Username, user.PasswordHash, user.CreatedAt, user.UpdatedAt,
 	).Scan(&userID)
 	require.NoError(t, err)
 
@@ -36,7 +36,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, foundUser)
 		assert.Equal(t, user.Username, foundUser.Username)
-		assert.Equal(t, user.Password, foundUser.Password)
+		assert.Equal(t, user.PasswordHash, foundUser.PasswordHash)
 		assert.Equal(t, user.CreatedAt.UTC(), foundUser.CreatedAt.UTC())
 		assert.Equal(t, user.UpdatedAt.UTC(), foundUser.UpdatedAt.UTC())
 	})
@@ -56,7 +56,7 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 	now := time.Now().UTC().Truncate(time.Second)
 	user := &domain.User{
 		Username:  "testuser",
-		Password:  "hashedpassword",
+		PasswordHash:  "hashedpassword",
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -65,7 +65,7 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 	_, err := db.Exec(
 		`INSERT INTO users (username, password, created_at, updated_at)
 		VALUES ($1, $2, $3, $4)`,
-		user.Username, user.Password, user.CreatedAt, user.UpdatedAt,
+		user.Username, user.PasswordHash, user.CreatedAt, user.UpdatedAt,
 	)
 	require.NoError(t, err)
 
@@ -74,7 +74,7 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, foundUser)
 		assert.Equal(t, user.Username, foundUser.Username)
-		assert.Equal(t, user.Password, foundUser.Password)
+		assert.Equal(t, user.PasswordHash, foundUser.PasswordHash)
 		assert.Equal(t, user.CreatedAt.UTC(), foundUser.CreatedAt.UTC())
 		assert.Equal(t, user.UpdatedAt.UTC(), foundUser.UpdatedAt.UTC())
 	})

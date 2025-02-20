@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	DB                *DBConfig
-	AuthServiceAddress string
+	ProductServiceAddress string
 	JWTSecret         string
 }
 
@@ -22,7 +22,7 @@ type DBConfig struct {
 
 func Load() (*Config, error) {
 	// Загружаем .env файл
-	err := godotenv.Load(filepath.Join("internal", "auth", "config", ".env-auth"))
+	err := godotenv.Load(filepath.Join("internal", "product", "config", ".env-product"))
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func Load() (*Config, error) {
 			Password: os.Getenv("DB_PASSWORD"),
 			Name:     os.Getenv("DB_NAME"),
 		},
-		AuthServiceAddress: os.Getenv("AUTH_SERVICE_ADDRESS"),
+		ProductServiceAddress: os.Getenv("PRODUCT_SERVICE_ADDRESS"),
 		JWTSecret:         os.Getenv("JWT_SECRET"),
 	}, nil
 }

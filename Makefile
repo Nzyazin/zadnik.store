@@ -149,6 +149,11 @@ run-gateway:
 	@echo "==> Starting gateway service..."
 	go run ./cmd/gateway/main.go
 
+.PHONY: run-product
+run-product:
+	@echo "==> Starting product service..."
+	go run ./cmd/product/main.go
+
 # Run commands
 .PHONY: run-services
 run-services:
@@ -163,6 +168,6 @@ run-services:
 .PHONY: run-all
 run-all:
 	@echo "==> Starting all services..."
-	make run-auth & make run-gateway
+	make run-auth & make run-gateway & make run-product
 
 .PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services migrate-clean migrate-force
