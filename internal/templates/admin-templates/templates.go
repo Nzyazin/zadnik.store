@@ -26,11 +26,13 @@ type AuthParams struct {
 type ProductsIndexParams struct {
 	BaseParams
 	Products []Product
+	Error string
 }
 
 // TemplateFunctions содержит функции для использования в шаблонах
 type TemplateFunctions struct {
 	StaticWithHash func(string) string
+	Add func(int, int) int
 }
 
 // Templates хранит все шаблоны и их функции
@@ -44,7 +46,7 @@ type Templates struct {
 func NewTemplates(tf TemplateFunctions) (*Templates, error) {
 	t := &Templates{
 		funcs: template.FuncMap{
-			"add":           func(a, b int) int { return a + b },
+			"add":           tf.Add,
 			"staticWithHash": tf.StaticWithHash,
 		},
 	}
@@ -87,7 +89,6 @@ func (t *Templates) RenderAuth(w io.Writer, p AuthParams) error {
 
 func (t *Templates) RenderProductsIndex(w io.Writer, p ProductsIndexParams) error {
 	// Установим базовые параметры
-	p.Title = "Товары"
 	p.View = "products-index"
 	
 	return t.products.Execute(w, p)

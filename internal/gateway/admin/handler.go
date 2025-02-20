@@ -142,24 +142,33 @@ type Product struct {
 }
 
 func (h *Handler) productsIndex(c *gin.Context) {
+	params := admin_templates.ProductsIndexParams{
+		BaseParams: admin_templates.BaseParams{
+			Title: "Товары",
+		},
+	}
+
 	resp, err := h.httpClient.Get(h.productServiceUrl + "/products")
 	if err != nil {
 		h.logger.Errorf("Failed to fetch products: %v", err)
-		c.String(http.StatusInternalServerError, "Failed to fetch products: method Get")
+		params.Error = "Не удалось загрузить список товаров"
+		h.renderProductsIndex(c, params)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		h.logger.Errorf("Product service returned non-200 status: %d", resp.StatusCode)
-		c.String(http.StatusInternalServerError, "Failed to fetch products")
+		params.Error = "Сервис товаров временно недоступен"
+		h.renderProductsIndex(c, params)
 		return
 	}
 
 	var apiProducts []Product
 	if err := json.NewDecoder(resp.Body).Decode(&apiProducts); err != nil {
 		h.logger.Errorf("Failed to decode products response: %v", err)
-		c.String(http.StatusInternalServerError, "Failed to decode products")
+		params.Error = "Ошибка при обработке данных"
+		h.renderProductsIndex(c, params)
 		return
 	}
 
@@ -174,12 +183,13 @@ func (h *Handler) productsIndex(c *gin.Context) {
 		}
 	}
 
-	params := admin_templates.ProductsIndexParams{
-		Products: products,
-	}
-	
+	params.Products = products
+	h.renderProductsIndex(c, params)
+}
+
+func (h *Handler) renderProductsIndex(c *gin.Context, params admin_templates.ProductsIndexParams) {
 	if err := h.templates.RenderProductsIndex(c.Writer, params); err != nil {
+		h.logger.Errorf("Failed to render products template: %v", err)
 		c.String(http.StatusInternalServerError, "Internal Server Error")
-		return
 	}
 }

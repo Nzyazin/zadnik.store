@@ -8,7 +8,6 @@ PROTO_FILES=$(PROTO_DIR)/*.proto
 proto:
 	@echo "==> Generation protobuf..."
 	@cd $(PROTO_DIR) && \
-	echo "Generation protobuf - product" && \
 	echo "Generation protobuf - auth" && \
 	protoc --go_out=. --go-grpc_out=. *.proto
 
@@ -169,5 +168,10 @@ run-services:
 run-all:
 	@echo "==> Starting all services..."
 	make run-auth & make run-gateway & make run-product
+
+.PHONY: generate-mocks
+generate-mocks: install-mockgen
+	@echo "==> Generating mocks..."
+	@mockgen -source=internal/auth/domain/user.go -destination=internal/auth/mocks/mock_repositories.go -package=mocks
 
 .PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services migrate-clean migrate-force

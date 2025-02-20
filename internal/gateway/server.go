@@ -61,6 +61,9 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	
 	templates, err := admin_templates.NewTemplates(admin_templates.TemplateFunctions{
 		StaticWithHash: StaticWithHash,
+		Add: func(a, b int) int {
+			return a + b
+		},
 	})
 	if err != nil {
 		return nil, err
