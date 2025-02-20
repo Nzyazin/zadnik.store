@@ -2,22 +2,24 @@ package gateway
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/Nzyazin/zadnik.store/internal/gateway/auth" 
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
-	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
+	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/middleware"
+	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 )
 
 type ServerConfig struct {
 	AuthServiceAddr string
+	ProductServiceAddr string
 	Development    bool
 }
 
@@ -63,7 +65,9 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	adminHandler := admin.NewHandler(authService, templates)
+
+	productServiceUrl := fmt.Sprintf("http://%s", cfg.ProductServiceAddr)
+	adminHandler := admin.NewHandler(authService, templates, productServiceUrl)
 	adminHandler.RegisterRoutes(s.router)
 
 	return s, nil

@@ -3,8 +3,11 @@ package admin
 import (
 	"net/http"
 	"time"
+	"encoding/json"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
+	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 )
@@ -12,18 +15,27 @@ import (
 type Handler struct {
 	authService auth.AuthService
 	templates   *admin_templates.Templates
+	productServiceUrl string
+	httpClient  *http.Client
+	logger common.Logger
 }
 
-func NewHandler(authService auth.AuthService, templates *admin_templates.Templates) *Handler {
+func NewHandler(authService auth.AuthService, templates *admin_templates.Templates, productServiceUrl string) *Handler {
 	return &Handler{
 		authService: authService,
 		templates:  templates,
+		productServiceUrl: productServiceUrl,
+		httpClient: &http.Client{
+			Timeout: time.Second * 10,
+		},
+		logger: common.NewSimpleLogger(),
 	}
 }
 
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	adminGroup := r.Group("/admin")
 	{
+		adminGroup.GET("/", h.adminIndex)
 		// Публичные роуты
 		adminGroup.GET("/login", h.loginPage)
 		adminGroup.POST("/login", h.login)
@@ -36,6 +48,16 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 			authorized.GET("/products", h.productsIndex)
 		}
 	}
+}
+
+func (h *Handler) adminIndex(c *gin.Context) {
+	_, err := c.Cookie("access_token")
+	if err != nil {
+		c.Redirect(http.StatusFound, "/admin/login")
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/products")
 }
 
 func (h *Handler) loginPage(c *gin.Context) {
@@ -111,9 +133,46 @@ func (h *Handler) authMiddleware() gin.HandlerFunc {
 	}
 }
 
+type Product struct {
+	ID int `json:"id"`
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+	Price decimal.Decimal `json:"price"`
+	Description string `json:"description"`
+}
+
 func (h *Handler) productsIndex(c *gin.Context) {
-	// TODO: Получение продуктов через gRPC
-	products := []admin_templates.Product{} // пока пустой список
+	resp, err := h.httpClient.Get(h.productServiceUrl + "/products")
+	if err != nil {
+		h.logger.Errorf("Failed to fetch products: %v", err)
+		c.String(http.StatusInternalServerError, "Failed to fetch products: method Get")
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		h.logger.Errorf("Product service returned non-200 status: %d", resp.StatusCode)
+		c.String(http.StatusInternalServerError, "Failed to fetch products")
+		return
+	}
+
+	var apiProducts []Product
+	if err := json.NewDecoder(resp.Body).Decode(&apiProducts); err != nil {
+		h.logger.Errorf("Failed to decode products response: %v", err)
+		c.String(http.StatusInternalServerError, "Failed to decode products")
+		return
+	}
+
+	products := make([]admin_templates.Product, len(apiProducts))
+	for i, p := range apiProducts {
+		products[i] = admin_templates.Product{
+			ID: p.ID,
+			Name: p.Name,
+			Slug: p.Slug,
+			Price: p.Price,
+			Description: p.Description,
+		}
+	}
 
 	params := admin_templates.ProductsIndexParams{
 		Products: products,

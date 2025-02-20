@@ -22,6 +22,7 @@ func main() {
 	// Создаем конфигурацию
 	cfg := &gateway.ServerConfig{
 		AuthServiceAddr: os.Getenv("AUTH_SERVICE_ADDRESS"),
+		ProductServiceAddr: os.Getenv("PRODUCT_SERVICE_ADDRESS"),
 		Development:    os.Getenv("DEVELOPMENT") == "true",
 	}
 
