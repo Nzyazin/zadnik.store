@@ -1,5 +1,7 @@
 .products-index
   padding: 20px
+  @include media(1240)
+    padding: 0 10px
 
 .products-index__header
   display: flex
@@ -7,20 +9,25 @@
   justify-content: space-between
   margin-bottom: 30px
   gap: 20px
+  @include media(1240)
+    margin-bottom: 9px
 
   @include media(520px)
     flex-direction: column
     align-items: stretch
 
-.page-title
+.products-index__page-title
   margin: 0
   font-size: 24px
   font-weight: 500
+  @include media(1240)
+    font-size: 16px
+    font-size: 18px
 
   @include media(520px)
     text-align: center
 
-.btn-primary
+.products-index__btn-primary
   display: inline-flex
   align-items: center
   gap: 8px
@@ -31,6 +38,8 @@
   border-radius: 8px
   transition: all 0.2s ease
   white-space: nowrap
+  @include media(1240)
+    padding: 6px 12px
 
   &:hover
     background: $orange_hover
@@ -43,33 +52,45 @@
   border-radius: 10px
   box-shadow: 0 2px 8px rgba($black, 0.1)
   overflow-x: auto
+  th, td
+    padding: 15px 20px
+    text-align: left
+    border-bottom: 1px solid $gray-light
+  
+    @include media(1240)
+      padding: 6px 9px
 
-.table
+.products-index__table-inner
   width: 100%
   min-width: 600px
   border-collapse: collapse
+  @include media(1240)
+    min-width: 100% 
 
-th, td
-  padding: 15px 20px
-  text-align: left
-  border-bottom: 1px solid $gray-light
+  th
+    font-weight: 600
+    color: $dark
+    background: $gray-light
 
-  @include media(700px)
-    padding: 12px 15px
+    &:first-child
+      width: 60px
+      @include media(1240)
+        width: 36px
 
-th
-  font-weight: 600
-  color: $dark
-  background: $gray-light
+    &:nth-child(2)
+      width: 40%
+      @include media(1240)
+        width: 30%
 
-  &:first-child
-    width: 60px
+    &:nth-child(3)
+      width: 20%
+      @include media(1240)
+        width: 15%
 
-  &:last-child
-    width: 150px
-
-    @include media(700px)
-      width: 120px
+    &:last-child
+      width: 150px
+      @include media(1240)
+        width: 10px
 
 td
   color: $dark
@@ -84,7 +105,7 @@ tbody tr
   &:last-child td
     border-bottom: none
 
-.btn-edit
+.products-index__btn-edit
   display: inline-flex
   align-items: center
   gap: 8px
@@ -95,14 +116,7 @@ tbody tr
   border-radius: 6px
   transition: all 0.2s ease
 
-  @include media(700px)
-    padding: 6px 10px
-
-    span
-      display: none
-
+  @include media(1240)
+    padding: 3px 6px
   &:hover
     background: rgba($blue, 0.2)
-
-  i
-    font-size: 16px

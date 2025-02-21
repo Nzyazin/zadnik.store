@@ -13,8 +13,8 @@
 
 .products-index
   .products-index__header
-    h1.page-title= title
-    a.btn.btn-primary(href="#") 
+    h1.products-index__page-title= title
+    a.btn.products-index__btn-primary(href="#") 
       i.icon-plus
       span Добавить товар
   
@@ -22,7 +22,7 @@
     .alert.alert-danger= error
   
   .products-index__table
-    table.table
+    table.products-index__table-inner
       thead
         tr
           th №
@@ -36,6 +36,5 @@
             td= product.name
             td #{product.price} ₽
             td
-              a.btn.btn-edit(href=`#`)
-                i.icon-edit
-                span Редактировать
+              a.btn.products-index__btn-edit(href=`#`)
+                span.text Редактировать
