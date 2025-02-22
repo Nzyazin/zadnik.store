@@ -1,0 +1,45 @@
+$black: #000
+$white: #ffffff
+$dark: #181212
+$orange: #EA7557
+$orange_hover: #FD9479
+$orange_active: #E2542F
+$gray-light: #F5F5F5
+$gray-lighter: #E1E1E1
+$gray-dark: #ddd0d0
+$gray:  #E1E1E1
+$red: #EB5757
+$peach: #FFF1EE
+$green: #27AE60
+$green-dark: #219653
+$blue: #2D9CFF
+
+// bp 1240, 950, 700, 520
+@mixin media($bp-size)
+  @media (max-width: $bp-size + px)
+    @content
+
+@mixin media_min($bp-size)
+  @media (min-width: $bp-size + 0.1 + px)
+    @content
+
+@mixin hover
+  @include media_min(1240)
+    @content
+
+$imgPath: '../images/'
+
+@mixin bgImg($img)
+  background-image: url($imgPath + $img)
+
+@mixin bgIcon($img, $w: 100%, $h: 100%)
+  background-image: url($imgPath + $img)
+  background-size: $w $h
+  background-repeat: no-repeat
+  background-position: center center
+
+@mixin maskBgIcon($img, $w: 100%, $h: 100%)
+  mask-image: url($imgPath + $img)
+  mask-size: $w $h
+  mask-repeat: no-repeat
+  mask-position: center center

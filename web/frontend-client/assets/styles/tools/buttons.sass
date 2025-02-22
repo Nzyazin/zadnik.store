@@ -1,0 +1,33 @@
+@mixin _button
+  display: inline-block
+  vertical-align: top
+  border: none
+  text-decoration: none
+  text-align: center
+  font-weight: 400
+  user-select: none
+  cursor: pointer
+  @include hover
+    transition-duration: .2s
+  &:hover
+    @include hover
+      transition-duration: .1s
+
+.button-orange
+  +_button
+  &
+    background-color: $orange
+    color: $white
+    transition-property: background-color
+    transition-duration: .2s
+  @include hover
+    transition-property: background-color
+    &:hover
+      @include hover
+        background-color: $orange_hover
+  &:not(&:disabled):active
+    @include hover
+      background-color: $orange_active
+  &:disabled
+    background-color: $gray
+    pointer-events: none

@@ -1,0 +1,11 @@
+extends ../components/_layout/layout
+
+block variables
+  - const title = 'Редактирование товара'
+
+block head
+  +title(title)
+  +description('')
+
+block body
+  include ../components/products/product-edit

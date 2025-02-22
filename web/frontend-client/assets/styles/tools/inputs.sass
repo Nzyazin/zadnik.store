@@ -1,0 +1,83 @@
+input[type="number"]
+  -moz-appearance: textfield
+  &::-webkit-outer-spin-button, &::-webkit-inner-spin-button
+    display: none
+    -webkit-appearance: none
+    -moz-appearance: none
+    appearance: none
+    margin: 0
+
+input[type="submit"]
+  -webkit-appearance: none
+  -moz-appearance: none
+  appearance: none
+
+input[type="search"]
+  appearance: none
+  &::-ms-clear
+    display: none
+  &::-webkit-search-decoration,
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-results-button,
+  &::-webkit-search-results-decoration
+    -webkit-appearance: none
+
+input[type=range]
+  -webkit-appearance: none
+  width: 100%
+
+input[type=range]::-webkit-slider-thumb
+  -webkit-appearance: none
+
+input[type=range]:focus
+  outline: none
+
+input[type=range]::-ms-track
+  width: 100%
+  cursor: pointer
+  background: transparent
+  border-color: transparent
+  color: transparent
+
+@mixin _input
+  display: block
+  border: 1px solid $white
+  width: 100%
+  color: rgba($dark, .8)
+
+.input
+  +_input
+  &:not(.input_error)
+    @include hover
+      &:hover
+        &::placeholder
+          color: rgba($dark, .8)
+  &::placeholder
+    color: rgba($dark, .5)
+    transition-property: color
+    transition-duration: .2s
+  &:disabled
+    background-color: $gray
+    color: rgba($dark, 0.3)
+    pointer-events: none
+
+input.input_error
+  border: 1px solid $red
+  &:hover, &:focus
+    border: 1px solid $red
+
+.textarea
+  +_input
+  transition-property: border-color
+  transition-duration: .2s
+  resize: none
+  &:not(.input_error)
+    @include hover
+      &:hover
+        border-color: $dark
+        &::placeholder
+          color: rgba($dark, .8)
+  &::placeholder
+    color: rgba($dark, .5)
+    transition-property: color
+    transition-duration: .2s

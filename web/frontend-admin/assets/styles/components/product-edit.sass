@@ -1,0 +1,112 @@
+.product-edit
+  padding: 20px
+  @include media(1240)
+    padding: 0 10px
+
+.product-edit__header
+  display: flex
+  align-items: center
+  justify-content: space-between
+  margin-bottom: 30px
+  gap: 20px
+  @include media(1240)
+    margin-bottom: 9px
+
+  @include media(520px)
+    flex-direction: column
+    align-items: stretch
+
+.product-edit__page-title
+  margin: 0
+  font-size: 24px
+  font-weight: 500
+  @include media(1240)
+    font-size: 18px
+
+  @include media(520px)
+    text-align: center
+
+.product-edit__btn-back
+  display: inline-flex
+  align-items: center
+  gap: 8px
+  padding: 8px 16px
+  background: $gray-light
+  border-radius: 8px
+  transition: all 0.2s ease
+  white-space: nowrap
+  @include media(1240)
+    padding: 6px 12px
+
+  &:hover
+    background: darken($gray-light, 5%)
+
+.product-edit__form
+  background: $white
+  border-radius: 10px
+  box-shadow: 0 2px 8px rgba($black, 0.1)
+  overflow: hidden
+  padding: 20px
+  @include media(1240)
+    padding: 15px
+
+.product-edit__form-inner
+  max-width: 600px
+
+.product-edit__form-group
+  margin-bottom: 20px
+  @include media(1240)
+    margin-bottom: 15px
+
+.product-edit__label
+  display: block
+  margin-bottom: 8px
+  font-weight: 500
+  @include media(1240)
+    margin-bottom: 6px
+    font-size: 14px
+
+.product-edit__input
+  width: 100%
+  padding: 8px 12px
+  border: 1px solid $gray-light
+  border-radius: 6px
+  font-size: 16px
+  @include media(1240)
+    padding: 6px 10px
+    font-size: 14px
+
+  &:focus
+    border-color: $blue
+    outline: none
+
+.product-edit__picture
+  display: block
+  width: 276px
+  @include media(1240)
+    width: 120px
+
+.product-edit__preview
+  margin-top: 10px
+  border-radius: 6px
+
+.product-edit__form-actions
+  margin-top: 30px
+  @include media(1240)
+    margin-top: 20px
+
+.product-edit__btn-save
+  display: inline-flex
+  align-items: center
+  gap: 8px
+  padding: 8px 24px
+  background: $orange
+  color: $white
+  border-radius: 8px
+  transition: all 0.2s ease
+  white-space: nowrap
+  @include media(1240)
+    padding: 6px 16px
+
+  &:hover
+    background: $orange_hover

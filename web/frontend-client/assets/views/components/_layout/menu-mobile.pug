@@ -1,0 +1,9 @@
+.menu-mobile(data-element="menu-mobile")
+  .menu-mobile__overlay(data-element="menu-mobile__overlay")
+  .menu-mobile__wrapper
+    .menu-mobile__cont
+      ul.menu-mobile__list
+        each item in menuList
+          li.menu-mobile__item
+            a.menu-mobile__link(href=item.link, data-role="scroll-to-anchor", data-element="menu-mobile__link")= item.text
+      a.header__phone-link_mobile.link-dark.text-big(href=phone.link)= phone.mask
