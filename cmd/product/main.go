@@ -39,7 +39,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/products", productHandler.GetAll).Methods("GET")
 
-	log.Printf("Starting product service on %s", cfg.ProductServiceAddress)
+	logger.Infof("Starting product service on %s", cfg.ProductServiceAddress)
 	if err := http.ListenAndServe(cfg.ProductServiceAddress, router); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}

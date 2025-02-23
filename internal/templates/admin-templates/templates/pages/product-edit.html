@@ -1,0 +1,44 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="product-edit">
+    <div class="product-edit__header">
+        <h1 class="product-edit__page-title">{{.Title}}</h1>
+        <a href="/admin/products" class="btn product-edit__btn-back">
+            <span class="text">Вернуться к списку</span>
+        </a>
+    </div>
+    {{if .Error}}
+        <div class="alert alert-danger">{{.Error}}</div>
+    {{end}}
+    <div class="product-edit__form">
+        <form action="/admin/products/{{.Product.ID}}/edit" method="POST">
+            <div class="product-edit__form-group">
+                <label class="product-edit__label" for="name">Название</label>
+                <input id="name" class="product-edit__input" type="text" name="name" value="{{.Product.Name}}" required>
+            </div>
+            <div class="product-edit__form-group">
+                <label class="product-edit__label" for="price">Цена</label>
+                <input id="price" class="product-edit__input" type="number" name="price" value="{{.Product.Price}}" required>
+            </div>
+            <div class="product-edit__form-group">
+                <label class="product-edit__label" for="description">Описание</label>
+                <textarea id="description" class="product-edit__input" name="description" required>{{.Product.Description}}</textarea>
+            </div>
+            <div class="product-edit__form-group">
+                <label class="product-edit__label" for="image">Изображение</label>
+                <input id="image" class="product-edit__input" type="file" name="image">
+                <picture class="product-edit__picture">
+                    <source srcset="{{staticWithHash (printf "/static/images/products/%s" .Product.Image)}}" media="(max-width: 1240px)" type="image/">
+                    <img src="{{staticWithHash (printf "/static/images/products/%s" .Product.Image)}}" alt="Изображение товара">
+                </picture>
+            </div>
+            <div class="product-edit__form-actions">
+                <button class="btn product-edit__btn-save" type="submit">
+                    <span class="text">Сохранить</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}

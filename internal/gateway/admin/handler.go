@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shopspring/decimal"
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
@@ -47,8 +46,58 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 		{
 			authorized.GET("/products", h.productsIndex)
 			authorized.GET("/products/:id/edit", h.productEdit)
-			authorized.POST("/products/:id/edit", h.productUpdate)
+			//authorized.POST("/products/:id/edit", h.productUpdate)
 		}
+	}
+}
+
+func (h *Handler) productEdit(c *gin.Context) {
+	_, err := c.Cookie("access_token")
+	if err != nil {
+		c.Redirect(http.StatusFound, "/admin/login")
+		return
+	}
+
+	productID := c.Param("id")
+	if productID == "" {
+		h.logger.Errorf("Product ID is empty")
+		c.Redirect(http.StatusFound, "/admin/products")
+		return
+	}
+
+	resp, err := h.httpClient.Get(h.productServiceUrl + "/products/" + productID)
+	if err != nil {
+		h.logger.Errorf("Failed to get product: %v", err)
+		c.Redirect(http.StatusFound, "/admin/products")
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		h.logger.Errorf("Product service returned non-200 status: %d", resp.Status)
+		c.Redirect(http.StatusFound, "/admin/products")
+		return
+	}
+
+	var product admin_templates.Product
+	if err := json.NewDecoder(resp.Body).Decode(&product); err != nil {
+		h.logger.Errorf("failed to decode product: " + err.Error())
+		c.Redirect(http.StatusFound, "/admin/products")
+		return
+	}
+
+	params := admin_templates.ProductEditParams{
+		BaseParams: admin_templates.BaseParams{
+			Title: "Редактирование товара - " + product.Name,
+		},
+		Product: product,
+
+	}
+
+	if err := h.templates.RenderProductEdit(c.Writer, params); err != nil {
+		h.logger.Errorf("Failed to render product template: %v", err)
+		c.Redirect(http.StatusFound, "/admin/products")
+		return
 	}
 }
 
@@ -135,14 +184,6 @@ func (h *Handler) authMiddleware() gin.HandlerFunc {
 	}
 }
 
-type Product struct {
-	ID int `json:"id"`
-	Name string `json:"name"`
-	Slug string `json:"slug"`
-	Price decimal.Decimal `json:"price"`
-	Description string `json:"description"`
-}
-
 func (h *Handler) productsIndex(c *gin.Context) {
 	params := admin_templates.ProductsIndexParams{
 		BaseParams: admin_templates.BaseParams{
@@ -166,7 +207,7 @@ func (h *Handler) productsIndex(c *gin.Context) {
 		return
 	}
 
-	var apiProducts []Product
+	var apiProducts []admin_templates.Product
 	if err := json.NewDecoder(resp.Body).Decode(&apiProducts); err != nil {
 		h.logger.Errorf("Failed to decode products response: %v", err)
 		params.Error = "Ошибка при обработке данных"

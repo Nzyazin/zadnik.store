@@ -2,6 +2,7 @@
     const product = {
       name: 'Механическая клавиатура Keychron K2',
       price: 12999,
+      description: 'Надежная клавиатура для работы и разработки',
       image: '/images/products/keyboard.jpg'
     }
     const error = null
@@ -25,6 +26,10 @@
         label.product-edit__label Цена
         input.product-edit__input(type="number" name="price" value=product.price)
       
+      .product-edit__form-group
+        label.product-edit__label Описание
+        textarea.product-edit__input(name="description" value=product.description required)
+
       .product-edit__form-group
         label.product-edit__label Изображение
         input.product-edit__input(type="file" name="image")
