@@ -3,9 +3,8 @@
 {{define "content"}}
 <div class="products-index">
     <div class="products-index__header">
-        <h1 class="page-title">{{.Title}}</h1>
-        <a class="btn btn-primary" href="/admin/products/create">
-            <i class="icon-plus"></i>
+        <h1 class="products-index__page-title">{{.Title}}</h1>
+        <a class="btn products-index__btn-primary" href="/admin/products/create">
             <span>Добавить товар</span>
         </a>
     </div>
@@ -15,7 +14,7 @@
     {{end}}
 
     <div class="products-index__table">
-        <table class="table">
+        <table class="products-index__table-inner">
             <thead>
                 <tr>
                     <th>№</th>
@@ -31,8 +30,7 @@
                     <td>{{$product.Name}}</td>
                     <td>{{$product.Price}} ₽</td>
                     <td>
-                        <a class="btn btn-edit" href="/admin/products/{{$product.ID}}/edit">
-                            <i class="icon-edit"></i>
+                        <a class="btn products-index__btn-edit" href="/admin/products/{{$product.ID}}/edit">
                             <span>Редактировать</span>
                         </a>
                     </td>
