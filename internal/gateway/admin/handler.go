@@ -46,6 +46,8 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 		authorized.Use(h.authMiddleware())
 		{
 			authorized.GET("/products", h.productsIndex)
+			authorized.GET("/products/:id/edit", h.productEdit)
+			authorized.POST("/products/:id/edit", h.productUpdate)
 		}
 	}
 }
