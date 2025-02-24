@@ -29,8 +29,10 @@
                 <label class="product-edit__label" for="image">Изображение</label>
                 <input id="image" class="product-edit__input" type="file" name="image">
                 <picture class="product-edit__picture">
-                    <source srcset="{{staticWithHash (printf "/static/images/products/%s" .Product.Image)}}" media="(max-width: 1240px)" type="image/">
-                    <img src="{{staticWithHash (printf "/static/images/products/%s" .Product.Image)}}" alt="Изображение товара">
+                    {{if .Product.ImageURL.Valid}}
+                        <source srcset="{{staticWithHash (printf "/static/images/products/%s" .Product.ImageURL.String)}}" media="(max-width: 1240px)" type="image/">
+                        <img src="{{staticWithHash (printf "/static/images/products/%s" .Product.ImageURL.String)}}" alt="Изображение товара">
+                    {{end}}
                 </picture>
             </div>
             <div class="product-edit__form-actions">
