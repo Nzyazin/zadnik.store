@@ -38,6 +38,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/products", productHandler.GetAll).Methods("GET")
+	router.HandleFunc("/products/{id}", productHandler.GetByID).Methods("GET")
 
 	logger.Infof("Starting product service on %s", cfg.ProductServiceAddress)
 	if err := http.ListenAndServe(cfg.ProductServiceAddress, router); err != nil {

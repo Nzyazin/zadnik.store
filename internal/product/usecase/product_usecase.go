@@ -20,3 +20,7 @@ func NewProductUseCase(repo domain.ProductRepository) ProductUseCase {
 func (puc *productUseCase) GetAll(ctx context.Context) ([]*domain.Product, error) {
 	return puc.repo.GetAll(ctx)
 }
+
+func (puc *productUseCase) GetByID(ctx context.Context, id int32) (*domain.Product, error) {
+	return puc.repo.GetByID(ctx, id)
+}

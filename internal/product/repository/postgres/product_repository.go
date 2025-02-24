@@ -21,3 +21,10 @@ func (r *productRepository) GetAll(ctx context.Context) ([]*domain.Product, erro
 	err := r.db.SelectContext(ctx, &products, query)
 	return products, err
 }
+
+func (r *productRepository) GetByID(ctx context.Context, id int32) (*domain.Product, error) {
+	product := &domain.Product{}
+	query := `SELECT * FROM products WHERE id = $1`
+	err := r.db.GetContext(ctx, product, query, id)
+	return product, err
+}
