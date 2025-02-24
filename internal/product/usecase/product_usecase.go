@@ -7,6 +7,7 @@ import (
 
 type ProductUseCase interface {
 	GetAll(ctx context.Context) ([]*domain.Product, error)
+	GetByID(ctx context.Context, id int32) (*domain.Product, error)
 }
 
 type productUseCase struct {
