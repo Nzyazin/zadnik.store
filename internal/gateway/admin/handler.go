@@ -1,14 +1,19 @@
 package admin
 
 import (
-	"net/http"
-	"time"
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"io"
+	"time"
+	"mime/multipart"
 
-	"github.com/gin-gonic/gin"
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -46,9 +51,106 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 		{
 			authorized.GET("/products", h.productsIndex)
 			authorized.GET("/products/:id/edit", h.productEdit)
-			//authorized.POST("/products/:id/edit", h.productUpdate)
+			authorized.POST("/products/:id/edit", h.productUpdate)
 		}
 	}
+}
+
+func (h *Handler) redirectWithError(c *gin.Context, productID, message string) {
+	c.Redirect(http.StatusFound, fmt.Sprintf("/admin/products/%s/edit?error=%s",
+		productID, url.QueryEscape(message)))
+}
+
+func (h *Handler) prepareMultipartForm(c *gin.Context, productID string) (*bytes.Buffer, string, error) {
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	for key, values := range c.Request.PostForm {
+		if len(values) > 0 {
+			if err := writer.WriteField(key, values[0]); err != nil {
+				return nil, "", fmt.Errorf("failed to write field %s: %v", key, err)
+			}
+		}
+	}
+
+	file, err := c.FormFile("image"); 
+	if err == nil && file != nil {
+		if err := h.addFileToForm(writer, file); err != nil {
+			return nil, "", err
+		}
+	}
+	
+	return body, writer.FormDataContentType(), nil
+}
+
+func (h *Handler) addFileToForm(writer *multipart.Writer, file *multipart.FileHeader) error {
+	part, err := writer.CreateFormFile("image", file.Filename)
+	if err != nil {
+		return fmt.Errorf("failed to create form file: %v", err)
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return fmt.Errorf("failed to open file: %v", err)
+	}
+	defer src.Close()
+
+	if _, err = io.Copy(part, src); err != nil {
+		return fmt.Errorf("failed to copy file: %v", err)
+	}
+
+	return nil
+}
+
+func (h *Handler) sendProductRequest(productID string, body *bytes.Buffer, contentType string) error {
+	req, err := http.NewRequest(http.MethodPatch, h.productServiceUrl + "/products/" + productID, body)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", contentType)
+
+	resp, err := h.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to do request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("product service returned non-200 status: %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+func (h *Handler) productUpdate(c *gin.Context) {
+	_, err := c.Cookie("access_token")
+	if err != nil {
+		c.Redirect(http.StatusFound, "/admin/login")
+		return
+	}
+
+	productID := c.Param("id")
+	if productID == "" {
+		h.logger.Errorf("Product ID is empty")
+		c.Redirect(http.StatusFound, "/admin/products")
+		return
+	}
+
+	body, contentType, err := h.prepareMultipartForm(c, productID)
+	if err != nil {
+		h.logger.Errorf("Failed to prepare form: %v", err)
+		h.redirectWithError(c, productID, "Failed to prepare form")
+		return
+	}
+
+	if err := h.sendProductRequest(productID, body, contentType); err != nil {
+		h.logger.Errorf("Failed to update product: %v", err)
+		h.redirectWithError(c, productID, "Failed to update product")
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/admin/products")
 }
 
 func (h *Handler) productEdit(c *gin.Context) {

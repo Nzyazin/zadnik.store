@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"context"
 	"fmt"
 	"html/template"
 
@@ -49,14 +48,14 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	})
 
 	// Подключаемся к auth сервису
-	authConn, err := grpc.Dial(cfg.AuthServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	authConn, err := grpc.NewClient(cfg.AuthServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
 	authClient := pb.NewAuthServiceClient(authConn)
 
 	// Инициализация сервисов
-	authService := NewAuthService(authClient)
+	authService := auth.NewGRPCAuthService(authClient)
 
 	
 	templates, err := admin_templates.NewTemplates(admin_templates.TemplateFunctions{
@@ -78,20 +77,4 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 func (s *Server) Run(addr string) error {
 	return s.router.Run(addr)
-}
-
-type authService struct {
-	client pb.AuthServiceClient
-}
-
-func NewAuthService(client pb.AuthServiceClient) auth.AuthService {
-	return &authService{client: client}
-}
-
-func (s *authService) Login(ctx context.Context, username, password string) (*pb.LoginResponse, error) {
-	return s.client.Login(ctx, &pb.LoginRequest{Username: username, Password: password})
-}
-
-func (s *authService) ValidateToken(ctx context.Context, token string) (*pb.ValidateTokenResponse, error) {
-	return s.client.ValidateToken(ctx, &pb.ValidateTokenRequest{AccessToken: token})
 }
