@@ -61,7 +61,7 @@ func (h *Handler) redirectWithError(c *gin.Context, productID, message string) {
 		productID, url.QueryEscape(message)))
 }
 
-func (h *Handler) prepareMultipartForm(c *gin.Context, productID string) (*bytes.Buffer, string, error) {
+func (h *Handler) prepareMultipartForm(c *gin.Context) (*bytes.Buffer, string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -137,7 +137,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 		return
 	}
 
-	body, contentType, err := h.prepareMultipartForm(c, productID)
+	body, contentType, err := h.prepareMultipartForm(c)
 	if err != nil {
 		h.logger.Errorf("Failed to prepare form: %v", err)
 		h.redirectWithError(c, productID, "Failed to prepare form")
