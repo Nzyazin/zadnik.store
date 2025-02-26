@@ -13,12 +13,14 @@ import (
 type ProductHandler struct {
 	productUsecase usecase.ProductUseCase
 	logger         common.Logger
+	apiKey         string
 }
 
-func NewProductHandler(productUsecase usecase.ProductUseCase, logger common.Logger) *ProductHandler {
+func NewProductHandler(productUsecase usecase.ProductUseCase, logger common.Logger, apiKey string) *ProductHandler {
 	return &ProductHandler{
 		productUsecase: productUsecase,
 		logger:         logger,
+		apiKey:         apiKey,
 	}
 }
 
@@ -71,4 +73,10 @@ func (p *ProductHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode product", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (p *ProductHandler) Update(w http) {}
+
+func (p *ProductHandler) AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func())
 }

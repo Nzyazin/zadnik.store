@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+
 	"github.com/Nzyazin/zadnik.store/internal/product/domain"
 )
 

@@ -1,14 +1,40 @@
 package postgres
 
 import (
-	"github.com/jmoiron/sqlx"
 	"context"
+	"fmt"
+	"time"
 
+	"github.com/jmoiron/sqlx"
+
+	"github.com/Nzyazin/zadnik.store/internal/product/config"
 	"github.com/Nzyazin/zadnik.store/internal/product/domain"
 )
 
 type productRepository struct {
 	db *sqlx.DB
+}
+
+func NewPostgresDB(dbCfg *config.DBConfig) (*sqlx.DB, error) {
+	connStr := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		dbCfg.Host,
+		dbCfg.Port,
+		dbCfg.User,
+		dbCfg.Password,
+		dbCfg.Name,
+	)
+
+	db, err := sqlx.Connect("postgres", connStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to postgres: %w", err)
+	}
+
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(5 * time.Minute)
+
+	return db, nil
 }
 
 func NewProductRepository(db *sqlx.DB) domain.ProductRepository {

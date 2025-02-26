@@ -10,6 +10,7 @@ type Config struct {
 	DB                *DBConfig
 	ProductServiceAddress string
 	JWTSecret         string
+	APIKey            string
 }
 
 type DBConfig struct {
@@ -20,7 +21,7 @@ type DBConfig struct {
 	Name     string
 }
 
-func Load() (*Config, error) {
+func GetConfig() (*Config, error) {
 	// Загружаем .env файл
 	err := godotenv.Load(filepath.Join("internal", "product", "config", ".env-product"))
 	if err != nil {
@@ -37,5 +38,6 @@ func Load() (*Config, error) {
 		},
 		ProductServiceAddress: os.Getenv("PRODUCT_SERVICE_ADDRESS"),
 		JWTSecret:         os.Getenv("JWT_SECRET"),
+		APIKey:            os.Getenv("API_KEY"),
 	}, nil
 }

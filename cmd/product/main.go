@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"fmt"
 	"net/http"
 
 	"github.com/Nzyazin/zadnik.store/internal/product/config"
@@ -11,37 +10,36 @@ import (
 	"github.com/Nzyazin/zadnik.store/internal/product/usecase"
 	"github.com/Nzyazin/zadnik.store/internal/product/delivery"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
 
 
 func main() {
-	cfg, err := config.Load()
+	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	dbConn, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name))
-
+	db, err := postgres.NewPostgresDB(cfg.DB)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatalf("Failed to initialize db: %v", err)
 	}
-	defer dbConn.Close()
+	defer db.Close()
 
 	logger := common.NewSimpleLogger()
-	productRepo := postgres.NewProductRepository(dbConn)
+	productRepo := postgres.NewProductRepository(db)
 	productUseCase := usecase.NewProductUseCase(productRepo)
-	productHandler := delivery.NewProductHandler(productUseCase, logger)
+	productHandler := delivery.NewProductHandler(productUseCase, logger, cfg.JWTSecret)
 
 	router := mux.NewRouter()
+	router.Use(productHandler.AuthMiddleware)
 	router.HandleFunc("/products", productHandler.GetAll).Methods("GET")
 	router.HandleFunc("/products/{id}", productHandler.GetByID).Methods("GET")
+	router.HandleFunc("/products/{id}", productHandler.Update).Methods("PATCH")
 
 	logger.Infof("Starting product service on %s", cfg.ProductServiceAddress)
 	if err := http.ListenAndServe(cfg.ProductServiceAddress, router); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		log.Fatalf("Failed to start product service: %v", err)
 	}
 }
