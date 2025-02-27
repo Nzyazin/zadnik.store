@@ -54,3 +54,30 @@ func (r *productRepository) GetByID(ctx context.Context, id int32) (*domain.Prod
 	err := r.db.GetContext(ctx, product, query, id)
 	return product, err
 }
+
+func (r *productRepository) Update(ctx context.Context, product *domain.Product) (*domain.Product, error) {
+	query := `
+		UPDATE products 
+		SET name = $1, slug = $2, description = $3, price = $4, image_url = $5
+		WHERE id = $6
+		RETURNING *
+	`
+	updatedProduct := &domain.Product{}
+	err := r.db.GetContext(
+		ctx,
+		updatedProduct,
+		query,
+		product.Name,
+		product.Slug,
+		product.Description,
+		product.Price,
+		product.ImageURL,
+		product.ID,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to updated product: %w", err)
+	}
+
+	return updatedProduct, nil
+}

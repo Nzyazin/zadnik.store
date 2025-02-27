@@ -19,7 +19,9 @@ import (
 type ServerConfig struct {
 	AuthServiceAddr string
 	ProductServiceAddr string
+	ProductServiceAPIKey string
 	Development    bool
+	UserHTTPS      bool
 }
 
 type Server struct {
@@ -68,8 +70,13 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		return nil, err
 	}
 
-	productServiceUrl := fmt.Sprintf("http://%s", cfg.ProductServiceAddr)
-	adminHandler := admin.NewHandler(authService, templates, productServiceUrl)
+	protocol := "http"
+	if cfg.UserHTTPS {
+		protocol = "https"
+	}
+
+	productServiceUrl := fmt.Sprintf("%s://%s", protocol, cfg.ProductServiceAddr)
+	adminHandler := admin.NewHandler(authService, templates, productServiceUrl, cfg.ProductServiceAPIKey)
 	adminHandler.RegisterRoutes(s.router)
 
 	return s, nil

@@ -20,15 +20,17 @@ type Handler struct {
 	authService auth.AuthService
 	templates   *admin_templates.Templates
 	productServiceUrl string
+	productServiceAPIKey string
 	httpClient  *http.Client
 	logger common.Logger
 }
 
-func NewHandler(authService auth.AuthService, templates *admin_templates.Templates, productServiceUrl string) *Handler {
+func NewHandler(authService auth.AuthService, templates *admin_templates.Templates, productServiceUrl string, productServiceAPIKey string) *Handler {
 	return &Handler{
 		authService: authService,
 		templates:  templates,
 		productServiceUrl: productServiceUrl,
+		productServiceAPIKey: productServiceAPIKey,
 		httpClient: &http.Client{
 			Timeout: time.Second * 10,
 		},
@@ -109,6 +111,7 @@ func (h *Handler) sendProductRequest(productID string, body *bytes.Buffer, conte
 	}
 
 	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("X-API-KEY", h.productServiceAPIKey)
 
 	resp, err := h.httpClient.Do(req)
 	if err != nil {

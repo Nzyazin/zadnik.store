@@ -25,6 +25,8 @@ func main() {
 	cfg := &gateway.ServerConfig{
 		AuthServiceAddr: os.Getenv("AUTH_SERVICE_ADDRESS"),
 		ProductServiceAddr: os.Getenv("PRODUCT_SERVICE_ADDRESS"),
+		ProductServiceAPIKey: os.Getenv("PRODUCT_SERVICE_API_KEY"),
+		UserHTTPS: os.Getenv("USE_HTTPS") == "true",
 		Development:    os.Getenv("DEVELOPMENT") == "true",
 	}
 
