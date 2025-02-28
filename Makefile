@@ -193,4 +193,4 @@ generate-mocks: install-mockgen
 	@echo "==> Generating mocks..."
 	@mockgen -source=internal/auth/domain/user.go -destination=internal/auth/mocks/mock_repositories.go -package=mocks
 
-.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services migrate-clean migrate-force
+.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services migrate-clean migrate-force rabbitmq-start rabbitmq-stop rabbitmq-restart rabbitmq-status
