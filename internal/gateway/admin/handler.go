@@ -9,9 +9,11 @@ import (
 	"io"
 	"time"
 	"mime/multipart"
-
+	"strconv"
+	
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
+	"github.com/Nzyazin/zadnik.store/internal/gateway/broker"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 	"github.com/gin-gonic/gin"
 )
@@ -23,9 +25,16 @@ type Handler struct {
 	productServiceAPIKey string
 	httpClient  *http.Client
 	logger common.Logger
+	messageBroker broker.MessageBroker
 }
 
-func NewHandler(authService auth.AuthService, templates *admin_templates.Templates, productServiceUrl string, productServiceAPIKey string) *Handler {
+func NewHandler(
+		authService auth.AuthService, 
+		templates *admin_templates.Templates, 
+		productServiceUrl string, 
+		productServiceAPIKey string,
+		messageBroker broker.MessageBroker,
+	) *Handler {
 	return &Handler{
 		authService: authService,
 		templates:  templates,
@@ -35,6 +44,7 @@ func NewHandler(authService auth.AuthService, templates *admin_templates.Templat
 			Timeout: time.Second * 10,
 		},
 		logger: common.NewSimpleLogger(),
+		messageBroker: messageBroker,
 	}
 }
 
@@ -140,17 +150,53 @@ func (h *Handler) productUpdate(c *gin.Context) {
 		return
 	}
 
-	body, contentType, err := h.prepareMultipartForm(c)
+	name := c.PostForm("name")
+	description := c.PostForm("description")
+	price, err := strconv.ParseFloat(c.PostForm("price"), 64)
 	if err != nil {
-		h.logger.Errorf("Failed to prepare form: %v", err)
-		h.redirectWithError(c, productID, "Failed to prepare form")
+		h.redirectWithError(c, productID, "Invalid price format")
 		return
 	}
 
-	if err := h.sendProductRequest(productID, body, contentType); err != nil {
-		h.logger.Errorf("Failed to update product: %v", err)
-		h.redirectWithError(c, productID, "Failed to update product")
+	productEvent := &broker.ProductEvent{
+		EventType: broker.EvenTypeProductUpdated,
+		ProductID: productID,
+		Name: name,
+		Price: price,
+		Description: description,
+	}
+
+	if err := h.messageBroker.PublishProduct(c.Request.Context(), productEvent); err != nil {
+		h.logger.Errorf("Failed to publish product event: %v", err)
+		h.redirectWithError(c, productID, "Failed to publish product event")
 		return
+	}
+
+	if file, err := c.FormFile("image"); err == nil && file != nil {
+		imageData, err := file.Open()
+		if err != nil {
+			h.redirectWithError(c, productID, "Failed to read image")
+			return
+		}
+		defer imageData.Close()
+
+		imageBytes, err := io.ReadAll(imageData)
+		if err != nil {
+			h.redirectWithError(c, productID, "Failed to read image")
+			return
+		}
+
+		imageEvent := &broker.ImageEvent{
+			EventType: broker.EventImageUploaded,
+			ProductID: productID,
+			ImageData: imageBytes,
+		}
+
+		if err := h.messageBroker.PublishImage(c.Request.Context(), imageEvent); err != nil {
+			h.logger.Errorf("Failed to publish image event: %v", err)
+			h.redirectWithError(c, productID, "Failed to publish image event")
+			return
+		}
 	}
 
 	c.Redirect(http.StatusFound, "/admin/products")

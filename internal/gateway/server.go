@@ -22,6 +22,11 @@ type ServerConfig struct {
 	ProductServiceAPIKey string
 	Development    bool
 	UserHTTPS      bool
+	RabbitMQ struct {
+		URL string
+		Username string
+		Password string
+	}
 }
 
 type Server struct {
