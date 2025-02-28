@@ -159,7 +159,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	}
 
 	productEvent := &broker.ProductEvent{
-		EventType: broker.EvenTypeProductUpdated,
+		EventType: broker.EventTypeProductUpdated,
 		ProductID: productID,
 		Name: name,
 		Price: price,

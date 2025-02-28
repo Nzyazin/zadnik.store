@@ -7,7 +7,8 @@ type EventType string
 const (
 	EventTypeProductCreated   EventType = "product.created"
 	EventTypeProductUpdated   EventType = "product.updated"
-	EvenetTypeProductUploaded EventType = "product.uploaded"
+	EventTypeProductDeleted   EventType = "product.deleted"
+	EventImageUploaded        EventType = "image.uploaded"
 )
 
 type Event interface {

@@ -18,6 +18,7 @@ require (
 require (
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
+	github.com/streadway/amqp v1.1.0 // indirect
 )
 
 require (
