@@ -163,6 +163,25 @@ run-services:
 	@echo "==> Starting gateway service..."
 	@./bin/gateway.exe
 
+# RabbitMQ commands
+.PHONY: rabbitmq-start rabbitmq-stop rabbitmq-restart rabbitmq-status
+
+rabbitmq-start:
+	@echo "==> Starting RabbitMQ..."
+	@docker ps -q -f name=rabbitmq > /dev/null 2>&1 || \
+	docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+
+rabbitmq-stop:
+	@echo "==> Stopping RabbitMQ..."
+	@docker stop rabbitmq > /dev/null 2>&1 || true
+	@docker rm rabbitmq > /dev/null 2>&1 || true
+
+rabbitmq-restart: rabbitmq-stop rabbitmq-start
+
+rabbitmq-status:
+	@echo "==> RabbitMQ status:"
+	@docker ps -f name=rabbitmq
+
 # Combined
 .PHONY: run-all
 run-all:
