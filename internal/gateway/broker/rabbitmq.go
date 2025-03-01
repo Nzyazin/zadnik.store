@@ -30,10 +30,8 @@ type RabbitMQConfig struct {
 func NewRabbitMQBroker(config RabbitMQConfig) (*RabbitMQBroker, error) {
 	logger := common.NewSimpleLogger()
 
+	// Используем URL напрямую, так как он уже содержит протокол amqp:// и учетные данные
 	rabbitUrl := config.URL
-	if config.Username != "" && config.Password != "" {
-		rabbitUrl = fmt.Sprintf("amqp://%s:%s@%s", config.Username, config.Password, config.URL)
-	}
 
 	conn, err := amqp.Dial(rabbitUrl)
 	if err != nil {

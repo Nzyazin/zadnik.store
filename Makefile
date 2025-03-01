@@ -168,19 +168,22 @@ run-services:
 
 rabbitmq-start:
 	@echo "==> Starting RabbitMQ..."
-	@sudo docker ps -q -f name=rabbitmq > /dev/null 2>&1 || \
-	sudo docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+	@if [ -z "$$(docker ps -a -q -f name=rabbitmq)" ]; then \
+		docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management; \
+	else \
+		docker start rabbitmq; \
+	fi
 
 rabbitmq-stop:
 	@echo "==> Stopping RabbitMQ..."
-	@sudo docker stop rabbitmq > /dev/null 2>&1 || true
-	@sudo docker rm rabbitmq > /dev/null 2>&1 || true
+	@docker stop rabbitmq > /dev/null 2>&1 || true
+	@docker rm rabbitmq > /dev/null 2>&1 || true
 
 rabbitmq-restart: rabbitmq-stop rabbitmq-start
 
 rabbitmq-status:
 	@echo "==> RabbitMQ status:"
-	@sudo docker ps -f name=rabbitmq
+	@docker ps -f name=rabbitmq
 
 # Combined
 .PHONY: run-all
