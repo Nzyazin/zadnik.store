@@ -58,7 +58,7 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := server.Run("" + port); err != nil && err != http.ErrServerClosed {
+		if err := server.Run(":" + port); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to run server: %v", err)
 		}
 	}()

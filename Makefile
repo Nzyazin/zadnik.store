@@ -168,16 +168,12 @@ run-services:
 
 rabbitmq-start:
 	@echo "==> Starting RabbitMQ..."
-	@if [ -z "$$(docker ps -a -q -f name=rabbitmq)" ]; then \
-		docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management; \
-	else \
-		docker start rabbitmq; \
-	fi
+	docker compose up -d rabbitmq
 
 rabbitmq-stop:
 	@echo "==> Stopping RabbitMQ..."
-	@docker stop rabbitmq > /dev/null 2>&1 || true
-	@docker rm rabbitmq > /dev/null 2>&1 || true
+	docker compose stop rabbitmq
+	docker compose rm -f rabbitmq
 
 rabbitmq-restart: rabbitmq-stop rabbitmq-start
 

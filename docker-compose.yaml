@@ -1,6 +1,29 @@
 version: '3.8'
 
 services:
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    network_mode: "host"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    build:
+      context: .
+      dockerfile: deployments/docker/gateway/Dockerfile.gateway
+    
+    network_mode: "host"
+    container_name: gateway
+    env_file:
+      - ./internal/gateway/config/.env-gateway 
+
   prometheus:
     image: prom/prometheus:latest
     ports:
@@ -23,7 +46,9 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana-storage:/var/lib/grafana
+
 volumes:
+  rabbitmq_data:
   grafana-storage:
 
 networks:
