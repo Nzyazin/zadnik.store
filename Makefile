@@ -168,12 +168,12 @@ run-services:
 
 rabbitmq-start:
 	@echo "==> Starting RabbitMQ..."
-	docker compose up -d rabbitmq
+	docker-compose up -d rabbitmq
 
 rabbitmq-stop:
 	@echo "==> Stopping RabbitMQ..."
-	docker compose stop rabbitmq
-	docker compose rm -f rabbitmq
+	docker-compose stop rabbitmq
+	docker-compose rm -f rabbitmq
 
 rabbitmq-restart: rabbitmq-stop rabbitmq-start
 
