@@ -216,7 +216,15 @@ func (h *Handler) productEdit(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.httpClient.Get(h.productServiceUrl + "/products/" + productID)
+	req, err := http.NewRequest(http.MethodGet, h.productServiceUrl + "/products/" + productID, nil)
+	if err != nil {
+		h.logger.Errorf("Failed to create request: %v", err)
+		c.Redirect(http.StatusFound, "/admin/products")
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	
+	resp, err := h.httpClient.Do(req)
 	if err != nil {
 		h.logger.Errorf("Failed to get product: %v", err)
 		c.Redirect(http.StatusFound, "/admin/products")
@@ -342,7 +350,16 @@ func (h *Handler) productsIndex(c *gin.Context) {
 		},
 	}
 
-	resp, err := h.httpClient.Get(h.productServiceUrl + "/products")
+	req, err := http.NewRequest(http.MethodGet, h.productServiceUrl + "/products", nil)
+	if err != nil {
+		h.logger.Errorf("Failed to create request: %v", err)
+		params.Error = "Не удалось загрузить список товаров"
+		h.renderProductsIndex(c, params)
+		return
+	}
+	req.Header.Set("X-API-KEY", h.productServiceAPIKey)
+
+	resp, err := h.httpClient.Do(req)
 	if err != nil {
 		h.logger.Errorf("Failed to fetch products: %v", err)
 		params.Error = "Не удалось загрузить список товаров"

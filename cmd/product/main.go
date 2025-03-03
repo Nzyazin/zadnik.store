@@ -30,7 +30,7 @@ func main() {
 	logger := common.NewSimpleLogger()
 	productRepo := postgres.NewProductRepository(db)
 	productUseCase := usecase.NewProductUseCase(productRepo)
-	productHandler := delivery.NewProductHandler(productUseCase, logger, cfg.JWTSecret)
+	productHandler := delivery.NewProductHandler(productUseCase, logger, cfg.APIKey)
 
 	router := mux.NewRouter()
 	router.Use(productHandler.AuthMiddleware)
