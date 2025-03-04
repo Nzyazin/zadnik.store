@@ -34,12 +34,8 @@ func main() {
 		UserHTTPS: os.Getenv("USE_HTTPS") == "true",
 		RabbitMQ: struct {
 			URL string
-			Username string
-			Password string
 		}{
 			URL: os.Getenv("RABBITMQ_URL"),
-			Username: os.Getenv("RABBITMQ_USERNAME"),
-			Password: os.Getenv("RABBITMQ_PASSWORD"),
 		},
 		Development:    os.Getenv("DEVELOPMENT") == "true",
 	}

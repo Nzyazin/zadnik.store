@@ -25,11 +25,7 @@ type ServerConfig struct {
 	ProductServiceAPIKey string
 	Development    bool
 	UserHTTPS      bool
-	RabbitMQ struct {
-		URL string
-		Username string
-		Password string
-	}
+	RabbitMQ broker.RabbitMQConfig
 }
 
 type Server struct {
@@ -62,8 +58,6 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	messageBroker, err := broker.NewRabbitMQBroker(
 		broker.RabbitMQConfig{
 			URL: cfg.RabbitMQ.URL,
-			Username: cfg.RabbitMQ.Username,
-			Password: cfg.RabbitMQ.Password,
 		},
 	)
 	if err != nil {

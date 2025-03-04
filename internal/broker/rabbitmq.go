@@ -23,8 +23,6 @@ type RabbitMQBroker struct {
 
 type RabbitMQConfig struct {
 	URL string
-	Username string
-	Password string
 }
 
 func NewRabbitMQBroker(config RabbitMQConfig) (*RabbitMQBroker, error) {

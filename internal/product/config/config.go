@@ -1,9 +1,11 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"os"
 	"path/filepath"
+
+	"github.com/Nzyazin/zadnik.store/internal/broker"
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -11,6 +13,7 @@ type Config struct {
 	ProductServiceAddress string
 	JWTSecret         string
 	APIKey            string
+	RabbitMQ broker.RabbitMQConfig
 }
 
 type DBConfig struct {
@@ -39,5 +42,8 @@ func GetConfig() (*Config, error) {
 		ProductServiceAddress: os.Getenv("PRODUCT_SERVICE_ADDRESS"),
 		JWTSecret:         os.Getenv("JWT_SECRET"),
 		APIKey:            os.Getenv("API_KEY"),
+		RabbitMQ: broker.RabbitMQConfig{
+			URL: os.Getenv("RABBITMQ_URL"),
+		},
 	}, nil
 }
