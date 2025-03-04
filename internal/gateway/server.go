@@ -15,7 +15,7 @@ import (
 	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/middleware"
-	"github.com/Nzyazin/zadnik.store/internal/gateway/broker"
+	"github.com/Nzyazin/zadnik.store/internal/broker"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 )
 

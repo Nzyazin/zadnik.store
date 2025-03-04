@@ -9,6 +9,7 @@ const (
 	EventTypeProductUpdated   EventType = "product.updated"
 	EventTypeProductDeleted   EventType = "product.deleted"
 	EventImageUploaded        EventType = "image.uploaded"
+	EventImageProcessed       EventType = "image.processed"
 )
 
 type Event interface {
@@ -32,5 +33,6 @@ type ImageEvent struct {
 type MessageBroker interface {
 	PublishProduct(ctx context.Context, event *ProductEvent) error
 	PublishImage(ctx context.Context, event *ImageEvent) error
+	SubscribeToImageProcessed(ctx context.Context, handler func(*ImageEvent) error) error
 	Close() error
 }

@@ -36,14 +36,14 @@ func NewRabbitMQBroker(config RabbitMQConfig) (*RabbitMQBroker, error) {
 	conn, err := amqp.Dial(rabbitUrl)
 	if err != nil {
 		logger.Errorf("Failed to connect to RabbitMQ: %v", err)
-		return nil, fmt.Errorf("Failed to connect to RabbitMQ: %w", err)
+		return nil, fmt.Errorf("failed to connect to RabbitMQ: %w", err)
 	}
 
 	channel, err := conn.Channel()
 	if err != nil {
 		conn.Close()
 		logger.Errorf("Failed to create channel: %v", err)
-		return nil, fmt.Errorf("Failed to oepn a channel: %w", err)
+		return nil, fmt.Errorf("failed to oepn a channel: %w", err)
 	}
 	
 	err = declareExchanges(channel)
@@ -51,7 +51,7 @@ func NewRabbitMQBroker(config RabbitMQConfig) (*RabbitMQBroker, error) {
 		channel.Close()
 		conn.Close()
 		logger.Errorf("Failed to declare exchanges: %v", err)
-		return nil, fmt.Errorf("Failed to declare exchanges: %w", err)
+		return nil, fmt.Errorf("failed to declare exchanges: %w", err)
 	}
 
 	return &RabbitMQBroker{
@@ -143,6 +143,65 @@ func (b *RabbitMQBroker) PublishImage(ctx context.Context, event *ImageEvent) er
 	}
 
 	b.logger.Infof("Published image event: %s", event.EventType)
+	return nil
+}
+
+func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler func(*ImageEvent) error) error {
+	queue, err := b.channel.QueueDeclare(
+		"",
+		false,
+		true,
+		true,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+	
+	err = b.channel.QueueBind(
+		queue.Name,
+		string(EventImageProcessed),
+		imageExchange,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to bind queue: %w", err)
+	}
+
+	msgs, err := b.channel.Consume(
+		queue.Name,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to consume messages: %w", err)
+	}
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg := <-msgs:
+				var event ImageEvent
+				if err := json.Unmarshal(msg.Body, &event); err != nil {
+					b.logger.Errorf("Failed to unmarshal image processed event: %v", err)
+					continue
+				}
+
+				if err := handler(&event); err != nil {
+					b.logger.Errorf("Failed to handle image processed event: %v", err)
+				}
+			}
+		}
+	}()
+
 	return nil
 }
 

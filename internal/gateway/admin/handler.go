@@ -13,7 +13,7 @@ import (
 	
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
-	"github.com/Nzyazin/zadnik.store/internal/gateway/broker"
+	"github.com/Nzyazin/zadnik.store/internal/broker"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 	"github.com/gin-gonic/gin"
 )
@@ -223,7 +223,8 @@ func (h *Handler) productEdit(c *gin.Context) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	
+	req.Header.Set("X-API-KEY", h.productServiceAPIKey)
+
 	resp, err := h.httpClient.Do(req)
 	if err != nil {
 		h.logger.Errorf("Failed to get product: %v", err)
