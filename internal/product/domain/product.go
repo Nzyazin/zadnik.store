@@ -19,5 +19,6 @@ type Product struct {
 type ProductRepository interface {
 	GetAll(ctx context.Context) ([]*Product, error)
 	GetByID(ctx context.Context, id int32) (*Product, error)
+	UpdateProductImage(ctx context.Context, productID int32, imageURL string) error
 	Update(ctx context.Context, product *Product) (*Product, error)
 }

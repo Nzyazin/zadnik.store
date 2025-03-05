@@ -10,6 +10,7 @@ type ProductUseCase interface {
 	GetAll(ctx context.Context) ([]*domain.Product, error)
 	GetByID(ctx context.Context, id int32) (*domain.Product, error)
 	Update(ctx context.Context, product *domain.Product) (*domain.Product, error)
+	UpdateProductImage(ctx context.Context, productID int32, imageURL string) error
 }
 
 type productUseCase struct {
@@ -26,6 +27,10 @@ func (puc *productUseCase) GetAll(ctx context.Context) ([]*domain.Product, error
 
 func (puc *productUseCase) GetByID(ctx context.Context, id int32) (*domain.Product, error) {
 	return puc.repo.GetByID(ctx, id)
+}
+
+func (puc *productUseCase) UpdateProductImage(ctx context.Context, productID int32, imageURL string) error {
+	return puc.repo.UpdateProductImage(ctx, productID, imageURL)
 }
 
 func (puc *productUseCase) Update(ctx context.Context, product *domain.Product) (*domain.Product, error) {

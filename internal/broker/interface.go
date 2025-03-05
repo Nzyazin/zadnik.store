@@ -26,7 +26,7 @@ type ProductEvent struct {
 
 type ImageEvent struct {
 	EventType EventType `json:"event_type"`
-	ProductID string    `json:"product_id"`
+	ProductID int32    `json:"product_id"`
 	ImageURL  string    `json:"image_url"`
 }
 

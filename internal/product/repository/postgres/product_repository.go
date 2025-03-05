@@ -55,6 +55,12 @@ func (r *productRepository) GetByID(ctx context.Context, id int32) (*domain.Prod
 	return product, err
 }
 
+func (r *productRepository) UpdateProductImage(ctx context.Context, productID int32, imageURL string) error {
+	query := `UPDATE products SET image_url = $1 WHERE id = $2`
+	_, err := r.db.ExecContext(ctx, query, imageURL, productID)
+	return err
+}
+
 func (r *productRepository) Update(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	query := `
 		UPDATE products 
