@@ -13,6 +13,9 @@
     {{end}}
     <div class="product-edit__form">
         <form action="/admin/products/{{.Product.ID}}/edit" method="POST">
+            <input type="hidden" name="original_price" value="{{.Product.Price}}">
+            <input type="hidden" name="original_name" value="{{.Product.Name}}">
+            <input type="hidden" name="original_description" value="{{.Product.Description}}">
             <div class="product-edit__form-group">
                 <label class="product-edit__label" for="name">Название</label>
                 <input id="name" class="product-edit__input" type="text" name="name" value="{{.Product.Name}}" required>

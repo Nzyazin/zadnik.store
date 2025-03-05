@@ -10,7 +10,7 @@ type ProductUseCase interface {
 	GetAll(ctx context.Context) ([]*domain.Product, error)
 	GetByID(ctx context.Context, id int32) (*domain.Product, error)
 	Update(ctx context.Context, product *domain.Product) (*domain.Product, error)
-	UpdateProductImage(ctx context.Context, productID int32, imageURL string) error
+	UpdateProductImage(ctx context.Context, productID int32, imageURL []byte) error
 }
 
 type productUseCase struct {

@@ -1,16 +1,15 @@
 package admin
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"io"
 	"time"
-	"mime/multipart"
 	"strconv"
 	
+	"github.com/shopspring/decimal"
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	"github.com/Nzyazin/zadnik.store/internal/broker"
@@ -73,133 +72,128 @@ func (h *Handler) redirectWithError(c *gin.Context, productID, message string) {
 		productID, url.QueryEscape(message)))
 }
 
-func (h *Handler) prepareMultipartForm(c *gin.Context) (*bytes.Buffer, string, error) {
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-
-	for key, values := range c.Request.PostForm {
-		if len(values) > 0 {
-			if err := writer.WriteField(key, values[0]); err != nil {
-				return nil, "", fmt.Errorf("failed to write field %s: %v", key, err)
-			}
-		}
-	}
-
-	file, err := c.FormFile("image"); 
-	if err == nil && file != nil {
-		if err := h.addFileToForm(writer, file); err != nil {
-			return nil, "", err
-		}
-	}
-	
-	return body, writer.FormDataContentType(), nil
-}
-
-func (h *Handler) addFileToForm(writer *multipart.Writer, file *multipart.FileHeader) error {
-	part, err := writer.CreateFormFile("image", file.Filename)
-	if err != nil {
-		return fmt.Errorf("failed to create form file: %v", err)
-	}
-
-	src, err := file.Open()
-	if err != nil {
-		return fmt.Errorf("failed to open file: %v", err)
-	}
-	defer src.Close()
-
-	if _, err = io.Copy(part, src); err != nil {
-		return fmt.Errorf("failed to copy file: %v", err)
-	}
-
-	return nil
-}
-
-func (h *Handler) sendProductRequest(productID string, body *bytes.Buffer, contentType string) error {
-	req, err := http.NewRequest(http.MethodPatch, h.productServiceUrl + "/products/" + productID, body)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %v", err)
-	}
-
-	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("X-API-KEY", h.productServiceAPIKey)
-
-	resp, err := h.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to do request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("product service returned non-200 status: %d", resp.StatusCode)
-	}
-
-	return nil
-}
-
-func (h *Handler) productUpdate(c *gin.Context) {
+func (h *Handler) checkAuth(c *gin.Context) bool {
 	_, err := c.Cookie("access_token")
 	if err != nil {
 		c.Redirect(http.StatusFound, "/admin/login")
+		return false
+	}
+	return true
+}
+
+func (h *Handler) validateProductID(c *gin.Context) (int64, error) {
+	productID := c.Param("id")
+	if productID == "" {
+		return 0, fmt.Errorf("product ID is empty")
+	}
+	return strconv.ParseInt(productID, 10, 64)
+}
+
+func (h *Handler) productUpdate(c *gin.Context) {
+	if !h.checkAuth(c) {
 		return
 	}
 
-	productID := c.Param("id")
-	if productID == "" {
-		h.logger.Errorf("Product ID is empty")
+	productIDInt, err := h.validateProductID(c)
+	if err != nil {
+		h.logger.Errorf("Product ID validation failed: %v", err)
 		c.Redirect(http.StatusFound, "/admin/products")
 		return
 	}
 
 	name := c.PostForm("name")
 	description := c.PostForm("description")
-	price, err := strconv.ParseFloat(c.PostForm("price"), 64)
-	if err != nil {
-		h.redirectWithError(c, productID, "Invalid price format")
-		return
-	}
+	priceStr := c.PostForm("price")
+
+	originalPrice := c.PostForm("original_price")
+	originalName := c.PostForm("original_name")
+	originalDescription := c.PostForm("original_description")
 
 	productEvent := &broker.ProductEvent{
 		EventType: broker.EventTypeProductUpdated,
-		ProductID: productID,
-		Name: name,
-		Price: price,
-		Description: description,
+		ProductID: int32(productIDInt),
+	}
+	productIDStr := strconv.FormatInt(productIDInt, 10)
+
+	if priceDecimal, err := h.handlePriceUpdate(priceStr, originalPrice); err != nil {
+		h.redirectWithError(c, productIDStr, "Failed to update price")
+		return
+	} else if priceDecimal != decimal.Zero {
+		productEvent.Price = priceDecimal
+	}
+	
+	if name != originalName {
+		productEvent.Name = name
 	}
 
-	if err := h.messageBroker.PublishProduct(c.Request.Context(), productEvent); err != nil {
-		h.logger.Errorf("Failed to publish product event: %v", err)
-		h.redirectWithError(c, productID, "Failed to publish product event")
+	if description != originalDescription {
+		productEvent.Description = description
+	}
+
+	if productEvent.Price != decimal.Zero || productEvent.Name != "" || productEvent.Description != "" {
+		if err := h.messageBroker.PublishProduct(c.Request.Context(), productEvent); err != nil {
+			h.logger.Errorf("Failed to publish product event: %v", err)
+			h.redirectWithError(c, productIDStr, "Failed to publish product event")
+			return
+		}
+	}
+	
+	if err := h.handleImageUpload(c, productIDInt); err != nil {
+		h.redirectWithError(c, strconv.FormatInt(productIDInt, 10), err.Error())
 		return
 	}
 
-	if file, err := c.FormFile("image"); err == nil && file != nil {
-		imageData, err := file.Open()
-		if err != nil {
-			h.redirectWithError(c, productID, "Failed to read image")
-			return
-		}
-		defer imageData.Close()
+	c.Redirect(http.StatusFound, "/admin/products")
+}
 
-		imageBytes, err := io.ReadAll(imageData)
-		if err != nil {
-			h.redirectWithError(c, productID, "Failed to read image")
-			return
-		}
+func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
+	file, err := c.FormFile("image")
+	if err != nil || file == nil {
+		return nil
+	}
+	imageData, err := file.Open()
+	if err != nil {
+		return fmt.Errorf("failed to open image: %w", err)
+	}
+	defer imageData.Close()
 
-		imageEvent := &broker.ImageEvent{
-			EventType: broker.EventImageUploaded,
-			ProductID: productID,
-			ImageData: imageBytes,
-		}
-
-		if err := h.messageBroker.PublishImage(c.Request.Context(), imageEvent); err != nil {
-			h.logger.Errorf("Failed to publish image event: %v", err)
-			h.redirectWithError(c, productID, "Failed to publish image event")
-			return
-		}
+	imageBytes, err := io.ReadAll(imageData)
+	if err != nil {
+		return fmt.Errorf("failed to read image: %w", err)
 	}
 
-	c.Redirect(http.StatusFound, "/admin/products")
+	imageEvent := &broker.ImageEvent{
+		EventType: broker.EventImageUploaded,
+		ProductID: int32(productIDInt),
+		ImageData: imageBytes,
+	}
+
+	if err := h.messageBroker.PublishImage(c.Request.Context(), imageEvent); err != nil {
+		h.logger.Errorf("Failed to publish image event: %v", err)
+		return fmt.Errorf("failed to publish image event: %v", err)
+	}
+
+	return nil
+}
+
+func (h *Handler) handlePriceUpdate(productIDStr, originalPrice string) (decimal.Decimal, error) {
+	if productIDStr == originalPrice {
+		return decimal.Zero, nil
+	}
+	
+	priceDecimal, err := decimal.NewFromString(productIDStr)
+	if err != nil {
+		return decimal.Zero, fmt.Errorf("invalid price format: %w", err)
+	}
+	if priceDecimal.IsNegative() {
+		return decimal.Zero, fmt.Errorf("price cannot be negative")
+	}
+
+	if priceDecimal.IsZero() {
+		return decimal.Zero, fmt.Errorf("price cannot be zero")
+	}
+
+	return priceDecimal, nil
 }
 
 func (h *Handler) productEdit(c *gin.Context) {

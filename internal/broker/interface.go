@@ -31,7 +31,7 @@ type ProductEvent struct {
 type ImageEvent struct {
 	EventType EventType `json:"event_type"`
 	ProductID int32    `json:"product_id"`
-	ImageURL  string    `json:"image_url"`
+	ImageData []byte    `json:"image_data"`
 }
 
 type MessageBroker interface {

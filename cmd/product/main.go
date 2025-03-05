@@ -49,9 +49,9 @@ func main() {
 	defer cancel()
 
 	err = messageBroker.SubscribeToImageProcessed(ctx, func(event *broker.ImageEvent) error  {
-		logger.Infof("Receiver image processed even for product %d with URL %s", event.ProductID, event.ImageURL)
+		logger.Infof("Receiver image processed even for product %d with URL %s", event.ProductID, event.ImageData)
 		
-		if err := productUseCase.UpdateProductImage(ctx, event.ProductID, event.ImageURL); err != nil {
+		if err := productUseCase.UpdateProductImage(ctx, event.ProductID, event.ImageData); err != nil {
 			logger.Errorf("Failed to update product image: %v", err)
 			return err
 		}
