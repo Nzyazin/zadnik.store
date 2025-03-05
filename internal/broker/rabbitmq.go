@@ -203,6 +203,65 @@ func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler 
 	return nil
 }
 
+func (b *RabbitMQBroker) SubscribeToProductUpdate(ctx context.Context, handler func(*ProductEvent) error) error {
+	queue, err := b.channel.QueueDeclare(
+		"",    // имя очереди (пустое для автогенерации)
+		false, // durable
+		true,  // delete when unused
+		true,  // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+	
+	err = b.channel.QueueBind(
+		queue.Name,
+		string(EventTypeProductUpdated),
+		productExchange,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to bind queue: %w", err)
+	}
+
+	msgs, err := b.channel.Consume(
+		queue.Name,
+		"",    // consumer
+		true,  // auto-ack
+		false, // exclusive
+		false, // no-local
+		false, // no-wait
+		nil,   // args
+	)
+	if err != nil {
+		return fmt.Errorf("failed to consume messages: %w", err)
+	}
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg := <-msgs:
+				var event ProductEvent
+				if err := json.Unmarshal(msg.Body, &event); err != nil {
+					b.logger.Errorf("Failed to unmarshal product update event: %v", err)
+					continue
+				}
+
+				if err := handler(&event); err != nil {
+					b.logger.Errorf("Failed to handle product update event: %v", err)
+				}
+			}
+		}
+	}()
+
+	return nil
+}
+
 func (b *RabbitMQBroker) Close() error {
 	if b.channel != nil {
 		b.channel.Close()

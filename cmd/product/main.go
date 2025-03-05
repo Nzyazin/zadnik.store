@@ -49,18 +49,50 @@ func main() {
 	defer cancel()
 
 	err = messageBroker.SubscribeToImageProcessed(ctx, func(event *broker.ImageEvent) error  {
-		logger.Infof("Receiver image processed even for product %s with URL %s", event.ProductID, event.ImageURL)
+		logger.Infof("Receiver image processed even for product %d with URL %s", event.ProductID, event.ImageURL)
 		
 		if err := productUseCase.UpdateProductImage(ctx, event.ProductID, event.ImageURL); err != nil {
 			logger.Errorf("Failed to update product image: %v", err)
 			return err
 		}
 
-		logger.Infof("Successfully updated image URL for product %s", event.ProductID)
+		logger.Infof("Successfully updated image URL for product %d", event.ProductID)
 		return nil
 	})
 	if err != nil {
 		log.Fatalf("Failed to subscribe to image processed events: %v", err)
+	}
+
+	err = messageBroker.SubscribeToProductUpdate(ctx, func(event *broker.ProductEvent) error {
+		logger.Infof("Received product update event for product %d", event.ProductID)
+		
+		product, err := productUseCase.GetByID(ctx, event.ProductID)
+		if err != nil {
+			logger.Errorf("Failed to get product: %v", err)
+			return err
+		}
+
+		if event.Name != "" {
+			product.Name = event.Name
+		}
+		if !event.Price.IsZero() {
+			product.Price = event.Price
+		}
+		if event.Description != "" {
+			product.Description = event.Description
+		}
+
+		_, err = productUseCase.Update(ctx, product)
+		if err != nil {
+			logger.Errorf("Failed to update product: %v", err)
+			return err
+		}
+
+		logger.Infof("Successfully updated product %d", event.ProductID)
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("Failed to subscribe to product updated events: %v", err)
 	}
 
 	router := mux.NewRouter()

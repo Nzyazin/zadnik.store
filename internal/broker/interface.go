@@ -1,6 +1,10 @@
 package broker
 
-import "context"
+import (
+	"context"
+
+	"github.com/shopspring/decimal"
+)
 
 type EventType string
 
@@ -18,9 +22,9 @@ type Event interface {
 
 type ProductEvent struct {
 	EventType   EventType `json:"event_type"`
-	ProductID   string    `json:"product_id"`
+	ProductID   int32    `json:"product_id"`
 	Name        string    `json:"name"`
-	Price       float64   `json:"price"`
+	Price       decimal.Decimal   `json:"price"`
 	Description string    `json:"description"`
 }
 
@@ -32,6 +36,7 @@ type ImageEvent struct {
 
 type MessageBroker interface {
 	PublishProduct(ctx context.Context, event *ProductEvent) error
+	SubscribeToProductUpdate(ctx context.Context, handler func(*ProductEvent) error) error
 	PublishImage(ctx context.Context, event *ImageEvent) error
 	SubscribeToImageProcessed(ctx context.Context, handler func(*ImageEvent) error) error
 	Close() error
