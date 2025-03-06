@@ -144,7 +144,34 @@ func (b *RabbitMQBroker) PublishImage(ctx context.Context, event *ImageEvent) er
 	return nil
 }
 
-func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler func(*ImageEvent) error) error {
+func (b *RabbitMQBroker) PublishProductImage(ctx context.Context, event *ProductImageEvent) error {
+	body, err := json.Marshal(event)
+	if err != nil {
+		b.logger.Errorf("Failed to marshal product image event: %v", err)
+		return fmt.Errorf("failed to marshal product image event: %w", err)
+	}
+
+	err = b.channel.Publish(
+		imageExchange,
+		string(event.EventType),
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body: body,
+			DeliveryMode: amqp.Persistent,
+			Timestamp: time.Now(),
+		})
+	if err != nil {
+		b.logger.Errorf("Failted to publish product image event: %v", err)
+		return fmt.Errorf("failed to publish product image event: %w", err)
+	}
+
+	b.logger.Infof("Published product image event: %v", event.EventType)
+	return nil
+}
+
+func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler func(*ProductImageEvent) error) error {
 	queue, err := b.channel.QueueDeclare(
 		"",
 		false,
@@ -187,7 +214,7 @@ func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler 
 			case <-ctx.Done():
 				return
 			case msg := <-msgs:
-				var event ImageEvent
+				var event ProductImageEvent
 				if err := json.Unmarshal(msg.Body, &event); err != nil {
 					b.logger.Errorf("Failed to unmarshal image processed event: %v", err)
 					continue
@@ -254,6 +281,65 @@ func (b *RabbitMQBroker) SubscribeToProductUpdate(ctx context.Context, handler f
 
 				if err := handler(&event); err != nil {
 					b.logger.Errorf("Failed to handle product update event: %v", err)
+				}
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler func(*ImageEvent) error) error {
+	queue, err := b.channel.QueueDeclare(
+		"",
+		false,
+		true,
+		true,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+	
+	err = b.channel.QueueBind(
+		queue.Name,
+		string(EventImageUploaded),
+		imageExchange,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to bind queue: %w", err)
+	}
+
+	msgs, err := b.channel.Consume(
+		queue.Name,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to consume messages: %w", err)
+	}
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg := <-msgs:
+				var event ImageEvent
+				if err := json.Unmarshal(msg.Body, &event); err != nil {
+					b.logger.Errorf("Failed to unmarshal image upload event: %v", err)
+					continue
+				}
+
+				if err := handler(&event); err != nil {
+					b.logger.Errorf("Failed to handle image upload event: %v", err)
 				}
 			}
 		}
