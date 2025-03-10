@@ -186,7 +186,7 @@ func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler 
 	
 	err = b.channel.QueueBind(
 		queue.Name,
-		string(EventImageProcessed),
+		string(EventTypeImageProcessed),
 		imageExchange,
 		false,
 		nil,
@@ -304,7 +304,7 @@ func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler fun
 	
 	err = b.channel.QueueBind(
 		queue.Name,
-		string(EventImageUploaded),
+		string(EventTypeImageUploaded),
 		imageExchange,
 		false,
 		nil,

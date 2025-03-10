@@ -153,6 +153,11 @@ run-product:
 	@echo "==> Starting product service..."
 	go run ./cmd/product/main.go
 
+.PHONY: run-image
+run-image:
+	@echo "==> Starting image service..."
+	go run ./cmd/image/main.go
+
 # Run commands
 .PHONY: run-services
 run-services:

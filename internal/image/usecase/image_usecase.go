@@ -38,7 +38,7 @@ func (iuc *imageUseCase) ProcessImage(ctx context.Context, imageData []byte, pro
 	}
 
 	event := &broker.ProductImageEvent{
-		EventType: broker.EventImageUploaded,
+		EventType: broker.EventTypeImageProcessed,
 		ProductID: productID,
 		ImageURL: imageURL,
 	}

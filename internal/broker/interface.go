@@ -12,8 +12,8 @@ const (
 	EventTypeProductCreated   EventType = "product.created"
 	EventTypeProductUpdated   EventType = "product.updated"
 	EventTypeProductDeleted   EventType = "product.deleted"
-	EventImageUploaded        EventType = "image.uploaded"
-	EventImageProcessed       EventType = "image.processed"
+	EventTypeImageUploaded    EventType = "image.uploaded"
+	EventTypeImageProcessed   EventType = "image.processed"
 )
 
 type Event interface {

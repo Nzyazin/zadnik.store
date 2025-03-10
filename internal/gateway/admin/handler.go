@@ -163,7 +163,7 @@ func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
 	}
 
 	imageEvent := &broker.ImageEvent{
-		EventType: broker.EventImageUploaded,
+		EventType: broker.EventTypeImageUploaded,
 		ProductID: int32(productIDInt),
 		ImageData: imageBytes,
 	}
