@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
-	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/Nzyazin/zadnik.store/internal/product/config"
-	"github.com/Nzyazin/zadnik.store/internal/product/repository/postgres"
-	"github.com/Nzyazin/zadnik.store/internal/common"
-	"github.com/Nzyazin/zadnik.store/internal/product/usecase"
-	"github.com/Nzyazin/zadnik.store/internal/product/delivery"
 	"github.com/Nzyazin/zadnik.store/internal/broker"
+	"github.com/Nzyazin/zadnik.store/internal/common"
+	"github.com/Nzyazin/zadnik.store/internal/product/config"
+	"github.com/Nzyazin/zadnik.store/internal/product/delivery"
+	"github.com/Nzyazin/zadnik.store/internal/product/repository/postgres"
+	"github.com/Nzyazin/zadnik.store/internal/product/usecase"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -47,6 +50,9 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
 
 	err = messageBroker.SubscribeToImageProcessed(ctx, func(event *broker.ProductImageEvent) error  {
 		logger.Infof("Receiver image processed even for product %d with URL %s", event.ProductID, event.ImageURL)

@@ -14,10 +14,16 @@ import (
 )
 
 func main() {
-	err := godotenv.Load(filepath.Join("internal", "image", "config", ".env-image"))
+	projectDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Failed to get working directory: %v", err)
+	}
+	err = godotenv.Load(filepath.Join("internal", "image", "config", ".env-image"))
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
+
+	storagePath := filepath.Join(projectDir, os.Getenv("STORAGE_PATH"))
 
 	logger := common.NewSimpleLogger()
 
@@ -32,7 +38,7 @@ func main() {
 	defer messageBroker.Close()
 
 	imageStorage, err := storage.NewFileStorage(
-		os.Getenv("STORAGE_PATH"),
+		storagePath,
 		os.Getenv("IMAGE_BASE_URL"),
 	)
 	if err != nil {

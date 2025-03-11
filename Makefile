@@ -161,6 +161,15 @@ run-image:
 # RabbitMQ commands
 .PHONY: rabbitmq-start rabbitmq-stop rabbitmq-restart rabbitmq-status
 
+.PHONY: stop-all
+stop-all:
+	@echo "==> Stopping all services..."
+	@-pkill -f "cmd/auth/main"
+	@-pkill -f "cmd/gateway/main"
+	@-pkill -f "cmd/product/main"
+	@-pkill -f "cmd/image/main"
+	@echo "All services stopped"
+
 rabbitmq-start:
 	@echo "==> Starting RabbitMQ..."
 	docker compose up -d rabbitmq
@@ -181,6 +190,19 @@ rabbitmq-status:
 run-all:
 	@echo "==> Starting all services..."
 	make run-auth & make run-gateway & make run-product & make run-image
+
+.PHONY: check-ports
+check-ports:
+	@echo "==> Checking service ports..."
+	@echo "Auth Service (50051):"
+	@-lsof -i :50051 || echo "Port available"
+	@echo "\nProduct Service (50055):"
+	@-lsof -i :50055 || echo "Port available"
+	@echo "\nGateway Service (8083):"
+	@-lsof -i :8083 || echo "Port available"
+	@echo "\nImage Service (8084):"
+	@-lsof -i :8084 || echo "Port available"
+
 
 .PHONY: generate-mocks
 generate-mocks: install-mockgen
