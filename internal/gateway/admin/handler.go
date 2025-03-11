@@ -148,8 +148,14 @@ func (h *Handler) productUpdate(c *gin.Context) {
 
 func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
 	file, err := c.FormFile("image")
-	if err != nil || file == nil {
+	if err == http.ErrMissingFile {
 		return nil
+	}
+	if err != nil{
+		return fmt.Errorf("failed to get image: %w", err)
+	}
+	if file == nil {
+		return fmt.Errorf("file not found")
 	}
 	imageData, err := file.Open()
 	if err != nil {
@@ -173,6 +179,7 @@ func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
 		return fmt.Errorf("failed to publish image event: %v", err)
 	}
 
+	h.logger.Infof("Successfully published image event for product ID: %d", productIDInt)
 	return nil
 }
 
@@ -245,7 +252,7 @@ func (h *Handler) productEdit(c *gin.Context) {
 			Title: "Редактирование товара - " + product.Name,
 		},
 		Product: product,
-
+		Error: c.Query("error"),
 	}
 
 	if err := h.templates.RenderProductEdit(c.Writer, params); err != nil {

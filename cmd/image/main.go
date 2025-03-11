@@ -1,10 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"path/filepath"
-	"context"
 
 	"github.com/Nzyazin/zadnik.store/internal/broker"
 	"github.com/Nzyazin/zadnik.store/internal/common"
@@ -59,6 +59,6 @@ func main() {
 		log.Fatalf("Failed to subscribe to image upload: %v", err)
 	}
 
-	logger.Infof("Image service started")
-	select {}	
+	logger.Infof("Starting image service")
+	select {}
 }

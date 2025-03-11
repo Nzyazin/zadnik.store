@@ -158,16 +158,6 @@ run-image:
 	@echo "==> Starting image service..."
 	go run ./cmd/image/main.go
 
-# Run commands
-.PHONY: run-services
-run-services:
-	@echo "==> Starting auth service..."
-	@./bin/auth.exe &
-	@echo "==> Waiting for auth service to start..."
-	@sleep 2
-	@echo "==> Starting gateway service..."
-	@./bin/gateway.exe
-
 # RabbitMQ commands
 .PHONY: rabbitmq-start rabbitmq-stop rabbitmq-restart rabbitmq-status
 
@@ -190,7 +180,7 @@ rabbitmq-status:
 .PHONY: run-all
 run-all:
 	@echo "==> Starting all services..."
-	make run-auth & make run-gateway & make run-product
+	make run-auth & make run-gateway & make run-product & make run-image
 
 .PHONY: generate-mocks
 generate-mocks: install-mockgen
