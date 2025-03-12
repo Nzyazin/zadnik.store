@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Nzyazin/zadnik.store/internal/broker"
 	"github.com/Nzyazin/zadnik.store/internal/common"
@@ -107,8 +108,35 @@ func main() {
 	router.HandleFunc("/products/{id}", productHandler.GetByID).Methods("GET")
 	router.HandleFunc("/products/{id}", productHandler.Update).Methods("PATCH")
 
-	logger.Infof("Starting product service on %s", cfg.ProductServiceAddress)
-	if err := http.ListenAndServe(cfg.ProductServiceAddress, router); err != nil {
-		log.Fatalf("Failed to start product service: %v", err)
+	srv := &http.Server {
+		Addr: cfg.ProductServiceAddress,
+		Handler: router,
+	}
+
+	go func() {
+		logger.Infof("Starting product service on %s", srv.Addr)
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			logger.Errorf("Failed to start product server: %v", err)
+		}
+	}()
+
+	<-signalChan
+	logger.Infof("Received shutdown signal")
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, 6 * time.Second)
+	defer shutdownCancel()
+
+	cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		logger.Errorf("Server shutdown error: %v", err)
+	} else {
+		logger.Infof("Server shutdown successfully")
+	}
+
+	select {
+	case <-shutdownCtx.Done():
+		logger.Warnf("Shutdown timeout exceeded, forcing exit")
+	default:
+		logger.Infof("All operations completed gracefully")
 	}
 }
