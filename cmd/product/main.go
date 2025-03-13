@@ -50,7 +50,7 @@ func main() {
 	defer messageBroker.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()//TODO: cancel x2?
+	defer cancel()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)

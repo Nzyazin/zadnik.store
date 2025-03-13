@@ -48,6 +48,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	// Static files
 	s.router.Static("/static", "./bin/static")
+	s.router.Static("/storage/images", "./storage/images")
 	s.router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Добавляем функции в шаблоны
