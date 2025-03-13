@@ -35,5 +35,8 @@
             td= product.name
             td #{product.price} ₽
             td
-              a.btn.products-index__btn-edit(href=`#`)
-                span.text Редактировать
+              .products-index__actions  
+                a.btn.products-index__btn-edit(href=`#`)
+                  span.text Редактировать
+                a.btn.products-index__btn-delete(href=`#`)
+                  i.products-index__btn-delete-icon
