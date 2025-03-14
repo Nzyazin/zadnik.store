@@ -50,13 +50,13 @@ migrate-create:
 migrate-clean:
 	@if [ "$(SERVICE)" = "auth" ]; then \
 		echo "==> Cleaning migrations state for 'auth'" && \
-		PGPASSWORD=postgres psql -U postgres -d auth -c "DROP TABLE IF EXISTS schema_migrations;" && \
-		PGPASSWORD=postgres psql -U postgres -d auth -c "DROP TABLE IF EXISTS users;" && \
+		PGPASSWORD=postgres psql -h localhost -U postgres -d auth -c "DROP TABLE IF EXISTS schema_migrations;" && \
+		PGPASSWORD=postgres psql -h localhost -U postgres -d auth -c "DROP TABLE IF EXISTS users;" && \
 		make migrate-up SERVICE=auth; \
 	elif [ "$(SERVICE)" = "product" ]; then \
 		echo "==> Cleaning migrations state for 'product'" && \
-		PGPASSWORD=postgres psql -U postgres -d product -c "DROP TABLE IF EXISTS schema_migrations;" && \
-		PGPASSWORD=postgres psql -U postgres -d product -c "DROP TABLE IF EXISTS products;" && \
+		PGPASSWORD=postgres psql -h localhost -U postgres -d product -c "DROP TABLE IF EXISTS schema_migrations;" && \
+		PGPASSWORD=postgres psql -h localhost -U postgres -d product -c "DROP TABLE IF EXISTS products;" && \
 		make migrate-up SERVICE=product; \
 	else \
 		echo "Please specify SERVICE=auth or SERVICE=product"; \
