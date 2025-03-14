@@ -94,17 +94,31 @@
 
 .products-index__actions
   display: flex
-  gap: 8px
+  gap: 27px
+  justify-content: end
+
+.products-index__delete-form
+  cursor: pointer
 
 .products-index__btn-delete
+  border: none
+  background: none
+
+.products-index__btn-delete-icon
+  +maskBgIcon('ic_delete_basket.svg', 36px, 36px)
+  width: 42px
+  height: 42px
+  display: inline-block
   background-color: $red
-  color: $white
   &:hover
     background-color: $red_hover
+  @include media(1240)
+    +maskBgIcon('ic_delete_basket.svg', 27px, 27px)
+    width: 27px
+    height: 27px
 
 td
   color: $dark
-
   &:last-child
     text-align: right
 
