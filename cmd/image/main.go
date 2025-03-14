@@ -61,6 +61,8 @@ func main() {
 		logger.Infof("Successfully proccessed image for product %d", event.ProductID)
 		return nil
 	})
+
+	
 	if err != nil {
 		log.Fatalf("Failed to subscribe to image upload: %v", err)
 	}

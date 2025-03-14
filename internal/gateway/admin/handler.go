@@ -3,46 +3,46 @@ package admin
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
-	"io"
-	"time"
 	"strconv"
-	
-	"github.com/shopspring/decimal"
+	"time"
+
+	"github.com/Nzyazin/zadnik.store/internal/broker"
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
-	"github.com/Nzyazin/zadnik.store/internal/broker"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
 )
 
 type Handler struct {
-	authService auth.AuthService
-	templates   *admin_templates.Templates
-	productServiceUrl string
+	authService          auth.AuthService
+	templates            *admin_templates.Templates
+	productServiceUrl    string
 	productServiceAPIKey string
-	httpClient  *http.Client
-	logger common.Logger
-	messageBroker broker.MessageBroker
+	httpClient           *http.Client
+	logger               common.Logger
+	messageBroker        broker.MessageBroker
 }
 
 func NewHandler(
-		authService auth.AuthService, 
-		templates *admin_templates.Templates, 
-		productServiceUrl string, 
-		productServiceAPIKey string,
-		messageBroker broker.MessageBroker,
-	) *Handler {
+	authService auth.AuthService,
+	templates *admin_templates.Templates,
+	productServiceUrl string,
+	productServiceAPIKey string,
+	messageBroker broker.MessageBroker,
+) *Handler {
 	return &Handler{
-		authService: authService,
-		templates:  templates,
-		productServiceUrl: productServiceUrl,
+		authService:          authService,
+		templates:            templates,
+		productServiceUrl:    productServiceUrl,
 		productServiceAPIKey: productServiceAPIKey,
 		httpClient: &http.Client{
 			Timeout: time.Second * 10,
 		},
-		logger: common.NewSimpleLogger(),
+		logger:        common.NewSimpleLogger(),
 		messageBroker: messageBroker,
 	}
 }
@@ -63,9 +63,45 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 			authorized.GET("/products", h.productsIndex)
 			authorized.GET("/products/:id/edit", h.productEdit)
 			authorized.POST("/products/:id/edit", h.productUpdate)
-			authorized.DELETE("/products/:id", h.productDelete)
+			authorized.DELETE("/products/:id/delete", h.productDelete)
 		}
 	}
+}
+
+func (h *Handler) productDelete(c *gin.Context) {
+	if !h.checkAuth(c) {
+		h.logger.Errorf("Unauthorized attempt to delete product")
+		return
+	}
+
+	productIDint, err := h.validateProductID(c)
+	if err != nil {
+		h.logger.Errorf("Product ID validation failed: %v", err)
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "ID is not valid",
+		})
+		return
+	}
+
+	h.logger.Infof("Starting deletion process for product %d", productIDint)
+
+	productEvent := &broker.ProductEvent{
+		EventType: broker.EventTypeProductDeleted,
+		ProductID: int32(productIDint),
+	}
+
+	if err := h.messageBroker.PublishProduct(c.Request.Context(), productEvent); err != nil {
+		h.logger.Errorf("Failed to publish product event: %v", err)
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "Did not can delete product",
+		})
+		return
+	}
+
+	h.logger.Infof("Successfully published delete event for product %d", productIDint)
+
+	// После успешного удаления редиректим на список продуктов
+	c.Redirect(http.StatusFound, "/admin/products")
 }
 
 func (h *Handler) redirectWithError(c *gin.Context, productID, message string) {
@@ -122,7 +158,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	} else if priceDecimal != decimal.Zero {
 		productEvent.Price = priceDecimal
 	}
-	
+
 	if name != originalName {
 		productEvent.Name = name
 	}
@@ -138,7 +174,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 			return
 		}
 	}
-	
+
 	if err := h.handleImageUpload(c, productIDInt); err != nil {
 		h.redirectWithError(c, strconv.FormatInt(productIDInt, 10), err.Error())
 		return
@@ -152,7 +188,7 @@ func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
 	if err == http.ErrMissingFile {
 		return nil
 	}
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("failed to get image: %w", err)
 	}
 	if file == nil {
@@ -188,7 +224,7 @@ func (h *Handler) handlePriceUpdate(productIDStr, originalPrice string) (decimal
 	if productIDStr == originalPrice {
 		return decimal.Zero, nil
 	}
-	
+
 	priceDecimal, err := decimal.NewFromString(productIDStr)
 	if err != nil {
 		return decimal.Zero, fmt.Errorf("invalid price format: %w", err)
@@ -218,7 +254,7 @@ func (h *Handler) productEdit(c *gin.Context) {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodGet, h.productServiceUrl + "/products/" + productID, nil)
+	req, err := http.NewRequest(http.MethodGet, h.productServiceUrl+"/products/"+productID, nil)
 	if err != nil {
 		h.logger.Errorf("Failed to create request: %v", err)
 		c.Redirect(http.StatusFound, "/admin/products")
@@ -253,7 +289,7 @@ func (h *Handler) productEdit(c *gin.Context) {
 			Title: "Редактирование товара - " + product.Name,
 		},
 		Product: product,
-		Error: c.Query("error"),
+		Error:   c.Query("error"),
 	}
 
 	if err := h.templates.RenderProductEdit(c.Writer, params); err != nil {
@@ -277,7 +313,7 @@ func (h *Handler) loginPage(c *gin.Context) {
 	params := admin_templates.AuthParams{
 		Error: c.Query("error"),
 	}
-	
+
 	if err := h.templates.RenderAuth(c.Writer, params); err != nil {
 		c.String(http.StatusInternalServerError, "Internal Server Error")
 		return
@@ -301,7 +337,7 @@ func (h *Handler) login(c *gin.Context) {
 	c.SetCookie(
 		"access_token",
 		resp.AccessToken,
-		int(24 * time.Hour.Seconds()),
+		int(24*time.Hour.Seconds()),
 		"/",
 		"",
 		false, // secure
@@ -311,7 +347,7 @@ func (h *Handler) login(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/admin/products")
 }
 
-func (h *Handler) logout(c * gin.Context) {
+func (h *Handler) logout(c *gin.Context) {
 	c.SetCookie(
 		"access_token",
 		"",
@@ -353,7 +389,7 @@ func (h *Handler) productsIndex(c *gin.Context) {
 		},
 	}
 
-	req, err := http.NewRequest(http.MethodGet, h.productServiceUrl + "/products", nil)
+	req, err := http.NewRequest(http.MethodGet, h.productServiceUrl+"/products", nil)
 	if err != nil {
 		h.logger.Errorf("Failed to create request: %v", err)
 		params.Error = "Не удалось загрузить список товаров"
@@ -389,10 +425,10 @@ func (h *Handler) productsIndex(c *gin.Context) {
 	products := make([]admin_templates.Product, len(apiProducts))
 	for i, p := range apiProducts {
 		products[i] = admin_templates.Product{
-			ID: p.ID,
-			Name: p.Name,
-			Slug: p.Slug,
-			Price: p.Price,
+			ID:          p.ID,
+			Name:        p.Name,
+			Slug:        p.Slug,
+			Price:       p.Price,
 			Description: p.Description,
 		}
 	}
