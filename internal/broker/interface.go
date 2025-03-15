@@ -47,5 +47,6 @@ type MessageBroker interface {
 	PublishProductImage(ctx context.Context, event *ProductImageEvent) error
 	SubscribeToImageProcessed(ctx context.Context, handler func(*ProductImageEvent) error) error
 	SubscribeToImageUpload(ctx context.Context, handler func(*ImageEvent) error) error
+	SubscribeToImageDelete(ctx context.Context, handler func(*ImageEvent) error) error
 	Close() error
 }
