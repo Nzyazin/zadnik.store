@@ -62,7 +62,18 @@ func main() {
 		return nil
 	})
 
-	
+	err = messageBroker.SubscribeToImageDelete(ctx, func(event *broker.ProductEvent) error {
+		logger.Infof("Received product delete event for product %d", event.ProductID)
+
+		if err := imageUseCase.DeleteImage(ctx, event.ProductID); err != nil {
+			logger.Errorf("Failed to delete image for product %d: %v", event.ProductID, err)
+			return err
+		}
+
+		logger.Infof("Successfully deleted image for product %d", event.ProductID)
+		return nil
+	})
+
 	if err != nil {
 		log.Fatalf("Failed to subscribe to image upload: %v", err)
 	}

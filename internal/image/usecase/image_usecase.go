@@ -11,6 +11,7 @@ import (
 
 type ImageUseCase interface {
 	ProcessImage(ctx context.Context, imageData []byte, productID int32) error
+	DeleteImage(ctx context.Context, productID int32) error
 }
 
 type imageUseCase struct {
@@ -50,5 +51,15 @@ func (iuc *imageUseCase) ProcessImage(ctx context.Context, imageData []byte, pro
 		return fmt.Errorf("failed to publish image processed event: %w", err)
 	}
 	
+	return nil
+}
+
+func (iuc *imageUseCase) DeleteImage(ctx context.Context, productID int32) error {
+	imageURL := fmt.Sprintf("%s/%d.jpg", iuc.storage.GetBaseURL(), productID)
+
+	if err := iuc.storage.Delete(ctx, imageURL); err != nil {
+		return fmt.Errorf("failed to delete image: %w", err)
+	}
+
 	return nil
 }

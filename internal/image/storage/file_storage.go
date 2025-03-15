@@ -49,3 +49,7 @@ func (fs *fileStorage) Delete(ctx context.Context, imageURL string) error {
 
     return nil
 }
+
+func (fs *fileStorage) GetBaseURL() string {
+    return fs.baseURL
+}
