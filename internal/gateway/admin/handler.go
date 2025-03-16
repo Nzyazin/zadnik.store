@@ -83,11 +83,14 @@ func (h *Handler) productDelete(c *gin.Context) {
 		return
 	}
 
+	imageURL := c.PostForm("image_url")
+
 	h.logger.Infof("Starting deletion process for product %d", productIDint)
 
 	productEvent := &broker.ProductEvent{
 		EventType: broker.EventTypeProductDeleted,
 		ProductID: int32(productIDint),
+		ImageURL: imageURL,
 	}
 
 	if err := h.messageBroker.PublishProduct(c.Request.Context(), productEvent); err != nil {
@@ -430,6 +433,7 @@ func (h *Handler) productsIndex(c *gin.Context) {
 			Slug:        p.Slug,
 			Price:       p.Price,
 			Description: p.Description,
+			ImageURL:    p.ImageURL,
 		}
 	}
 
