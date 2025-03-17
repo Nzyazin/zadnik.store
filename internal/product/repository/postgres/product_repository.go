@@ -87,3 +87,51 @@ func (r *productRepository) Update(ctx context.Context, product *domain.Product)
 
 	return updatedProduct, nil
 }
+
+func (r *productRepository) BeginDelete(ctx context.Context, productID int32) error {
+
+	var product domain.Product
+	err := r.db.GetContext(ctx, &product, `SELECT * FROM products WHERE id = $1 FOR UPDATE`, productID)
+	if err != nil {
+		return fmt.Errorf("failed to get product: %w", err)
+	}
+
+	if product.Status == domain.ProductStatusDeleting {
+		return fmt.Errorf("product %d is already deleted", productID)
+	}
+
+	_, err = r.db.ExecContext(ctx, `UPDATE products SET status = $1 WHERE ID = $2`, domain.ProductStatusDeleting, productID)
+	if err != nil {
+		return fmt.Errorf("failed to begin delete product: %w", err)
+	}
+
+	return nil
+}
+
+func (r *productRepository) CompleteDelete(ctx context.Context, productID int32) error {
+	var product domain.Product
+	err := r.db.GetContext(ctx, &product, `SELECT * FROM products WHERE id = $1`, productID)
+	if err != nil {
+		return fmt.Errorf("failed to get product: %w", err)
+	}
+
+	if product.Status != domain.ProductStatusDeleting {
+		return fmt.Errorf("product %d is not in deleting status", productID)
+	}
+
+	result, err := r.db.ExecContext(ctx, `DELETE FROM products WHERE id = $1 AND status = $2`, productID, domain.ProductStatusDeleting)
+	if err != nil {
+		return fmt.Errorf("failed to delete product: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get affected rows: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("product %d was not deleted", productID)
+	}
+
+	return nil
+}
+
