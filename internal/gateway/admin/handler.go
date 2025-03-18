@@ -63,7 +63,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 			authorized.GET("/products", h.productsIndex)
 			authorized.GET("/products/:id/edit", h.productEdit)
 			authorized.POST("/products/:id/edit", h.productUpdate)
-			authorized.DELETE("/products/:id/delete", h.productDelete)
+			authorized.POST("/products/:id/delete", h.productDelete)
 		}
 	}
 }

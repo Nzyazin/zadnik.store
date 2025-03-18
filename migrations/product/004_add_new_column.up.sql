@@ -1,2 +1,2 @@
 ALTER TABLE products
-ADD COLUMN status VARCHAR(255);
+ADD COLUMN status VARCHAR(255) DEFAULT 'active';
