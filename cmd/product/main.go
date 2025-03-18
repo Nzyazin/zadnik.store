@@ -15,6 +15,7 @@ import (
 	"github.com/Nzyazin/zadnik.store/internal/product/delivery"
 	"github.com/Nzyazin/zadnik.store/internal/product/repository/postgres"
 	"github.com/Nzyazin/zadnik.store/internal/product/usecase"
+	"fmt"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -71,8 +72,7 @@ func main() {
 	}
 
 	err = messageBroker.SubscribeToProductUpdate(ctx, func(event *broker.ProductEvent) error {
-		logger.Infof("Received product update event for product %d", event.ProductID)
-		
+		logger.Infof("Received product update event for product %d", event.ProductID)		
 		
 		product, err := productUseCase.GetByID(ctx, event.ProductID)
 		if err != nil {
@@ -109,14 +109,41 @@ func main() {
 			return nil
 		}
 
+		if event.ImageURL == "" {
+			if err := productUseCase.BeginDelete(ctx, event.ProductID); err != nil {
+				return err
+			}
+			if err := productUseCase.CompleteDelete(ctx, event.ProductID); err != nil {
+				return err
+			}
+			return nil
+		}
+		
 		if err := productUseCase.BeginDelete(ctx, event.ProductID); err != nil {
 			return err
 		}
 
-		imageDeletionCh := make(chan error, 1)
-		cleanup, err := messageBroker.
+		if event.Error != "" {
+			if err := productUseCase.RollbackDelete(ctx, event.ProductID); err != nil {
+				logger.Infof("Image deletion failed for product: %d: %s", event.ProductID, event.Error)
+				return fmt.Errorf("image deletion failed: %s", err)
+			}			
+		}
 
+		if event.Error == "" {
+			if err := productUseCase.CompleteDelete(ctx, event.ProductID); err != nil {
+				logger.Infof("Image deletion failed for product: %d: %s", event.ProductID, event.Error)
+				return fmt.Errorf("image deletion failed: %s", err)
+			}
+		}
+		
+		logger.Infof("Successfully deleted product %d", event.ProductID)
+		return nil
 	})
+
+	if err != nil {
+		log.Fatalf("Failed to subscribe to product deleted events: %v", err)
+	}
 
 	router := mux.NewRouter()
 	router.Use(productHandler.AuthMiddleware)

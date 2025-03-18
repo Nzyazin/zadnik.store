@@ -47,8 +47,10 @@ func NewApp(config *config.Config) (*App, error) {
 	}, nil
 }
 
-func (a *App) handleImageUpload(ctx context.Context, event *broker.ImageEvent) error {
+func (a *App) handleImageUpload(event *broker.ImageEvent) error {
 	a.logger.Infof("Received image upload event for product %d", event.ProductID)
+
+	ctx := context.Background()
 
 	if err := a.imageUseCase.ProcessImage(ctx, event.ImageData, event.ProductID); err != nil {
 		a.logger.Errorf("Failed to process image %v", err)
@@ -59,8 +61,10 @@ func (a *App) handleImageUpload(ctx context.Context, event *broker.ImageEvent) e
 	return nil
 }
 
-func (a *App) handleImageDelete(ctx context.Context, event *broker.ProductEvent) error {
+func (a *App) handleImageDelete(event *broker.ProductEvent) error {
 	a.logger.Infof("Received product delete event for product %d", event.ProductID)
+
+	ctx := context.Background()
 
 	if err := a.imageUseCase.DeleteImage(ctx, event.ProductID); err != nil {
 		a.logger.Errorf("Failed to delete image for product %d: %v", event.ProductID, err)
@@ -77,6 +81,7 @@ func (a *App) handleImageDelete(ctx context.Context, event *broker.ProductEvent)
 	successEvent := &broker.ProductEvent{
 		EventType: broker.EventTypeProductDeleted,
 		ProductID: event.ProductID,
+		Error: "",
 	}
 
 	return a.messageBroker.PublishProduct(ctx, successEvent)
