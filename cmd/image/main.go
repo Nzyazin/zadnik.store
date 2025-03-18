@@ -3,81 +3,29 @@ package main
 import (
 	"context"
 	"log"
-	"os"
-	"path/filepath"
+	"os/signal"
+	"syscall"
 
-	"github.com/Nzyazin/zadnik.store/internal/broker"
-	"github.com/Nzyazin/zadnik.store/internal/common"
-	"github.com/Nzyazin/zadnik.store/internal/image/storage"
-	"github.com/Nzyazin/zadnik.store/internal/image/usecase"
-	"github.com/joho/godotenv"
+	"github.com/Nzyazin/zadnik.store/internal/image/app"
+	"github.com/Nzyazin/zadnik.store/internal/image/config"
 )
 
 func main() {
-	projectDir, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Failed to get working directory: %v", err)
-	}
-	err = godotenv.Load(filepath.Join("internal", "image", "config", ".env-image"))
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	storagePath := filepath.Join(projectDir, os.Getenv("STORAGE_PATH"))
-
-	logger := common.NewSimpleLogger()
-
-	messageBroker, err := broker.NewRabbitMQBroker(
-		broker.RabbitMQConfig{
-			URL: os.Getenv("RABBITMQ_URL"),
-		},
-	)
-	if err != nil {
-		log.Fatalf("Failed to initialize message broker: %v", err)
-	}
-	defer messageBroker.Close()
-
-	imageStorage, err := storage.NewFileStorage(
-		storagePath,
-		os.Getenv("IMAGE_BASE_URL"),
-	)
-	if err != nil {
-		log.Fatalf("Failed to initialize file storage: %v", err)
-	}
-
-	imageUseCase := usecase.NewImageUseCase(imageStorage, messageBroker, logger)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	err = messageBroker.SubscribeToImageUpload(ctx, func(event *broker.ImageEvent) error {
-		logger.Infof("Received image upload event for product %d", event.ProductID)
-
-		if err := imageUseCase.ProcessImage(ctx, event.ImageData, event.ProductID); err != nil {
-			logger.Errorf("Failed to process image %v", err)
-			return err
+		config, err := config.LoadConfig()
+		if err != nil {
+			log.Fatalf("Failed to load config: %v", err)
 		}
 
-		logger.Infof("Successfully proccessed image for product %d", event.ProductID)
-		return nil
-	})
-
-	err = messageBroker.SubscribeToImageDelete(ctx, func(event *broker.ProductEvent) error {
-		logger.Infof("Received product delete event for product %d", event.ProductID)
-
-		if err := imageUseCase.DeleteImage(ctx, event.ProductID); err != nil {
-			logger.Errorf("Failed to delete image for product %d: %v", event.ProductID, err)
-			return err
+		application, err := app.NewApp(config)
+		if err != nil {
+			log.Fatalf("Failed to initialize application: %v", err)
 		}
+		defer application.Shutdown()
 
-		logger.Infof("Successfully deleted image for product %d", event.ProductID)
-		return nil
-	})
+		ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+		defer cancel()
 
-	if err != nil {
-		log.Fatalf("Failed to subscribe to image upload: %v", err)
-	}
-
-	logger.Infof("Starting image service")
-	select {}
+		if err := application.Run(ctx); err != nil {
+			log.Fatalf("Failed to run application: %v", err)
+		}
 }

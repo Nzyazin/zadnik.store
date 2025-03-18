@@ -73,6 +73,7 @@ func main() {
 	err = messageBroker.SubscribeToProductUpdate(ctx, func(event *broker.ProductEvent) error {
 		logger.Infof("Received product update event for product %d", event.ProductID)
 		
+		
 		product, err := productUseCase.GetByID(ctx, event.ProductID)
 		if err != nil {
 			logger.Errorf("Failed to get product: %v", err)
@@ -98,9 +99,24 @@ func main() {
 		logger.Infof("Successfully updated product %d", event.ProductID)
 		return nil
 	})
+
 	if err != nil {
 		log.Fatalf("Failed to subscribe to product updated events: %v", err)
 	}
+
+	err = messageBroker.SubscribeToImageDelete(ctx, func(event *broker.ProductEvent) error {
+		if event.EventType != broker.EventTypeProductDeleted {
+			return nil
+		}
+
+		if err := productUseCase.BeginDelete(ctx, event.ProductID); err != nil {
+			return err
+		}
+
+		imageDeletionCh := make(chan error, 1)
+		cleanup, err := messageBroker.
+
+	})
 
 	router := mux.NewRouter()
 	router.Use(productHandler.AuthMiddleware)

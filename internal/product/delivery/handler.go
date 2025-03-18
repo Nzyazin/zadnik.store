@@ -4,9 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"context"
+	"fmt"
+	"time"
 
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/product/usecase"
+	"github.com/Nzyazin/zadnik.store/internal/broker"
 	"github.com/gorilla/mux"
 	"github.com/shopspring/decimal"
 )
@@ -14,6 +18,7 @@ import (
 type ProductHandler struct {
 	productUsecase usecase.ProductUseCase
 	logger         common.Logger
+	messageBroker  broker.MessageBroker
 	apiKey         string
 }
 
@@ -172,4 +177,86 @@ func (p *ProductHandler) AuthMiddleware(next http.Handler) http.Handler {
 		p.logger.Infof("Request authenticated successfully")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (p *ProductHandler) HandleProductEvent(ctx context.Context, event *broker.ProductEvent) error {
+	p.logger.Infof("Received product event type %s for product %d", event.EventType, event.ProductID)
+
+	switch event.EventType {
+	case broker.EventTypeProductUpdated:
+		return p.handleProductUpdate(ctx, event)
+	case broker.EventTypeProductDeleted:
+		return p.handleProductDelete(ctx, event)
+	default:
+		p.logger.Warnf("Unknown event type: %s", event.EventType)
+		return nil
+	}
+}
+
+func (p *ProductHandler) handleProductUpdate(ctx context.Context, event *broker.ProductEvent) error {
+	product, err := p.productUsecase.GetByID(ctx, event.ProductID)
+	if err != nil {
+		p.logger.Errorf("Failed to get product: %v", err)
+		return err
+	}
+	
+	if event.Name != "" {
+		product.Name = event.Name
+	}
+	if !event.Price.IsZero() {
+		product.Price = event.Price
+	}
+	if event.Description != "" {
+		product.Description = event.Description
+	}
+
+	_, err = p.productUsecase.Update(ctx, product)
+	if err != nil {
+		p.logger.Errorf("Failed to update product: %v", err)
+		return err
+	}
+
+	p.logger.Infof("Successfully updated product %d", event.ProductID)
+	return nil
+}
+
+func (p *ProductHandler) handleProductDelete(ctx context.Context, event *broker.ProductEvent) error {
+	if err := p.productUsecase.BeginDelete(ctx, event.ProductID); err != nil {
+		p.logger.Errorf("Failed to begin delete product: %v", err)
+		return err
+	}
+
+	if err := p.waitForImageDeletion(ctx, event.ProductID); err != nil {
+		p.logger.Errorf("Image deletion failed: %v", err)
+		if rollBackErr := p.productUsecase.RollbackDelete(ctx, event.ProductID); rollBackErr != nil {
+			p.logger.Errorf("Failed to rollback: %v", rollBackErr)
+		}
+		return err
+	}
+
+	return p.productUsecase.CompleteDelete(ctx, event.ProductID)
+}
+
+func (p *ProductHandler) waitForImageDeletion(ctx context.Context, productID int32) error {
+	imageDeletionCh := make(chan error, 1)
+	err := p.messageBroker.SubscribeToImageDelete(ctx, func(event *broker.ProductEvent) error {
+		if event.ProductID == productID {
+			if event.Error == "" {
+				imageDeletionCh <- nil
+			} else {
+				imageDeletionCh <- fmt.Errorf("image deletion failed")
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to subscribe to image deletion events: %w", err)
+	}
+
+	select {
+	case err := <-imageDeletionCh:
+		return err
+	case <-time.After(6 * time.Second):
+		return fmt.Errorf("timeout waiting for image deletion")
+	}
 }

@@ -11,6 +11,9 @@ type ProductUseCase interface {
 	GetByID(ctx context.Context, id int32) (*domain.Product, error)
 	Update(ctx context.Context, product *domain.Product) (*domain.Product, error)
 	UpdateProductImage(ctx context.Context, productID int32, imageURL string) error
+	BeginDelete(ctx context.Context, productID int32) error
+	CompleteDelete(ctx context.Context, productID int32) error
+	RollbackDelete(ctx context.Context, productID int32) error
 }
 
 type productUseCase struct {
@@ -35,4 +38,16 @@ func (puc *productUseCase) UpdateProductImage(ctx context.Context, productID int
 
 func (puc *productUseCase) Update(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	return puc.repo.Update(ctx, product)
+}
+
+func (puc *productUseCase) BeginDelete(ctx context.Context, productID int32) error {
+	return puc.repo.BeginDelete(ctx, productID)
+}
+
+func (puc *productUseCase) CompleteDelete(ctx context.Context, productID int32) error {
+	return puc.repo.CompleteDelete(ctx, productID)
+}
+
+func (puc *productUseCase) RollbackDelete(ctx context.Context, productID int32) error {
+	return puc.repo.RollbackDelete(ctx, productID)
 }

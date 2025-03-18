@@ -119,7 +119,7 @@ func (r *productRepository) CompleteDelete(ctx context.Context, productID int32)
 		return fmt.Errorf("product %d is not in deleting status", productID)
 	}
 
-	result, err := r.db.ExecContext(ctx, `DELETE FROM products WHERE id = $1 AND status = $2`, productID, domain.ProductStatusDeleting)
+	result, err := r.db.ExecContext(ctx, "DELETE FROM products WHERE id = $1 AND status = $2", productID, domain.ProductStatusDeleting)
 	if err != nil {
 		return fmt.Errorf("failed to delete product: %w", err)
 	}
@@ -135,3 +135,20 @@ func (r *productRepository) CompleteDelete(ctx context.Context, productID int32)
 	return nil
 }
 
+func (r *productRepository) RollbackDelete(ctx context.Context, productID int32) error {
+	result, err := r.db.ExecContext(ctx, 
+		"UPDATE products SET status = $1 WHERE id = $2 AND status = $3",
+		domain.ProductStatusActive, productID, domain.ProductStatusDeleting)
+	if err != nil {
+		return fmt.Errorf("failed to rollback status: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get affected rows: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("product %d status was not rolled back", productID)
+	}
+	return nil
+}

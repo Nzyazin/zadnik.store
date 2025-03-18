@@ -27,6 +27,7 @@ type ProductEvent struct {
 	Price       decimal.Decimal   `json:"price"`
 	Description string    `json:"description"`
 	ImageURL string `json:"image_url"`
+	Error string `json:"error,omitempty"`
 }
 
 type ImageEvent struct {
