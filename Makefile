@@ -161,14 +161,7 @@ run-image:
 # RabbitMQ commands
 .PHONY: rabbitmq-start rabbitmq-stop rabbitmq-restart rabbitmq-status
 
-.PHONY: stop-all
-stop-all:
-	@echo "==> Stopping all services..."
-	@-pkill -f "cmd/auth/main"
-	@-pkill -f "cmd/gateway/main"
-	@-pkill -f "cmd/product/main"
-	@-pkill -f "cmd/image/main"
-	@echo "All services stopped"
+
 
 rabbitmq-start:
 	@echo "==> Starting RabbitMQ..."
@@ -202,6 +195,15 @@ check-ports:
 	@-lsof -i :8083 || echo "Port available"
 	@echo "\nImage Service (8084):"
 	@-lsof -i :8084 || echo "Port available"
+
+.PHONY: stop-all
+stop-all:
+	@echo "==> Stopping all services..."
+	@-pkill -f "cmd/auth/main"
+	@-pkill -f "cmd/gateway/main"
+	@-pkill -f "cmd/product/main"
+	@-pkill -f "cmd/image/main"
+	@echo "All services stopped"
 
 
 .PHONY: generate-mocks

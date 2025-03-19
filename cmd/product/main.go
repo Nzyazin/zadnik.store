@@ -105,6 +105,7 @@ func main() {
 	}
 
 	err = messageBroker.SubscribeToImageDelete(ctx, func(event *broker.ProductEvent) error {
+		logger.Infof("Started image deletion for product %d", event.ProductID)
 		if event.EventType != broker.EventTypeProductDeleted {
 			return nil
 		}

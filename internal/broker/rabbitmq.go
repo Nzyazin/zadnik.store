@@ -349,6 +349,7 @@ func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler fun
 }
 
 func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, handler func(*ProductEvent) error) error {
+	b.logger.Infof("Subscribing to image delete events")
 	queue, err := b.channel.QueueDeclare(
 		"",
 		false,
@@ -392,6 +393,7 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, handler fun
 				return
 			case msg, ok := <-msgs:
 				if !ok {
+					b.logger.Infof("Image delete subscription closed")
 					return
 				}
 				var event ProductEvent
@@ -399,6 +401,8 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, handler fun
 					b.logger.Errorf("Failed to unmarshal image delete event: %v", err)
 					continue
 				}
+
+				b.logger.Infof("Received image delete event for product %d", event.ProductID)
 
 				if err := handler(&event); err != nil {
 					b.logger.Errorf("Failed to handle product delete event: %v", err)
