@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	productExchange = "products"
-	imageExchange = "images"
+	ProductExchange = "products"
+	ImageExchange = "images"
+	ProductImageExchange = "product_images"
 )
 
 type RabbitMQBroker struct {
@@ -61,7 +62,7 @@ func NewRabbitMQBroker(config RabbitMQConfig) (*RabbitMQBroker, error) {
 
 func declareExchanges(channel *amqp.Channel) error {
 	err := channel.ExchangeDeclare(
-		productExchange,
+		ProductExchange,
 		"topic",
 		true,
 		false,
@@ -74,7 +75,7 @@ func declareExchanges(channel *amqp.Channel) error {
 	}
 
 	err = channel.ExchangeDeclare(
-		imageExchange,
+		ImageExchange,
 		"topic",
 		true,
 		false,
@@ -82,14 +83,29 @@ func declareExchanges(channel *amqp.Channel) error {
 		false,
 		nil,
 	)
+
 	if err != nil {
 		return fmt.Errorf("failed to declare image exchange: %w", err)
+	}
+
+	err = channel.ExchangeDeclare(
+		ProductImageExchange,
+		"fanout",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to declare product_image exchange: %w", err)
 	}
 
 	return nil
 }
 
-func (b *RabbitMQBroker) PublishProduct(ctx context.Context, event *ProductEvent) error {
+func (b *RabbitMQBroker) PublishProduct(ctx context.Context, exchange string, event *ProductEvent) error {
 	body, err := json.Marshal(event)
 	if err != nil {
 		b.logger.Errorf("Failed to marshal product event: %v", err)
@@ -97,7 +113,7 @@ func (b *RabbitMQBroker) PublishProduct(ctx context.Context, event *ProductEvent
 	}
 
 	err = b.channel.Publish(
-		productExchange,
+		exchange,
 		string(event.EventType),
 		false,
 		false,
@@ -125,7 +141,7 @@ func (b *RabbitMQBroker) PublishImage(ctx context.Context, event *ImageEvent) er
 	}
 
 	err = b.channel.Publish(
-		imageExchange,
+		ImageExchange,
 		string(event.EventType),
 		false,
 		false,
@@ -152,7 +168,7 @@ func (b *RabbitMQBroker) PublishProductImage(ctx context.Context, event *Product
 	}
 
 	err = b.channel.Publish(
-		imageExchange,
+		ImageExchange,
 		string(event.EventType),
 		false,
 		false,
@@ -187,7 +203,7 @@ func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler 
 	err = b.channel.QueueBind(
 		queue.Name,
 		string(EventTypeImageProcessed),
-		imageExchange,
+		ImageExchange,
 		false,
 		nil,
 	)
@@ -246,7 +262,7 @@ func (b *RabbitMQBroker) SubscribeToProductUpdate(ctx context.Context, handler f
 	err = b.channel.QueueBind(
 		queue.Name,
 		string(EventTypeProductUpdated),
-		productExchange,
+		ProductExchange,
 		false,
 		nil,
 	)
@@ -290,6 +306,7 @@ func (b *RabbitMQBroker) SubscribeToProductUpdate(ctx context.Context, handler f
 }
 
 func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler func(*ImageEvent) error) error {
+	b.logger.Infof("Subscribing to image upload events")
 	queue, err := b.channel.QueueDeclare(
 		"",
 		false,
@@ -305,7 +322,7 @@ func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler fun
 	err = b.channel.QueueBind(
 		queue.Name,
 		string(EventTypeImageUploaded),
-		imageExchange,
+		ImageExchange,
 		false,
 		nil,
 	)
@@ -365,7 +382,7 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, handler fun
 	err = b.channel.QueueBind(
 		queue.Name,
 		string(EventTypeProductDeleted),
-		imageExchange,
+		ImageExchange,
 		false,
 		nil,
 	)

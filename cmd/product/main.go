@@ -15,7 +15,6 @@ import (
 	"github.com/Nzyazin/zadnik.store/internal/product/delivery"
 	"github.com/Nzyazin/zadnik.store/internal/product/repository/postgres"
 	"github.com/Nzyazin/zadnik.store/internal/product/usecase"
-	"fmt"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -104,43 +103,6 @@ func main() {
 		log.Fatalf("Failed to subscribe to product updated events: %v", err)
 	}
 
-	err = messageBroker.SubscribeToImageDelete(ctx, func(event *broker.ProductEvent) error {
-		logger.Infof("Started image deletion for product %d", event.ProductID)
-		if event.EventType != broker.EventTypeProductDeleted {
-			return nil
-		}
-
-		if event.ImageURL == "" {
-			if err := productUseCase.BeginDelete(ctx, event.ProductID); err != nil {
-				return err
-			}
-			if err := productUseCase.CompleteDelete(ctx, event.ProductID); err != nil {
-				return err
-			}
-			return nil
-		}
-		
-		if err := productUseCase.BeginDelete(ctx, event.ProductID); err != nil {
-			return err
-		}
-
-		if event.Error != "" {
-			if err := productUseCase.RollbackDelete(ctx, event.ProductID); err != nil {
-				logger.Infof("Image deletion failed for product: %d: %s", event.ProductID, event.Error)
-				return fmt.Errorf("image deletion failed: %s", err)
-			}			
-		}
-
-		if event.Error == "" {
-			if err := productUseCase.CompleteDelete(ctx, event.ProductID); err != nil {
-				logger.Infof("Image deletion failed for product: %d: %s", event.ProductID, event.Error)
-				return fmt.Errorf("image deletion failed: %s", err)
-			}
-		}
-		
-		logger.Infof("Successfully deleted product %d", event.ProductID)
-		return nil
-	})
 
 	if err != nil {
 		log.Fatalf("Failed to subscribe to product deleted events: %v", err)

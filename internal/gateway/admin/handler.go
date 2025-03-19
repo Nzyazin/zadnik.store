@@ -93,7 +93,7 @@ func (h *Handler) productDelete(c *gin.Context) {
 		ImageURL: imageURL,
 	}
 
-	if err := h.messageBroker.PublishProduct(c.Request.Context(), productEvent); err != nil {
+	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ImageExchange, productEvent); err != nil {
 		h.logger.Errorf("Failed to publish product event: %v", err)
 		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
 			Error: "Did not can delete product",
@@ -171,7 +171,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	}
 
 	if productEvent.Price != decimal.Zero || productEvent.Name != "" || productEvent.Description != "" {
-		if err := h.messageBroker.PublishProduct(c.Request.Context(), productEvent); err != nil {
+		if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageExchange, productEvent); err != nil {
 			h.logger.Errorf("Failed to publish product event: %v", err)
 			h.redirectWithError(c, productIDStr, "Failed to publish product event")
 			return

@@ -43,7 +43,7 @@ type ProductImageEvent struct {
 }
 
 type MessageBroker interface {
-	PublishProduct(ctx context.Context, event *ProductEvent) error
+	PublishProduct(ctx context.Context, exchange string, event *ProductEvent) error
 	SubscribeToProductUpdate(ctx context.Context, handler func(*ProductEvent) error) error
 	PublishImage(ctx context.Context, event *ImageEvent) error
 	PublishProductImage(ctx context.Context, event *ProductImageEvent) error
