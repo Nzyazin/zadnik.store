@@ -70,21 +70,21 @@ func (a *App) handleImageDelete(event *broker.ProductEvent) error {
 		a.logger.Errorf("Failed to delete image for product %d: %v", event.ProductID, err)
 
 		failEvent := &broker.ProductEvent{
-			EventType: broker.EventTypeProductDeleted,
+			EventType: broker.EventTypeImageDeleted,
 			ProductID: event.ProductID,
 			Error: err.Error(),
 		}
-		a.messageBroker.PublishProduct(ctx, failEvent)
+		a.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, failEvent)
 		return err
 	}
 
 	successEvent := &broker.ProductEvent{
-		EventType: broker.EventTypeProductDeleted,
+		EventType: broker.EventTypeImageDeleted,
 		ProductID: event.ProductID,
 		Error: "",
 	}
 
-	return a.messageBroker.PublishProduct(ctx, successEvent)
+	return a.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, successEvent)
 }
 
 func (a *App) Run(ctx context.Context) error {

@@ -13,7 +13,7 @@ import (
 const (
 	ProductExchange = "products"
 	ImageExchange = "images"
-	ProductImageExchange = "product_images"
+	ProductImageExchange = "products_images"
 )
 
 type RabbitMQBroker struct {
