@@ -74,7 +74,7 @@ func (a *App) handleImageDelete(event *broker.ProductEvent) error {
 			ProductID: event.ProductID,
 			Error: err.Error(),
 		}
-		a.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, failEvent)
+		a.messageBroker.PublishProduct(ctx, broker.ImageExchange, failEvent)
 		return err
 	}
 
@@ -84,7 +84,7 @@ func (a *App) handleImageDelete(event *broker.ProductEvent) error {
 		Error: "",
 	}
 
-	return a.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, successEvent)
+	return a.messageBroker.PublishProduct(ctx, broker.ImageExchange, successEvent)
 }
 
 func (a *App) Run(ctx context.Context) error {
@@ -92,7 +92,7 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to subscribe to image upload: %w", err)
 	}
 
-	if err := a.messageBroker.SubscribeToImageDelete(ctx, a.handleImageDelete); err != nil {
+	if err := a.messageBroker.SubscribeToImageDelete(ctx, broker.ProductImageExchange,  string(broker.EventTypeProductDeleted), a.handleImageDelete); err != nil {
 		return fmt.Errorf("failed to subscribe to image delete: %w", err)
 	}
 

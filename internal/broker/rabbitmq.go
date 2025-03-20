@@ -365,7 +365,7 @@ func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler fun
 	return nil
 }
 
-func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, handler func(*ProductEvent) error) error {
+func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, exchange, eventType string, handler func(*ProductEvent) error) error {
 	b.logger.Infof("Subscribing to image delete events")
 	queue, err := b.channel.QueueDeclare(
 		"",
@@ -381,8 +381,8 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, handler fun
 
 	err = b.channel.QueueBind(
 		queue.Name,
-		string(EventTypeProductDeleted),
-		ImageExchange,
+		string(eventType),
+		exchange,
 		false,
 		nil,
 	)
@@ -420,6 +420,72 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, handler fun
 				}
 
 				b.logger.Infof("Received image delete event for product %d", event.ProductID)
+
+				if err := handler(&event); err != nil {
+					b.logger.Errorf("Failed to handle product delete event: %v", err)
+				}
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, handler func(*ProductEvent) error) error {
+	b.logger.Infof("Subscribing to product delete events")
+	queue, err := b.channel.QueueDeclare(
+		"",
+		false,
+		true,
+		true,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+
+	err = b.channel.QueueBind(
+		queue.Name,
+		string(EventTypeProductDeleted),
+		ProductImageExchange,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to bind queue: %w", err)
+	}
+
+	msgs, err := b.channel.Consume(
+		queue.Name,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to start consuming messages: %w", err)
+	}
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg, ok := <-msgs:
+				if !ok {
+					b.logger.Infof("Image delete subscription closed")
+					return
+				}
+				var event ProductEvent
+				if err := json.Unmarshal(msg.Body, &event); err != nil {
+					b.logger.Errorf("Failed to unmarshal image delete event: %v", err)
+					continue
+				}
+
+				b.logger.Infof("Received product delete event for product %d", event.ProductID)
 
 				if err := handler(&event); err != nil {
 					b.logger.Errorf("Failed to handle product delete event: %v", err)

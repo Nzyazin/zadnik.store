@@ -1,10 +1,11 @@
 package gateway
 
 import (
+	"context"
 	"fmt"
 	"html/template"
-	"context"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -12,10 +13,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
+	"github.com/Nzyazin/zadnik.store/internal/broker"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/middleware"
-	"github.com/Nzyazin/zadnik.store/internal/broker"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 )
 
@@ -45,6 +46,16 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	s.router.Use(gin.Logger())
 	s.router.Use(gin.Recovery())
 	s.router.Use(middleware.PrometheusMiddleware())
+
+	s.router.Use(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if strings.HasPrefix(path, "/storage/images") || strings.HasPrefix(path, "/static"){
+			c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+			c.Header("Pragma", "no-cache")
+			c.Header("Expires", "0")
+		}
+		c.Next()
+	})
 
 	// Static files
 	s.router.Static("/static", "./bin/static")
