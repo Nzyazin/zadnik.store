@@ -4,9 +4,6 @@
 <div class="product-edit">
     <div class="product-edit__header">
         <h1 class="product-edit__page-title">{{.Title}}</h1>
-        <a href="/admin/products" class="btn product-edit__btn-back">
-            <span class="text">Вернуться к списку</span>
-        </a>
     </div>
     {{if .Error}}
         <div class="alert alert-danger">{{.Error}}</div>
