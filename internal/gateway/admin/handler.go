@@ -93,6 +93,18 @@ func (h *Handler) productDelete(c *gin.Context) {
 		ImageURL: imageURL,
 	}
 
+	done := make(chan error, 1)
+	if err := h.messageBroker.SubscribeToImageDelete(c.Request.Context(), broker.ProductImageExchange,  string(broker.EventTypeProductDeleteCompleted), func(pe *broker.ProductEvent) error {
+		h.logger.Infof("Received delete completed event for product %d", productIDint)
+		if pe.ProductID == int32(productIDint) {
+			done <- nil
+		}
+		return nil
+	}); err != nil {
+		h.logger.Errorf("Failed to subscribe to image delete: %v", err)
+		return
+	}
+
 	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageExchange, productEvent); err != nil {
 		h.logger.Errorf("Failed to publish product event: %v", err)
 		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
@@ -103,8 +115,19 @@ func (h *Handler) productDelete(c *gin.Context) {
 
 	h.logger.Infof("Successfully published delete event for product %d", productIDint)
 
-	// После успешного удаления редиректим на список продуктов
-	c.Redirect(http.StatusFound, "/admin/products")
+	select {
+	case <-done:
+		c.Redirect(http.StatusFound, "/admin/products")
+	case <-time.After(10 * time.Second):
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "Did not can delete product",
+		})
+	case <-c.Request.Context().Done():
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "Request cancelled",
+		})
+	}
+
 }
 
 func (h *Handler) redirectWithError(c *gin.Context, productID, message string) {

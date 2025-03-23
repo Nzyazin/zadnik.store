@@ -143,6 +143,14 @@ func main() {
 		if err := productUseCase.CompleteDelete(ctx, event.ProductID); err != nil {
 			return fmt.Errorf("failed to complete delete product: %d: %w", event.ProductID, err)
 		}
+
+		completedEvent := &broker.ProductEvent{
+			EventType: broker.EventTypeProductDeleteCompleted,
+			ProductID: event.ProductID,
+		}
+		if err := messageBroker.PublishProduct(ctx, broker.ProductImageExchange, completedEvent); err != nil {
+			logger.Errorf("Failed to publish delete completed event: %v", err)
+		}
 		logger.Infof("Successfully deleted product %d", event.ProductID)
 		return nil
 	})
