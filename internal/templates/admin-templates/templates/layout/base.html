@@ -8,20 +8,20 @@
 </head>
 <body>
     {{if not .HideHeader}}
-    <header class="header">
-        <div class="header__cont cont">
-            <nav class="header__nav">
-                <a class="header__nav-link{{if eq .View "products-index"}} active{{end}}" href="/admin/products">
-                    <i class="icon-box"></i>
-                    <span>Товары</span>
-                </a>
-                <a class="header__nav-link" href="/admin/logout">
-                    <i class="icon-box"></i>
-                    <span>Выход</span>
-                </a>
-            </nav>
-        </div>
-    </header>
+        <header class="header">
+            <div class="header__cont cont">
+                <nav class="header__nav">
+                    <a class="header__nav-link{{if eq .View "products-index"}} active{{end}}" href="/admin/products">
+                        <i class="icon-box"></i>
+                        <span>Товары</span>
+                    </a>
+                    <a class="header__nav-link" href="/admin/logout">
+                        <i class="icon-box"></i>
+                        <span>Выход</span>
+                    </a>
+                </nav>
+            </div>
+        </header>
     {{end}}
 
     <main class="content">
