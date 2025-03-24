@@ -1,9 +1,9 @@
-.product-edit
+.product-form
   padding: 20px
   @include media(1240)
     padding: 0 10px
 
-.product-edit__header
+.product-form__header
   display: flex
   align-items: center
   justify-content: space-between
@@ -16,7 +16,7 @@
     flex-direction: column
     align-items: stretch
 
-.product-edit__page-title
+.product-form__page-title
   margin: 0
   font-size: 24px
   font-weight: 500
@@ -26,7 +26,7 @@
   @include media(520px)
     text-align: center
 
-.product-edit__btn-back
+.product-form__btn-back
   display: inline-flex
   align-items: center
   gap: 8px
@@ -41,7 +41,7 @@
   &:hover
     background: darken($gray-light, 5%)
 
-.product-edit__form
+.product-form__form
   background: $white
   border-radius: 10px
   box-shadow: 0 2px 8px rgba($black, 0.1)
@@ -50,15 +50,15 @@
   @include media(1240)
     padding: 15px
 
-.product-edit__form-inner
+.product-form__form-inner
   max-width: 600px
 
-.product-edit__form-group
+.product-form__form-group
   margin-bottom: 20px
   @include media(1240)
     margin-bottom: 15px
 
-.product-edit__label
+.product-form__label
   display: block
   margin-bottom: 8px
   font-weight: 500
@@ -66,7 +66,7 @@
     margin-bottom: 6px
     font-size: 14px
 
-.product-edit__input
+.product-form__input
   width: 100%
   padding: 8px 12px
   border: 1px solid $gray-light
@@ -80,23 +80,23 @@
     border-color: $blue
     outline: none
 
-.product-edit__picture
+.product-form__picture
   display: block
   width: 276px
   margin-top: 12px
   @include media(1240)
     width: 120px
 
-.product-edit__preview
+.product-form__preview
   margin-top: 10px
   border-radius: 6px
 
-.product-edit__form-actions
+.product-form__form-actions
   margin-top: 30px
   @include media(1240)
     margin-top: 20px
 
-.product-edit__btn-save
+.product-form__btn-save
   display: inline-flex
   align-items: center
   gap: 8px

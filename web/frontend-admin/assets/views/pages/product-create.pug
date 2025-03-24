@@ -1,11 +1,12 @@
 extends ../components/_layout/layout
 
 block variables
-  - const title = 'Редактирование товара'
+  - const title = 'Добавление товара'
 
 block head
   +title(title)
   +description('')
 
 block body
-  include ../components/products/product-edit
+  include ../components/products/product-form
+  +product-form('create', error)
