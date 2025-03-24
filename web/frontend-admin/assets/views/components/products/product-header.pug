@@ -1,0 +1,12 @@
+.product-header
+  .product-header__header
+    h1.product-header__page-title= title
+    a.btn.product-header__btn-back(href="#") 
+      span.text Вернуться к списку
+
+  if error
+    .product-header__header
+      h1.product-header__page-title= title
+      a.btn.product-header__btn-back(href="#") 
+        span.text Вернуться к списку
+      .alert.alert-danger= error

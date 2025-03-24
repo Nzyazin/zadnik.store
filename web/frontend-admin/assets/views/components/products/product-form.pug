@@ -5,31 +5,18 @@
       description: 'Надежная клавиатура для работы и разработки',
       image: '/images/products/keyboard.jpg'
     }
-    const error = null
 
-mixin product-form(action, error)
-  .product-form
-    .product-form__header
-      h1.product-form__page-title= title
-      a.btn.product-form__btn-back(href="#") 
-        span.text Вернуться к списку
-  
-    if error
-      .product-form__header
-        h1.product-form__page-title= title
-        a.btn.product-form__btn-back(href="#") 
-          span
-        .alert.alert-danger= error
-    
+mixin product-form()
+  .product-form    
     .product-form__form
       form.product-form__form-inner(method="POST" enctype="multipart/form-data")
         .product-form__form-group
           label.product-form__label Название
-          input.product-form__input(type="text" name="name" value=product.name)
+          input.product-form__input(type="text" name="name" value=product.name required)
         
         .product-form__form-group
           label.product-form__label Цена
-          input.product-form__input(type="number" name="price" value=product.price)
+          input.product-form__input(type="number" name="price" value=product.price required)
         
         .product-form__form-group
           label.product-form__label Описание

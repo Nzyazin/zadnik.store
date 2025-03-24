@@ -89,7 +89,9 @@ func (t *Templates) parseTemplates() error {
 			Funcs(t.funcs).
 			ParseFS(files, 
 				"templates/layout/base.html", 
-				"templates/pages/product-edit.html"),
+				"templates/pages/product-edit.html",
+				"templates/components/product-form.html",
+			),
 	)
 
 	return nil
