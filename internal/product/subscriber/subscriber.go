@@ -1,0 +1,168 @@
+package subscriber
+
+import (
+	"context"
+	"fmt"
+	"errors"
+
+	"github.com/Nzyazin/zadnik.store/internal/broker"
+	"github.com/Nzyazin/zadnik.store/internal/common"
+	"github.com/Nzyazin/zadnik.store/internal/product/usecase"
+)
+
+type Subscriber struct {
+	useCase       usecase.ProductUseCase
+	messageBroker broker.MessageBroker
+	logger        common.Logger
+}
+
+type deleteResult struct {
+	productID int64
+	err       error
+}
+
+func NewSubscriber(useCase usecase.ProductUseCase, messageBroker broker.MessageBroker, logger common.Logger) *Subscriber {
+	return &Subscriber{
+		useCase:       useCase,
+		messageBroker: messageBroker,
+		logger:        logger,
+	}
+}
+
+func (s *Subscriber) Subscribe(ctx context.Context) error {
+	chImageProduct := make(chan deleteResult, 1)
+
+	if err := s.subscribeToImageProcessed(ctx); err != nil {
+		return err
+	}
+	if err := s.subscribeToProductUpdate(ctx); err != nil {
+		return err
+	}
+	if err := s.subscribeToProductDelete(ctx, chImageProduct); err != nil {
+		return err
+	}
+	if err := s.subscribeToImageDelete(ctx, chImageProduct); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Subscriber) subscribeToImageProcessed(ctx context.Context) error {
+	return s.messageBroker.SubscribeToImageProcessed(ctx, func(event *broker.ProductImageEvent) error {
+		s.logger.Infof("Received image processed event for product %d with URL %s", event.ProductID, event.ImageURL)
+
+		if err := s.useCase.UpdateProductImage(ctx, event.ProductID, event.ImageURL); err != nil {
+			s.logger.Errorf("Failed to update product image: %v", err)
+			return err
+		}
+
+		s.logger.Infof("Successfully updated image URL for product %d", event.ProductID)
+		return nil
+	})
+}
+
+func (s *Subscriber) subscribeToProductUpdate(ctx context.Context) error {
+	return s.messageBroker.SubscribeToProductUpdate(ctx, func(event *broker.ProductEvent) error {
+		s.logger.Infof("Received product update event for product %d", event.ProductID)
+
+		product, err := s.useCase.GetByID(ctx, event.ProductID)
+		if err != nil {
+			s.logger.Errorf("Failed to get product: %v", err)
+			return err
+		}
+
+		if event.Name != "" {
+			product.Name = event.Name
+		}
+		if !event.Price.IsZero() {
+			product.Price = event.Price
+		}
+		if event.Description != "" {
+			product.Description = event.Description
+		}
+
+		_, err = s.useCase.Update(ctx, product)
+		if err != nil {
+			s.logger.Errorf("Failed to update product: %v", err)
+			return err
+		}
+
+		s.logger.Infof("Successfully updated product %d", event.ProductID)
+		return nil
+	})
+}
+
+func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduct chan deleteResult) error {
+	return s.messageBroker.SubscribeToProductDelete(ctx, func(event *broker.ProductEvent) error {
+		s.logger.Infof("Started product deletion for product %d", event.ProductID)
+		if event.EventType != broker.EventTypeProductDeleted {
+			return nil
+		}
+
+		if event.ImageURL == "" {
+			if err := s.useCase.BeginDelete(ctx, event.ProductID); err != nil {
+				return fmt.Errorf("failed to begin delete product: %d: %w", event.ProductID, err)
+			}
+			if err := s.useCase.CompleteDelete(ctx, event.ProductID); err != nil {
+				return fmt.Errorf("failed to complete delete product: %d: %w", event.ProductID, err)
+			}
+			s.logger.Infof("Successfully deleted product %d without image", event.ProductID)
+			return nil
+		}
+
+		if err := s.useCase.BeginDelete(ctx, event.ProductID); err != nil {
+			return fmt.Errorf("failed to begin delete product: %d: %w", event.ProductID, err)
+		}
+
+		result := <-chImageProduct
+		if result.err != nil {
+			if err := s.useCase.RollbackDelete(ctx, event.ProductID); err != nil {
+				s.logger.Errorf("Failed to rollback delete product: %d: %v", event.ProductID, err)
+			}
+			return fmt.Errorf("failed to delete image for product %d: %w", event.ProductID, result.err)
+		}
+
+		if err := s.useCase.CompleteDelete(ctx, event.ProductID); err != nil {
+			return fmt.Errorf("failed to complete delete product: %d: %w", event.ProductID, err)
+		}
+
+		completedEvent := &broker.ProductEvent{
+			EventType: broker.EventTypeProductDeleteCompleted,
+			ProductID: event.ProductID,
+		}
+		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, completedEvent); err != nil {
+			s.logger.Errorf("Failed to publish delete completed event: %v", err)
+		}
+		s.logger.Infof("Successfully deleted product %d", event.ProductID)
+		return nil
+	})
+}
+
+func (s *Subscriber) subscribeToImageDelete(ctx context.Context, chImageProduct chan deleteResult) error {
+	return s.messageBroker.SubscribeToImageDelete(ctx, broker.ImageExchange, string(broker.EventTypeImageDeleted), func(event *broker.ProductEvent) error {
+		s.logger.Infof("Started subscribe for image deletion for product %d", event.ProductID)
+
+		if event.EventType != broker.EventTypeImageDeleted {
+			return nil
+		}
+
+		var deleteErr error
+		if event.Error != "" {
+			deleteErr = errors.New(event.Error)
+		}
+		chImageProduct <- deleteResult{
+			productID: int64(event.ProductID),
+			err: deleteErr,
+		}
+
+		if deleteErr == nil {
+			s.logger.Infof("Successfully deleted image for product %d", event.ProductID)
+		} else {
+			s.logger.Errorf("Failed to delete image for product %d: %v", event.ProductID, deleteErr)
+		}
+		
+		return nil
+	})
+}
+
