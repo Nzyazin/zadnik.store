@@ -94,7 +94,7 @@ func (s *Subscriber) subscribeToProductUpdate(ctx context.Context) error {
 }
 
 func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduct chan deleteResult) error {
-	return s.messageBroker.SubscribeToProductDelete(ctx, func(event *broker.ProductEvent) error {
+	return s.messageBroker.SubscribeToProductDelete(ctx, broker.ProductImageExchange, broker.EventTypeProductDeleted, func(event *broker.ProductEvent) error {
 		s.logger.Infof("Started product deletion for product %d", event.ProductID)
 		if event.EventType != broker.EventTypeProductDeleted {
 			return nil
@@ -140,7 +140,7 @@ func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduc
 }
 
 func (s *Subscriber) subscribeToImageDelete(ctx context.Context, chImageProduct chan deleteResult) error {
-	return s.messageBroker.SubscribeToImageDelete(ctx, broker.ImageExchange, string(broker.EventTypeImageDeleted), func(event *broker.ProductEvent) error {
+	return s.messageBroker.SubscribeToImageDelete(ctx, broker.ImageExchange, broker.EventTypeImageDeleted, func(event *broker.ProductEvent) error {
 		s.logger.Infof("Started subscribe for image deletion for product %d", event.ProductID)
 
 		if event.EventType != broker.EventTypeImageDeleted {

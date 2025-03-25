@@ -64,6 +64,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 			authorized.GET("/products/:id/edit", h.productEdit)
 			authorized.POST("/products/:id/edit", h.productUpdate)
 			authorized.POST("/products/:id/delete", h.productDelete)
+			authorized.POST("/products/create", h.productCreate)
 		}
 	}
 }
@@ -94,7 +95,7 @@ func (h *Handler) productDelete(c *gin.Context) {
 	}
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToImageDelete(c.Request.Context(), broker.ProductImageExchange,  string(broker.EventTypeProductDeleteCompleted), func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeTo(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received delete completed event for product %d", productIDint)
 		if pe.ProductID == int32(productIDint) {
 			done <- nil
@@ -152,6 +153,53 @@ func (h *Handler) validateProductID(c *gin.Context) (int64, error) {
 	return strconv.ParseInt(productID, 10, 64)
 }
 
+func (h *Handler) productCreate(c *gin.Context) {
+	if !h.checkAuth(c) {
+		return
+	}
+
+	name := c.PostForm("name")
+	description := c.PostForm("description")
+	priceStr := c.PostForm("price")
+
+	if name == "" || description == "" || priceStr == "" {
+		h.redirectWithError(c, "", "All fields are required")
+		return
+	}
+
+	productEvent := &broker.ProductEvent{
+		EventType: broker.EventTypeProductCreated,
+		Name: name,
+		Description: description,
+	}
+
+	if priceDecimal, err := h.handlePrice(priceStr, priceStr); err != nil {
+		h.redirectWithError(c, "", "Failed to create price")
+		return
+	} else if priceDecimal != decimal.Zero {
+		productEvent.Price = priceDecimal
+	}
+
+	
+
+	done := make(chan error, 1)
+	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
+		h.logger.Infof("Received delete completed event for product %d", productIDint)
+		done <- nil
+		return nil
+	}); err != nil {
+		h.logger.Errorf("Failed to subscribe to image delete: %v", err)
+		return
+	}
+
+	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageExchange, productEvent); err != nil {
+		h.logger.Errorf("Failed to publish product event: %v", err)
+		h.redirectWithError(c, "", "Failed to publish product event")
+		return
+	}
+
+}
+
 func (h *Handler) productUpdate(c *gin.Context) {
 	if !h.checkAuth(c) {
 		return
@@ -178,7 +226,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	}
 	productIDStr := strconv.FormatInt(productIDInt, 10)
 
-	if priceDecimal, err := h.handlePriceUpdate(priceStr, originalPrice); err != nil {
+	if priceDecimal, err := h.handlePrice(priceStr, originalPrice); err != nil {
 		h.redirectWithError(c, productIDStr, "Failed to update price")
 		return
 	} else if priceDecimal != decimal.Zero {
@@ -246,7 +294,7 @@ func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
 	return nil
 }
 
-func (h *Handler) handlePriceUpdate(productIDStr, originalPrice string) (decimal.Decimal, error) {
+func (h *Handler) handlePrice(productIDStr, originalPrice string) (decimal.Decimal, error) {
 	if productIDStr == originalPrice {
 		return decimal.Zero, nil
 	}

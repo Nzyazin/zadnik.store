@@ -1,25 +1,25 @@
 package broker
 
 import (
-	"fmt"
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
-	"github.com/streadway/amqp"
 	"github.com/Nzyazin/zadnik.store/internal/common"
+	"github.com/streadway/amqp"
 )
 
 const (
-	ProductExchange = "products"
-	ImageExchange = "images"
+	ProductExchange      = "products"
+	ImageExchange        = "images"
 	ProductImageExchange = "products_images"
 )
 
 type RabbitMQBroker struct {
-	conn *amqp.Connection
+	conn    *amqp.Connection
 	channel *amqp.Channel
-	logger common.Logger
+	logger  common.Logger
 }
 
 type RabbitMQConfig struct {
@@ -44,7 +44,7 @@ func NewRabbitMQBroker(config RabbitMQConfig) (*RabbitMQBroker, error) {
 		logger.Errorf("Failed to create channel: %v", err)
 		return nil, fmt.Errorf("failed to oepn a channel: %w", err)
 	}
-	
+
 	err = declareExchanges(channel)
 	if err != nil {
 		channel.Close()
@@ -54,9 +54,9 @@ func NewRabbitMQBroker(config RabbitMQConfig) (*RabbitMQBroker, error) {
 	}
 
 	return &RabbitMQBroker{
-		conn: conn,
+		conn:    conn,
 		channel: channel,
-		logger: logger,
+		logger:  logger,
 	}, nil
 }
 
@@ -118,12 +118,12 @@ func (b *RabbitMQBroker) PublishProduct(ctx context.Context, exchange string, ev
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
-			Body: body,
+			ContentType:  "application/json",
+			Body:         body,
 			DeliveryMode: amqp.Persistent,
-			Timestamp: time.Now(),
+			Timestamp:    time.Now(),
 		})
-	
+
 	if err != nil {
 		b.logger.Errorf("Failed to publish product event: %v", err)
 		return fmt.Errorf("failed to publish product event: %w", err)
@@ -146,10 +146,10 @@ func (b *RabbitMQBroker) PublishImage(ctx context.Context, event *ImageEvent) er
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
-			Body: body,
+			ContentType:  "application/json",
+			Body:         body,
 			DeliveryMode: amqp.Persistent,
-			Timestamp: time.Now(),
+			Timestamp:    time.Now(),
 		})
 	if err != nil {
 		b.logger.Errorf("Failed to publish image event: %v", err)
@@ -173,10 +173,10 @@ func (b *RabbitMQBroker) PublishProductImage(ctx context.Context, event *Product
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
-			Body: body,
+			ContentType:  "application/json",
+			Body:         body,
 			DeliveryMode: amqp.Persistent,
-			Timestamp: time.Now(),
+			Timestamp:    time.Now(),
 		})
 	if err != nil {
 		b.logger.Errorf("Failted to publish product image event: %v", err)
@@ -199,7 +199,7 @@ func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler 
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
-	
+
 	err = b.channel.QueueBind(
 		queue.Name,
 		string(EventTypeImageProcessed),
@@ -258,7 +258,7 @@ func (b *RabbitMQBroker) SubscribeToProductUpdate(ctx context.Context, handler f
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
-	
+
 	err = b.channel.QueueBind(
 		queue.Name,
 		string(EventTypeProductUpdated),
@@ -318,7 +318,7 @@ func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler fun
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
-	
+
 	err = b.channel.QueueBind(
 		queue.Name,
 		string(EventTypeImageUploaded),
@@ -365,7 +365,7 @@ func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler fun
 	return nil
 }
 
-func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, exchange, eventType string, handler func(*ProductEvent) error) error {
+func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error {
 	b.logger.Infof("Subscribing to image delete events")
 	queue, err := b.channel.QueueDeclare(
 		"",
@@ -431,7 +431,7 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, exchange, e
 	return nil
 }
 
-func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, handler func(*ProductEvent) error) error {
+func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, exchange string, eventType EventType,  handler func(*ProductEvent) error) error {
 	b.logger.Infof("Subscribing to product delete events")
 	queue, err := b.channel.QueueDeclare(
 		"",
@@ -447,8 +447,8 @@ func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, handler f
 
 	err = b.channel.QueueBind(
 		queue.Name,
-		string(EventTypeProductDeleted),
-		ProductImageExchange,
+		string(eventType),
+		exchange,
 		false,
 		nil,
 	)
