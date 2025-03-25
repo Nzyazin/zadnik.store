@@ -39,6 +39,7 @@ type ProductsIndexParams struct {
 type TemplateFunctions struct {
 	StaticWithHash func(string) string
 	Add func(int, int) int
+	Dict func(...interface{}) (map[string]interface{}, error)
 }
 
 // Templates хранит все шаблоны и их функции
@@ -55,6 +56,7 @@ func NewTemplates(tf TemplateFunctions) (*Templates, error) {
 		funcs: template.FuncMap{
 			"add":           tf.Add,
 			"staticWithHash": tf.StaticWithHash,
+			"dict":          tf.Dict,
 		},
 	}
 
@@ -90,6 +92,7 @@ func (t *Templates) parseTemplates() error {
 			ParseFS(files, 
 				"templates/layout/base.html", 
 				"templates/pages/product-edit.html",
+				"templates/components/product-header.html",
 				"templates/components/product-form.html",
 			),
 	)

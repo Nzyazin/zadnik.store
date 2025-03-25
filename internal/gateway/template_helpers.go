@@ -65,4 +65,8 @@ func Dict(values ...interface{}) (map[string]interface{}, error) {
 	}
 
 	return dict, nil
-} 
+}
+
+func Add(a, b int) int {
+	return a + b
+}

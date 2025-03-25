@@ -1,0 +1,10 @@
+{{define "product-header"}}
+    <div class="product-header">
+        <div class="product-header__header">
+            <h1 class="product-header__page-title">{{.Title}}</h1>
+        </div>
+        {{if .Error}}
+            <div class="alert alert-danger">{{.Error}}</div>
+        {{end}}
+    </div>
+{{end}}

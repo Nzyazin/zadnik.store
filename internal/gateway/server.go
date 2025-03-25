@@ -3,7 +3,6 @@ package gateway
 import (
 	"context"
 	"fmt"
-	"html/template"
 	"net/http"
 	"strings"
 
@@ -62,11 +61,6 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	s.router.Static("/storage/images", "./storage/images")
 	s.router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	// Добавляем функции в шаблоны
-	s.router.SetFuncMap(template.FuncMap{
-		"staticWithHash": StaticWithHash,
-	})
-
 	messageBroker, err := broker.NewRabbitMQBroker(
 		broker.RabbitMQConfig{
 			URL: cfg.RabbitMQ.URL,
@@ -91,9 +85,8 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	
 	templates, err := admin_templates.NewTemplates(admin_templates.TemplateFunctions{
 		StaticWithHash: StaticWithHash,
-		Add: func(a, b int) int {
-			return a + b
-		},
+		Add: Add,
+		Dict: Dict,
 	})
 	if err != nil {
 		return nil, err
