@@ -62,6 +62,10 @@ func (s *Subscriber) subscribeToImageProcessed(ctx context.Context) error {
 	})
 }
 
+func (s *Subscriber) subscribeToProductCreated(ctx context.Context) error {
+	return s.messageBroker.Su
+}
+
 func (s *Subscriber) subscribeToProductUpdate(ctx context.Context) error {
 	return s.messageBroker.SubscribeToProductUpdate(ctx, func(event *broker.ProductEvent) error {
 		s.logger.Infof("Received product update event for product %d", event.ProductID)

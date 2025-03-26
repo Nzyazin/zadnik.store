@@ -16,6 +16,8 @@ const (
 	EventTypeImageProcessed   EventType = "image.processed"
 	EventTypeImageDeleted EventType = "image.deleted"
 	EventTypeProductAdded EventType = "product.added"
+	EventTypeProductCreatedCompleted EventType = "product.created.completed"
+	EventTypeProductDeleteCompleted EventType = "product.deleted.completed"
 )
 
 type Event interface {
@@ -32,10 +34,17 @@ type ProductEvent struct {
 	Error string `json:"error,omitempty"`
 }
 
+func (e *ProductEvent) Type() EventType {
+	return e.EventType
+}
+
 type ImageEvent struct {
 	EventType EventType `json:"event_type"`
 	ProductID int32    `json:"product_id"`
 	ImageData []byte    `json:"image_data"`
+}
+func (e *ImageEvent) Type() EventType {
+	return e.EventType
 }
 
 type ProductImageEvent struct {
@@ -44,11 +53,15 @@ type ProductImageEvent struct {
 	ImageURL string    `json:"image_url"`
 }
 
+func (e *ProductImageEvent) Type() EventType {
+	return e.EventType
+}
+
 type MessageBroker interface {
 	PublishProduct(ctx context.Context, exchange string, event *ProductEvent) error
-	SubscribeToProductUpdate(ctx context.Context, handler func(*ProductEvent) error) error
-	PublishImage(ctx context.Context, event *ImageEvent) error
+	Publish(ctx context.Context, exchange string, event *ImageEvent) error
 	PublishProductImage(ctx context.Context, event *ProductImageEvent) error
+	SubscribeToProductUpdate(ctx context.Context, handler func(*ProductEvent) error) error
 	SubscribeToImageProcessed(ctx context.Context, handler func(*ProductImageEvent) error) error
 	SubscribeToImageUpload(ctx context.Context, handler func(*ImageEvent) error) error
 	SubscribeToImageDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error

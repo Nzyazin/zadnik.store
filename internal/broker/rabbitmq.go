@@ -133,15 +133,15 @@ func (b *RabbitMQBroker) PublishProduct(ctx context.Context, exchange string, ev
 	return nil
 }
 
-func (b *RabbitMQBroker) PublishImage(ctx context.Context, event *ImageEvent) error {
+func (b *RabbitMQBroker) Publish(ctx context.Context, exchange string, event *ImageEvent) error {
 	body, err := json.Marshal(event)
 	if err != nil {
-		b.logger.Errorf("Failed to marshal image event: %v", err)
-		return fmt.Errorf("failed to marshal image event: %w", err)
+		b.logger.Errorf("Failed to marshal event: %v", err)
+		return fmt.Errorf("failed to marshal event: %w", err)
 	}
 
 	err = b.channel.Publish(
-		ImageExchange,
+		exchange,
 		string(event.EventType),
 		false,
 		false,
@@ -152,11 +152,11 @@ func (b *RabbitMQBroker) PublishImage(ctx context.Context, event *ImageEvent) er
 			Timestamp:    time.Now(),
 		})
 	if err != nil {
-		b.logger.Errorf("Failed to publish image event: %v", err)
-		return fmt.Errorf("failted to publish image event: %w", err)
+		b.logger.Errorf("Failed to publish event: %v", err)
+		return fmt.Errorf("failted to publish event: %w", err)
 	}
 
-	b.logger.Infof("Published image event: %s", event.EventType)
+	b.logger.Infof("Published event: %s", event.EventType)
 	return nil
 }
 
@@ -433,6 +433,72 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, exchange st
 
 func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, exchange string, eventType EventType,  handler func(*ProductEvent) error) error {
 	b.logger.Infof("Subscribing to product delete events")
+	queue, err := b.channel.QueueDeclare(
+		"",
+		false,
+		true,
+		true,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+
+	err = b.channel.QueueBind(
+		queue.Name,
+		string(eventType),
+		exchange,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to bind queue: %w", err)
+	}
+
+	msgs, err := b.channel.Consume(
+		queue.Name,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to start consuming messages: %w", err)
+	}
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg, ok := <-msgs:
+				if !ok {
+					b.logger.Infof("Image delete subscription closed")
+					return
+				}
+				var event ProductEvent
+				if err := json.Unmarshal(msg.Body, &event); err != nil {
+					b.logger.Errorf("Failed to unmarshal image delete event: %v", err)
+					continue
+				}
+
+				b.logger.Infof("Received product delete event for product %d", event.ProductID)
+
+				if err := handler(&event); err != nil {
+					b.logger.Errorf("Failed to handle product delete event: %v", err)
+				}
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (b *RabbitMQBroker) SubscribeToProductCreated(ctx context.Context, exchange string, eventType EventType,  handler func(*ProductEvent) error) error {
+	b.logger.Infof("Subscribing to product created events")
 	queue, err := b.channel.QueueDeclare(
 		"",
 		false,

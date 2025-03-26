@@ -299,7 +299,7 @@ func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
 		ImageData: imageBytes,
 	}
 
-	if err := h.messageBroker.PublishImage(c.Request.Context(), imageEvent); err != nil {
+	if err := h.messageBroker.Publish(c.Request.Context(), broker.ImageExchange, imageEvent); err != nil {
 		h.logger.Errorf("Failed to publish image event: %v", err)
 		return fmt.Errorf("failed to publish image event: %v", err)
 	}
