@@ -95,7 +95,7 @@ func (h *Handler) productDelete(c *gin.Context) {
 	}
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeTo(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received delete completed event for product %d", productIDint)
 		if pe.ProductID == int32(productIDint) {
 			done <- nil
@@ -183,8 +183,8 @@ func (h *Handler) productCreate(c *gin.Context) {
 	
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
-		h.logger.Infof("Received delete completed event for product %d", productIDint)
+	if err := h.messageBroker.SubscribeToProductAdded(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductAdded, func(pe *broker.ProductEvent) error {
+		h.logger.Infof("Received add completed event for product %d", pe.ProductID)
 		done <- nil
 		return nil
 	}); err != nil {
@@ -193,11 +193,25 @@ func (h *Handler) productCreate(c *gin.Context) {
 	}
 
 	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageExchange, productEvent); err != nil {
-		h.logger.Errorf("Failed to publish product event: %v", err)
-		h.redirectWithError(c, "", "Failed to publish product event")
+		h.logger.Errorf("Failed to publish product event for creating product: %v", err)
+		h.redirectWithError(c, "", "Failed to publish product event for creating product")
 		return
 	}
 
+	h.logger.Infof("Successfully published create event for product")
+
+	select {
+	case <-done:
+		c.Redirect(http.StatusFound, "/admin/products")
+	case <-time.After(9 * time.Second):
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "Did not can create product",
+		})
+	case <-c.Request.Context().Done():
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "Request cancelled",
+		})
+	}
 }
 
 func (h *Handler) productUpdate(c *gin.Context) {

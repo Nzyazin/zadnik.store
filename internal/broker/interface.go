@@ -9,13 +9,13 @@ import (
 type EventType string
 
 const (
-	EventTypeProductCreated   EventType = "product.created"
+	EventTypeProductCreated   EventType = "product.creating"
 	EventTypeProductUpdated   EventType = "product.updated"
 	EventTypeProductDeleted   EventType = "product.deleted"
 	EventTypeImageUploaded    EventType = "image.uploaded"
 	EventTypeImageProcessed   EventType = "image.processed"
 	EventTypeImageDeleted EventType = "image.deleted"
-	EventTypeProductDeleteCompleted EventType = "product.delete.completed"
+	EventTypeProductAdded EventType = "product.added"
 )
 
 type Event interface {
