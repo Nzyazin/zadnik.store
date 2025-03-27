@@ -105,16 +105,16 @@ func declareExchanges(channel *amqp.Channel) error {
 	return nil
 }
 
-func (b *RabbitMQBroker) PublishProduct(ctx context.Context, exchange string, event *ProductEvent) error {
+func publish(b *RabbitMQBroker, ctx context.Context, exchange string, event Event) error {
 	body, err := json.Marshal(event)
 	if err != nil {
-		b.logger.Errorf("Failed to marshal product event: %v", err)
-		return fmt.Errorf("failed to marshal product event: %w", err)
+		b.logger.Errorf("Failed to marshal event %s: %v", event.Type(), err)
+		return fmt.Errorf("failed to marshal event %s: %w", event.Type(), err)
 	}
 
 	err = b.channel.Publish(
 		exchange,
-		string(event.EventType),
+		string(event.Type()),
 		false,
 		false,
 		amqp.Publishing{
@@ -123,68 +123,87 @@ func (b *RabbitMQBroker) PublishProduct(ctx context.Context, exchange string, ev
 			DeliveryMode: amqp.Persistent,
 			Timestamp:    time.Now(),
 		})
-
 	if err != nil {
-		b.logger.Errorf("Failed to publish product event: %v", err)
-		return fmt.Errorf("failed to publish product event: %w", err)
+		b.logger.Errorf("Failed to publish event %s: %v", event.Type(), err)
+		return fmt.Errorf("failed to publish event %s: %w", event.Type(), err)
 	}
 
-	b.logger.Infof("Published product event: %v", event.EventType)
+	b.logger.Infof("Published event: %s", event.Type())
 	return nil
 }
 
-func (b *RabbitMQBroker) Publish(ctx context.Context, exchange string, event *ImageEvent) error {
-	body, err := json.Marshal(event)
+func subscribe[T any](b *RabbitMQBroker, ctx context.Context, exchange string, eventType EventType, handler func(*T) error) error {
+	b.logger.Infof("Subscribing to %s events", eventType)
+	queue, err := b.channel.QueueDeclare(
+		"",
+		false,
+		true,
+		true,
+		false,
+		nil,
+	)
 	if err != nil {
-		b.logger.Errorf("Failed to marshal event: %v", err)
-		return fmt.Errorf("failed to marshal event: %w", err)
+		return fmt.Errorf("failed to declare queue: %w", err)
 	}
 
-	err = b.channel.Publish(
+	err = b.channel.QueueBind(
+		queue.Name,
+		string(eventType),
 		exchange,
-		string(event.EventType),
 		false,
-		false,
-		amqp.Publishing{
-			ContentType:  "application/json",
-			Body:         body,
-			DeliveryMode: amqp.Persistent,
-			Timestamp:    time.Now(),
-		})
+		nil,
+	)
 	if err != nil {
-		b.logger.Errorf("Failed to publish event: %v", err)
-		return fmt.Errorf("failted to publish event: %w", err)
+		return fmt.Errorf("failed to bind queue: %w", err)
+	}
+	
+	msgs, err := b.channel.Consume(
+		queue.Name,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to consume queue: %w", err)
 	}
 
-	b.logger.Infof("Published event: %s", event.EventType)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg, ok := <-msgs:
+				if !ok {
+					b.logger.Infof("Subscription to %s closed", eventType)
+					return
+				}
+				var event T
+				if err := json.Unmarshal(msg.Body, &event); err != nil {
+					b.logger.Errorf("Failed to unmarshal %s event: %v", eventType, err)
+					continue
+				}
+				if err := handler(&event); err != nil {
+					b.logger.Errorf("Failed to handle %s event: %v", eventType, err)
+				}
+			}
+		}
+	}()
 	return nil
+}
+
+func (b *RabbitMQBroker) PublishProduct(ctx context.Context, exchange string, event *ProductEvent) error {
+	return publish(b, ctx, exchange, event)
+}
+
+func (b *RabbitMQBroker) PublishImage(ctx context.Context, exchange string, event *ImageEvent) error {
+	return publish(b, ctx, exchange, event)
 }
 
 func (b *RabbitMQBroker) PublishProductImage(ctx context.Context, event *ProductImageEvent) error {
-	body, err := json.Marshal(event)
-	if err != nil {
-		b.logger.Errorf("Failed to marshal product image event: %v", err)
-		return fmt.Errorf("failed to marshal product image event: %w", err)
-	}
-
-	err = b.channel.Publish(
-		ImageExchange,
-		string(event.EventType),
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:  "application/json",
-			Body:         body,
-			DeliveryMode: amqp.Persistent,
-			Timestamp:    time.Now(),
-		})
-	if err != nil {
-		b.logger.Errorf("Failted to publish product image event: %v", err)
-		return fmt.Errorf("failed to publish product image event: %w", err)
-	}
-
-	b.logger.Infof("Published product image event: %v", event.EventType)
-	return nil
+	return publish(b, ctx, ProductImageExchange, event)
 }
 
 func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler func(*ProductImageEvent) error) error {
@@ -431,7 +450,7 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, exchange st
 	return nil
 }
 
-func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, exchange string, eventType EventType,  handler func(*ProductEvent) error) error {
+func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error {
 	b.logger.Infof("Subscribing to product delete events")
 	queue, err := b.channel.QueueDeclare(
 		"",
@@ -497,7 +516,7 @@ func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, exchange 
 	return nil
 }
 
-func (b *RabbitMQBroker) SubscribeToProductCreated(ctx context.Context, exchange string, eventType EventType,  handler func(*ProductEvent) error) error {
+func (b *RabbitMQBroker) SubscribeToProductCreated(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error {
 	b.logger.Infof("Subscribing to product created events")
 	queue, err := b.channel.QueueDeclare(
 		"",

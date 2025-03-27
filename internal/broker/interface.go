@@ -59,7 +59,7 @@ func (e *ProductImageEvent) Type() EventType {
 
 type MessageBroker interface {
 	PublishProduct(ctx context.Context, exchange string, event *ProductEvent) error
-	Publish(ctx context.Context, exchange string, event *ImageEvent) error
+	PublishImage(ctx context.Context, exchange string, event *ImageEvent) error
 	PublishProductImage(ctx context.Context, event *ProductImageEvent) error
 	SubscribeToProductUpdate(ctx context.Context, handler func(*ProductEvent) error) error
 	SubscribeToImageProcessed(ctx context.Context, handler func(*ProductImageEvent) error) error
