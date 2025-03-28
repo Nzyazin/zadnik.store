@@ -152,3 +152,26 @@ func (r *productRepository) RollbackDelete(ctx context.Context, productID int32)
 	}
 	return nil
 }
+
+func (r *productRepository) CreatePending(ctx context.Context, product *domain.Product) error {
+	var productID int32
+
+	query := `
+		INSERT INTO products (name, description, price, status)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id;
+	`
+
+	err := r.db.QueryRowContext(ctx, query,
+		product.Name,
+		product.Description,
+		product.Price,
+		domain.ProductStatusPending,
+	).Scan(&productID)
+
+	if err != nil {
+		return fmt.Errorf("failed to create pending product: %w", err)
+	}
+
+	return nil
+}

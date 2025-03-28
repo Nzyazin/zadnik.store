@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -178,9 +179,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 		return
 	} else if priceDecimal != decimal.Zero {
 		productEvent.Price = priceDecimal
-	}
-
-	
+	}	
 
 	done := make(chan error, 1)
 	if err := h.messageBroker.SubscribeToProductAdded(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductAdded, func(pe *broker.ProductEvent) error {
@@ -271,33 +270,43 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/admin/products")
 }
 
-func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
+func (h *Handler) handleImage(c *gin.Context) (io.ReadCloser, string, int64, error) {
 	file, err := c.FormFile("image")
 	if err == http.ErrMissingFile {
-		return nil
+		return nil, "", 0, nil
 	}
 	if err != nil {
-		return fmt.Errorf("failed to get image: %w", err)
+		return nil, "", 0, fmt.Errorf("failed to get image: %w", err)
 	}
 	if file == nil {
-		return fmt.Errorf("file not found")
+		return nil, "", 0, fmt.Errorf("file not found")
 	}
+
 	imageData, err := file.Open()
 	if err != nil {
-		return fmt.Errorf("failed to open image: %w", err)
+		return nil, "", 0, fmt.Errorf("failed to open image: %w", err)
 	}
-	defer imageData.Close()
+	return imageData, file.Filename, file.Size, nil
+}
 
-	imageBytes, err := io.ReadAll(imageData)
+func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
+	imageReader, _, _, err := h.handleImage(c)
 	if err != nil {
 		return fmt.Errorf("failed to read image: %w", err)
 	}
-
 	imageEvent := &broker.ImageEvent{
 		EventType: broker.EventTypeImageUploaded,
 		ProductID: int32(productIDInt),
-		ImageData: imageBytes,
 	}
+
+	if imageReader != nil {
+		defer imageReader.Close()
+		imageBytes, err := io.ReadAll(imageReader)
+		if err != nil {
+			return fmt.Errorf("failed to read image: %w", err)
+		}
+		imageEvent.ImageData = imageBytes
+	}	
 
 	if err := h.messageBroker.PublishImage(c.Request.Context(), broker.ImageExchange, imageEvent); err != nil {
 		h.logger.Errorf("Failed to publish image event: %v", err)

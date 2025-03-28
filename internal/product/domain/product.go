@@ -12,7 +12,8 @@ type ProductStatus string
 const (
 	ProductStatusActive ProductStatus = "active"
 	ProductStatusDeleting ProductStatus = "deleting"
-	ProductStatusDeleted ProductStatus = "deleted" 
+	ProductStatusDeleted ProductStatus = "deleted"
+	ProductStatusPending ProductStatus = "pending"
 )
 
 type Product struct {
@@ -33,4 +34,5 @@ type ProductRepository interface {
 	BeginDelete(ctx context.Context, productID int32) error
 	CompleteDelete(ctx context.Context, productID int32) error
 	RollbackDelete(ctx context.Context, productID int32) error
+	CreatePending(ctx context.Context, product *Product) error
 }

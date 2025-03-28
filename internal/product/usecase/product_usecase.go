@@ -14,6 +14,7 @@ type ProductUseCase interface {
 	BeginDelete(ctx context.Context, productID int32) error
 	CompleteDelete(ctx context.Context, productID int32) error
 	RollbackDelete(ctx context.Context, productID int32) error
+	CreatePending(ctx context.Context, product *domain.Product) error
 }
 
 type productUseCase struct {
@@ -50,4 +51,8 @@ func (puc *productUseCase) CompleteDelete(ctx context.Context, productID int32) 
 
 func (puc *productUseCase) RollbackDelete(ctx context.Context, productID int32) error {
 	return puc.repo.RollbackDelete(ctx, productID)
+}
+
+func (puc *productUseCase) CreatePending(ctx context.Context, product *domain.Product) error {
+	return puc.repo.CreatePending(ctx, product)
 }

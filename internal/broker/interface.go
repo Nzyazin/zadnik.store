@@ -27,6 +27,7 @@ type Event interface {
 type ProductEvent struct {
 	EventType   EventType `json:"event_type"`
 	ProductID   int32    `json:"product_id"`
+	ImageData   []byte    `json:"image_data"`
 	Name        string    `json:"name"`
 	Price       decimal.Decimal   `json:"price"`
 	Description string    `json:"description"`

@@ -63,7 +63,12 @@ func (s *Subscriber) subscribeToImageProcessed(ctx context.Context) error {
 }
 
 func (s *Subscriber) subscribeToProductCreated(ctx context.Context) error {
-	return s.messageBroker.Su
+	return s.messageBroker.SubscribeToProductCreated(ctx, broker.ProductImageExchange, broker.EventTypeProductCreated, func(event *broker.ProductEvent) error {
+		s.logger.Infof("Received data product event")
+
+		if err := 
+	})
+	//TODO
 }
 
 func (s *Subscriber) subscribeToProductUpdate(ctx context.Context) error {
