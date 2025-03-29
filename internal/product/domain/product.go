@@ -34,5 +34,6 @@ type ProductRepository interface {
 	BeginDelete(ctx context.Context, productID int32) error
 	CompleteDelete(ctx context.Context, productID int32) error
 	RollbackDelete(ctx context.Context, productID int32) error
-	CreatePending(ctx context.Context, product *Product) error
+	Create(ctx context.Context, product *Product) error
+	BeginCreate(ctx context.Context, product *Product) (*Product, error)
 }

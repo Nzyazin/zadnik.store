@@ -174,6 +174,21 @@ func (h *Handler) productCreate(c *gin.Context) {
 		Description: description,
 	}
 
+	imageReader, _, _, err := h.handleImage(c)
+	if err != nil {
+		h.redirectWithError(c, "", "Failed to handle image")
+		return
+	}
+	if imageReader != nil {
+		defer imageReader.Close()
+		imageBytes, err := io.ReadAll(imageReader)
+		if err != nil {
+			h.redirectWithError(c, "", "Failed to read image")
+			return
+		}
+		productEvent.ImageData = imageBytes
+	}	
+
 	if priceDecimal, err := h.handlePrice(priceStr, priceStr); err != nil {
 		h.redirectWithError(c, "", "Failed to create price")
 		return

@@ -21,6 +21,11 @@ type deleteResult struct {
 	err       error
 }
 
+type createResult struct {
+	productID int64
+	err error
+}
+
 func NewSubscriber(useCase usecase.ProductUseCase, messageBroker broker.MessageBroker, logger common.Logger) *Subscriber {
 	return &Subscriber{
 		useCase:       useCase,
@@ -62,13 +67,42 @@ func (s *Subscriber) subscribeToImageProcessed(ctx context.Context) error {
 	})
 }
 
-func (s *Subscriber) subscribeToProductCreated(ctx context.Context) error {
+func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProduct chan createResult) error {
 	return s.messageBroker.SubscribeToProductCreated(ctx, broker.ProductImageExchange, broker.EventTypeProductCreated, func(event *broker.ProductEvent) error {
 		s.logger.Infof("Received data product event")
 
-		if err := 
+		if event.ImageData == nil {
+			if err := s.useCase.CreateFromEvent(ctx, event); err != nil {
+				return fmt.Errorf("failed to begin create product: %d: %w", event.ProductID, err)
+			}
+		}
+		productID,err := s.useCase.BeginCreate(ctx, event)
+		if err != nil {
+			return fmt.Errorf("failed to begin create product: %d: %w", event.ProductID, err)
+		}
+		
+		result := <-chImageProduct
+		if result.err != nil {
+			if err := s.useCase.RollbackCreate(ctx, productID); err != nil {
+				s.logger.Errorf("Failed to rollback create product: %d: %v", event.ProductID, err)
+			}
+			return fmt.Errorf("failed to create image for product %d: %w", event.ProductID, result.err)
+		}
+
+		if err := s.useCase.CompleteCreate(ctx, event.ProductID); err != nil {
+			return fmt.Errorf("failed to complete create product: %d: %w", event.ProductID, err)
+		}
+
+		completedEvent := &broker.ProductEvent{
+			EventType: broker.EventTypeProductCreateCompleted,
+			ProductID: event.ProductID,
+		}
+		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, completedEvent); err != nil {
+			s.logger.Errorf("Failed to publish create completed event: %v", err)
+		}
+		s.logger.Infof("Successfully created product %d", event.ProductID)
+		return nil
 	})
-	//TODO
 }
 
 func (s *Subscriber) subscribeToProductUpdate(ctx context.Context) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Nzyazin/zadnik.store/internal/product/domain"
+	"github.com/Nzyazin/zadnik.store/internal/broker"
 )
 
 type ProductUseCase interface {
@@ -14,7 +15,8 @@ type ProductUseCase interface {
 	BeginDelete(ctx context.Context, productID int32) error
 	CompleteDelete(ctx context.Context, productID int32) error
 	RollbackDelete(ctx context.Context, productID int32) error
-	CreatePending(ctx context.Context, product *domain.Product) error
+	BeginCreate(ctx context.Context, event *broker.ProductEvent) error
+	CreateFromEvent(ctx context.Context, event *broker.ProductEvent) error
 }
 
 type productUseCase struct {
@@ -53,6 +55,28 @@ func (puc *productUseCase) RollbackDelete(ctx context.Context, productID int32) 
 	return puc.repo.RollbackDelete(ctx, productID)
 }
 
-func (puc *productUseCase) CreatePending(ctx context.Context, product *domain.Product) error {
-	return puc.repo.CreatePending(ctx, product)
+func (puc *productUseCase) RollbackCreate(ctx context.Context, productID int32) error {
+	return puc.repo.RollbackCreate(ctx, productID)
+}
+
+func (puc *productUseCase) CreateFromEvent(ctx context.Context, event *broker.ProductEvent) error {
+	product := &domain.Product{
+		ID: event.ProductID,
+		Name: event.Name,
+		Description: event.Description,
+		Price: event.Price,
+		Status: domain.ProductStatusPending,
+	}
+	return puc.repo.Create(ctx, product)
+}
+
+func (puc *productUseCase) BeginCreate(ctx context.Context, event *broker.ProductEvent) (*domain.Product, error) {
+	product := &domain.Product{
+		ID: event.ProductID,
+		Name: event.Name,
+		Description: event.Description,
+		Price: event.Price,
+		Status: domain.ProductStatusPending,
+	}
+	return puc.repo.BeginCreate(ctx, product)
 }

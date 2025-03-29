@@ -153,9 +153,46 @@ func (r *productRepository) RollbackDelete(ctx context.Context, productID int32)
 	return nil
 }
 
-func (r *productRepository) CreatePending(ctx context.Context, product *domain.Product) error {
-	var productID int32
+func (r *productRepository) RollbackCreate(ctx context.Context, productID int32) error {
+	result, err := r.db.ExecContext(ctx, 
+		"UPDATE products SET status = $1 WHERE id = $2 AND status = $3",
+		domain.ProductStatusActive, productID, domain.ProductStatusPending)
+	if err != nil {
+		return fmt.Errorf("failed to rollback status: %w", err)
+	}
 
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get affected rows: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("product %d status was not rolled back", productID)
+	}
+	return nil
+}
+
+func (r *productRepository) Create(ctx context.Context, product *domain.Product) error {
+	query := `
+		INSERT INTO products (name, description, price, status)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id;
+	`
+
+	_, err := r.db.ExecContext(ctx, query,
+		product.Name,
+		product.Description,
+		product.Price,
+		domain.ProductStatusPending,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to create product: %w", err)
+	}
+
+	return nil
+}
+
+func (r *productRepository) BeginCreate(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	query := `
 		INSERT INTO products (name, description, price, status)
 		VALUES ($1, $2, $3, $4)
@@ -167,11 +204,11 @@ func (r *productRepository) CreatePending(ctx context.Context, product *domain.P
 		product.Description,
 		product.Price,
 		domain.ProductStatusPending,
-	).Scan(&productID)
+	).Scan(&product.ID)
 
 	if err != nil {
-		return fmt.Errorf("failed to create pending product: %w", err)
+		return nil, fmt.Errorf("failed to create pending product: %w", err)
 	}
 
-	return nil
+	return product, nil
 }
