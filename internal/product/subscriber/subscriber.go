@@ -16,14 +16,9 @@ type Subscriber struct {
 	logger        common.Logger
 }
 
-type deleteResult struct {
+type result struct {
 	productID int64
 	err       error
-}
-
-type createResult struct {
-	productID int64
-	err error
 }
 
 func NewSubscriber(useCase usecase.ProductUseCase, messageBroker broker.MessageBroker, logger common.Logger) *Subscriber {
@@ -35,7 +30,7 @@ func NewSubscriber(useCase usecase.ProductUseCase, messageBroker broker.MessageB
 }
 
 func (s *Subscriber) Subscribe(ctx context.Context) error {
-	chImageProduct := make(chan deleteResult, 1)
+	chImageProduct := make(chan result, 1)
 
 	if err := s.subscribeToImageProcessed(ctx); err != nil {
 		return err
@@ -47,6 +42,9 @@ func (s *Subscriber) Subscribe(ctx context.Context) error {
 		return err
 	}
 	if err := s.subscribeToImageDelete(ctx, chImageProduct); err != nil {
+		return err
+	}
+	if err := s.subscribeToProductCreated(ctx, chImageProduct); err != nil {
 		return err
 	}
 
@@ -67,7 +65,7 @@ func (s *Subscriber) subscribeToImageProcessed(ctx context.Context) error {
 	})
 }
 
-func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProduct chan createResult) error {
+func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProduct chan result) error {
 	return s.messageBroker.SubscribeToProductCreated(ctx, broker.ProductImageExchange, broker.EventTypeProductCreated, func(event *broker.ProductEvent) error {
 		s.logger.Infof("Received data product event")
 
@@ -76,14 +74,14 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 				return fmt.Errorf("failed to begin create product: %d: %w", event.ProductID, err)
 			}
 		}
-		productID,err := s.useCase.BeginCreate(ctx, event)
+		product,err := s.useCase.BeginCreate(ctx, event)
 		if err != nil {
 			return fmt.Errorf("failed to begin create product: %d: %w", event.ProductID, err)
 		}
 		
 		result := <-chImageProduct
 		if result.err != nil {
-			if err := s.useCase.RollbackCreate(ctx, productID); err != nil {
+			if err := s.useCase.RollbackCreate(ctx, product.ID); err != nil {
 				s.logger.Errorf("Failed to rollback create product: %d: %v", event.ProductID, err)
 			}
 			return fmt.Errorf("failed to create image for product %d: %w", event.ProductID, result.err)
@@ -94,7 +92,7 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 		}
 
 		completedEvent := &broker.ProductEvent{
-			EventType: broker.EventTypeProductCreateCompleted,
+			EventType: broker.EventTypeProductCreatedCompleted,
 			ProductID: event.ProductID,
 		}
 		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, completedEvent); err != nil {
@@ -136,7 +134,7 @@ func (s *Subscriber) subscribeToProductUpdate(ctx context.Context) error {
 	})
 }
 
-func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduct chan deleteResult) error {
+func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduct chan result) error {
 	return s.messageBroker.SubscribeToProductDelete(ctx, broker.ProductImageExchange, broker.EventTypeProductDeleted, func(event *broker.ProductEvent) error {
 		s.logger.Infof("Started product deletion for product %d", event.ProductID)
 		if event.EventType != broker.EventTypeProductDeleted {
@@ -182,7 +180,7 @@ func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduc
 	})
 }
 
-func (s *Subscriber) subscribeToImageDelete(ctx context.Context, chImageProduct chan deleteResult) error {
+func (s *Subscriber) subscribeToImageDelete(ctx context.Context, chImageProduct chan result) error {
 	return s.messageBroker.SubscribeToImageDelete(ctx, broker.ImageExchange, broker.EventTypeImageDeleted, func(event *broker.ProductEvent) error {
 		s.logger.Infof("Started subscribe for image deletion for product %d", event.ProductID)
 
@@ -194,7 +192,7 @@ func (s *Subscriber) subscribeToImageDelete(ctx context.Context, chImageProduct 
 		if event.Error != "" {
 			deleteErr = errors.New(event.Error)
 		}
-		chImageProduct <- deleteResult{
+		chImageProduct <- result{
 			productID: int64(event.ProductID),
 			err: deleteErr,
 		}

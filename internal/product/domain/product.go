@@ -14,6 +14,7 @@ const (
 	ProductStatusDeleting ProductStatus = "deleting"
 	ProductStatusDeleted ProductStatus = "deleted"
 	ProductStatusPending ProductStatus = "pending"
+	ProductStatusCreating ProductStatus = "creating"
 )
 
 type Product struct {
@@ -36,4 +37,6 @@ type ProductRepository interface {
 	RollbackDelete(ctx context.Context, productID int32) error
 	Create(ctx context.Context, product *Product) error
 	BeginCreate(ctx context.Context, product *Product) (*Product, error)
+	RollbackCreate(ctx context.Context, productID int32) error
+	CompleteCreate(ctx context.Context, productID int32) error
 }

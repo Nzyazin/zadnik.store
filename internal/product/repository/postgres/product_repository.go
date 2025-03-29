@@ -155,10 +155,10 @@ func (r *productRepository) RollbackDelete(ctx context.Context, productID int32)
 
 func (r *productRepository) RollbackCreate(ctx context.Context, productID int32) error {
 	result, err := r.db.ExecContext(ctx, 
-		"UPDATE products SET status = $1 WHERE id = $2 AND status = $3",
-		domain.ProductStatusActive, productID, domain.ProductStatusPending)
+		"DELETE FROM products WHERE id = $1",
+		productID)
 	if err != nil {
-		return fmt.Errorf("failed to rollback status: %w", err)
+		return fmt.Errorf("failed to rollback creating product: %d: %w", productID, err)
 	}
 
 	rows, err := result.RowsAffected()
@@ -166,7 +166,7 @@ func (r *productRepository) RollbackCreate(ctx context.Context, productID int32)
 		return fmt.Errorf("failed to get affected rows: %w", err)
 	}
 	if rows == 0 {
-		return fmt.Errorf("product %d status was not rolled back", productID)
+		return fmt.Errorf("product %d was not rolled back", productID)
 	}
 	return nil
 }
@@ -189,6 +189,26 @@ func (r *productRepository) Create(ctx context.Context, product *domain.Product)
 		return fmt.Errorf("failed to create product: %w", err)
 	}
 
+	return nil
+}
+
+func (r *productRepository) CompleteCreate(ctx context.Context, productID int32) error {
+	result, err := r.db.ExecContext(ctx,
+		"UPDATE products SET status = $1 WHERE id = $2 AND status = $3",
+		domain.ProductStatusActive,
+		productID,
+		domain.ProductStatusPending)
+	if  err != nil {
+		return fmt.Errorf("failed to complete creating product: %d: %w", productID, err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get affected rows: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("product %d was not completed", productID)
+	}
 	return nil
 }
 

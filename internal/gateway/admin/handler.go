@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -197,7 +196,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 	}	
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductAdded(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductAdded, func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeToProductCreatedFinished(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductAdded, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received add completed event for product %d", pe.ProductID)
 		done <- nil
 		return nil
