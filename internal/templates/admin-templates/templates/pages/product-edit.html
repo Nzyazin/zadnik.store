@@ -1,8 +1,0 @@
-{{template "base" .}}
-
-{{define "content"}}
-    <div class="wrapper">
-        {{template "product-header" .}}
-        {{template "product-form" dict "Action" (printf "/admin/products/%d/edit" .Product.ID) "IsEdit" true "Product" .Product "ButtonText" "Сохранить"}}
-    </div>
-{{end}}

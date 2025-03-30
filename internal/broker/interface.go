@@ -15,7 +15,7 @@ const (
 	EventTypeImageUploaded    EventType = "image.uploaded"
 	EventTypeImageProcessed   EventType = "image.processed"
 	EventTypeImageDeleted EventType = "image.deleted"
-	EventTypeProductAdded EventType = "product.added"
+	EventTypeProductCreatedFinished EventType = "product.created.finished"
 	EventTypeProductCreatedCompleted EventType = "product.created.completed"
 	EventTypeProductDeleteCompleted EventType = "product.deleted.completed"
 )
@@ -68,5 +68,6 @@ type MessageBroker interface {
 	SubscribeToImageDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	SubscribeToProductDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	SubscribeToProductCreated(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
+	SubscribeToProductCreatedCompleted(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	Close() error
 }

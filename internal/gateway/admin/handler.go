@@ -61,10 +61,11 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 		authorized.Use(h.authMiddleware())
 		{
 			authorized.GET("/products", h.productsIndex)
-			authorized.GET("/products/:id/edit", h.productEdit)
+			authorized.GET("/products/create", h.productCreatePage)
+			authorized.POST("/products/create", h.productCreate)
+			authorized.GET("/products/:id/edit", h.productEditPage)
 			authorized.POST("/products/:id/edit", h.productUpdate)
 			authorized.POST("/products/:id/delete", h.productDelete)
-			authorized.POST("/products/create", h.productCreate)
 		}
 	}
 }
@@ -91,11 +92,11 @@ func (h *Handler) productDelete(c *gin.Context) {
 	productEvent := &broker.ProductEvent{
 		EventType: broker.EventTypeProductDeleted,
 		ProductID: int32(productIDint),
-		ImageURL: imageURL,
+		ImageURL:  imageURL,
 	}
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageExchange, broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received delete completed event for product %d", productIDint)
 		if pe.ProductID == int32(productIDint) {
 			done <- nil
@@ -153,6 +154,23 @@ func (h *Handler) validateProductID(c *gin.Context) (int64, error) {
 	return strconv.ParseInt(productID, 10, 64)
 }
 
+func (h *Handler) productCreatePage(c *gin.Context) {
+	if !h.checkAuth(c) {
+		return
+	}
+
+	if err := h.templates.RenderProductForm(c.Writer, admin_templates.ProductFormPageParams{
+		BaseParams: admin_templates.BaseParams{
+			Title: "Создание товара",
+		},
+		Error: c.Query("error"),
+	}); err != nil {
+		h.logger.Errorf("Failed to render product create page: %v", err)
+		c.String(http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+}
+
 func (h *Handler) productCreate(c *gin.Context) {
 	if !h.checkAuth(c) {
 		return
@@ -168,8 +186,8 @@ func (h *Handler) productCreate(c *gin.Context) {
 	}
 
 	productEvent := &broker.ProductEvent{
-		EventType: broker.EventTypeProductCreated,
-		Name: name,
+		EventType:   broker.EventTypeProductCreated,
+		Name:        name,
 		Description: description,
 	}
 
@@ -186,22 +204,22 @@ func (h *Handler) productCreate(c *gin.Context) {
 			return
 		}
 		productEvent.ImageData = imageBytes
-	}	
+	}
 
 	if priceDecimal, err := h.handlePrice(priceStr, priceStr); err != nil {
 		h.redirectWithError(c, "", "Failed to create price")
 		return
 	} else if priceDecimal != decimal.Zero {
 		productEvent.Price = priceDecimal
-	}	
+	}
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductCreatedFinished(c.Request.Context(), broker.ProductImageExchange,  broker.EventTypeProductAdded, func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeToProductCreatedCompleted(c.Request.Context(), broker.ProductImageExchange, broker.EventTypeProductCreatedCompleted, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received add completed event for product %d", pe.ProductID)
 		done <- nil
 		return nil
 	}); err != nil {
-		h.logger.Errorf("Failed to subscribe to image delete: %v", err)
+		h.logger.Errorf("Failed to subscribe to product created completed: %v", err)
 		return
 	}
 
@@ -320,7 +338,7 @@ func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
 			return fmt.Errorf("failed to read image: %w", err)
 		}
 		imageEvent.ImageData = imageBytes
-	}	
+	}
 
 	if err := h.messageBroker.PublishImage(c.Request.Context(), broker.ImageExchange, imageEvent); err != nil {
 		h.logger.Errorf("Failed to publish image event: %v", err)
@@ -351,7 +369,7 @@ func (h *Handler) handlePrice(productIDStr, originalPrice string) (decimal.Decim
 	return priceDecimal, nil
 }
 
-func (h *Handler) productEdit(c *gin.Context) {
+func (h *Handler) productEditPage(c *gin.Context) {
 	_, err := c.Cookie("access_token")
 	if err != nil {
 		c.Redirect(http.StatusFound, "/admin/login")
@@ -395,15 +413,15 @@ func (h *Handler) productEdit(c *gin.Context) {
 		return
 	}
 
-	params := admin_templates.ProductEditParams{
+	params := admin_templates.ProductFormPageParams{
 		BaseParams: admin_templates.BaseParams{
 			Title: "Редактирование товара - " + product.Name,
 		},
-		Product: product,
+		Product: &product,
 		Error:   c.Query("error"),
 	}
 
-	if err := h.templates.RenderProductEdit(c.Writer, params); err != nil {
+	if err := h.templates.RenderProductForm(c.Writer, params); err != nil {
 		h.logger.Errorf("Failed to render product template: %v", err)
 		c.Redirect(http.StatusFound, "/admin/products")
 		return

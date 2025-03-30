@@ -92,7 +92,7 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to subscribe to image upload: %w", err)
 	}
 
-	if err := a.messageBroker.SubscribeToImageDelete(ctx, broker.ProductImageExchange,  string(broker.EventTypeProductDeleted), a.handleImageDelete); err != nil {
+	if err := a.messageBroker.SubscribeToImageDelete(ctx, broker.ProductImageExchange,  broker.EventTypeProductDeleted, a.handleImageDelete); err != nil {
 		return fmt.Errorf("failed to subscribe to image delete: %w", err)
 	}
 

@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/broker"
 	"github.com/Nzyazin/zadnik.store/internal/product/domain"
 )
@@ -42,6 +43,7 @@ func (puc *productUseCase) UpdateProductImage(ctx context.Context, productID int
 }
 
 func (puc *productUseCase) Update(ctx context.Context, product *domain.Product) (*domain.Product, error) {
+	product.Slug = common.GenerateSlug(product.Name)
 	return puc.repo.Update(ctx, product)
 }
 
@@ -79,6 +81,7 @@ func (puc *productUseCase) BeginCreate(ctx context.Context, event *broker.Produc
 		Description: event.Description,
 		Price:       event.Price,
 		Status:      domain.ProductStatusPending,
+		Slug:        common.GenerateSlug(event.Name),
 	}
 	return puc.repo.BeginCreate(ctx, product)
 }
