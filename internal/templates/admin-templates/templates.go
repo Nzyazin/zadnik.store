@@ -37,6 +37,12 @@ type ProductCreateParams struct {
 	Error string
 }
 
+type ProductEditParams struct {
+	BaseParams
+	Product *Product
+	Error string
+}
+
 type ProductsIndexParams struct {
 	BaseParams
 	Products []Product
@@ -54,7 +60,7 @@ type TemplateFunctions struct {
 type Templates struct {
 	auth     *template.Template
 	products *template.Template
-	productForm *template.Template
+	productEdit *template.Template
 	funcs    template.FuncMap
 }
 
@@ -94,12 +100,12 @@ func (t *Templates) parseTemplates() error {
 			),
 	)
 
-	t.productForm = template.Must(
+	t.productEdit = template.Must(
 		template.New("base.html").
 			Funcs(t.funcs).
 			ParseFS(files, 
 				"templates/layout/base.html", 
-				"templates/pages/product-form-page.html",
+				"templates/pages/product-edit.html",
 				"templates/components/product-header.html",
 				"templates/components/product-form.html",
 			),
@@ -117,10 +123,10 @@ func (t *Templates) RenderAuth(w io.Writer, p AuthParams) error {
 	return t.auth.Execute(w, p)
 }
 
-func (t *Templates) RenderProductForm(w io.Writer, p ProductFormPageParams) error {
-	p.View = "product-form"
+func (t *Templates) RenderProductEdit(w io.Writer, p ProductEditParams) error {
+	p.View = "product-edit"
 	
-	return t.productForm.Execute(w, p)
+	return t.productEdit.Execute(w, p)
 }
 
 func (t *Templates) RenderProductsIndex(w io.Writer, p ProductsIndexParams) error {

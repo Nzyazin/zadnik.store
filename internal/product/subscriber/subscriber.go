@@ -66,7 +66,8 @@ func (s *Subscriber) subscribeToImageProcessed(ctx context.Context) error {
 }
 
 func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProduct chan result) error {
-	return s.messageBroker.SubscribeToProductCreated(ctx, broker.ProductImageExchange, broker.EventTypeProductCreated, func(event *broker.ProductEvent) error {
+	return s.messageBroker.SubscribeToProductCreated(ctx, broker.ProductImageDeletingExchange, broker.EventTypeProductCreated, func(event *broker.ProductEvent) error {
+
 		s.logger.Infof("Received data product event")
 
 		if event.ImageData == nil {
@@ -95,7 +96,7 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 			EventType: broker.EventTypeProductCreatedCompleted,
 			ProductID: event.ProductID,
 		}
-		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, completedEvent); err != nil {
+		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageDeletingExchange, completedEvent); err != nil {
 			s.logger.Errorf("Failed to publish create completed event: %v", err)
 		}
 		s.logger.Infof("Successfully created product %d", event.ProductID)
@@ -135,7 +136,7 @@ func (s *Subscriber) subscribeToProductUpdate(ctx context.Context) error {
 }
 
 func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduct chan result) error {
-	return s.messageBroker.SubscribeToProductDelete(ctx, broker.ProductImageExchange, broker.EventTypeProductDeleted, func(event *broker.ProductEvent) error {
+	return s.messageBroker.SubscribeToProductDelete(ctx, broker.ProductImageDeletingExchange, broker.EventTypeProductDeleted, func(event *broker.ProductEvent) error {
 		s.logger.Infof("Started product deletion for product %d", event.ProductID)
 		if event.EventType != broker.EventTypeProductDeleted {
 			return nil
@@ -172,7 +173,7 @@ func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduc
 			EventType: broker.EventTypeProductDeleteCompleted,
 			ProductID: event.ProductID,
 		}
-		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageExchange, completedEvent); err != nil {
+		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageDeletingExchange, completedEvent); err != nil {
 			s.logger.Errorf("Failed to publish delete completed event: %v", err)
 		}
 		s.logger.Infof("Successfully deleted product %d", event.ProductID)

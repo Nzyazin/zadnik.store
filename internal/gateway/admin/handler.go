@@ -96,7 +96,7 @@ func (h *Handler) productDelete(c *gin.Context) {
 	}
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageExchange, broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageDeletingExchange, broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received delete completed event for product %d", productIDint)
 		if pe.ProductID == int32(productIDint) {
 			done <- nil
@@ -107,7 +107,7 @@ func (h *Handler) productDelete(c *gin.Context) {
 		return
 	}
 
-	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageExchange, productEvent); err != nil {
+	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageDeletingExchange, productEvent); err != nil {
 		h.logger.Errorf("Failed to publish product event: %v", err)
 		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
 			Error: "Did not can delete product",
@@ -159,7 +159,7 @@ func (h *Handler) productCreatePage(c *gin.Context) {
 		return
 	}
 
-	if err := h.templates.RenderProductForm(c.Writer, admin_templates.ProductFormPageParams{
+	if err := h.templates.RenderProductEdit(c.Writer, admin_templates.ProductEditParams{
 		BaseParams: admin_templates.BaseParams{
 			Title: "Создание товара",
 		},
@@ -214,7 +214,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 	}
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductCreatedCompleted(c.Request.Context(), broker.ProductImageExchange, broker.EventTypeProductCreatedCompleted, func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeToProductCreatedCompleted(c.Request.Context(), broker.ProductImageDeletingExchange, broker.EventTypeProductCreatedCompleted, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received add completed event for product %d", pe.ProductID)
 		done <- nil
 		return nil
@@ -223,7 +223,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 		return
 	}
 
-	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageExchange, productEvent); err != nil {
+	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageCreatingExchange, productEvent); err != nil {
 		h.logger.Errorf("Failed to publish product event for creating product: %v", err)
 		h.redirectWithError(c, "", "Failed to publish product event for creating product")
 		return
@@ -266,7 +266,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	originalDescription := c.PostForm("original_description")
 
 	productEvent := &broker.ProductEvent{
-		EventType: broker.EventTypeProductUpdated,
+		EventType: broker.EventTypeProductUpdating,
 		ProductID: int32(productIDInt),
 	}
 	productIDStr := strconv.FormatInt(productIDInt, 10)
@@ -287,7 +287,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	}
 
 	if productEvent.Price != decimal.Zero || productEvent.Name != "" || productEvent.Description != "" {
-		if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageExchange, productEvent); err != nil {
+		if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageUpdatingExchange, productEvent); err != nil {
 			h.logger.Errorf("Failed to publish product event: %v", err)
 			h.redirectWithError(c, productIDStr, "Failed to publish product event")
 			return
@@ -413,7 +413,7 @@ func (h *Handler) productEditPage(c *gin.Context) {
 		return
 	}
 
-	params := admin_templates.ProductFormPageParams{
+	params := admin_templates.ProductEditParams{
 		BaseParams: admin_templates.BaseParams{
 			Title: "Редактирование товара - " + product.Name,
 		},
@@ -421,7 +421,7 @@ func (h *Handler) productEditPage(c *gin.Context) {
 		Error:   c.Query("error"),
 	}
 
-	if err := h.templates.RenderProductForm(c.Writer, params); err != nil {
+	if err := h.templates.RenderProductEdit(c.Writer, params); err != nil {
 		h.logger.Errorf("Failed to render product template: %v", err)
 		c.Redirect(http.StatusFound, "/admin/products")
 		return

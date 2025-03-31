@@ -88,11 +88,11 @@ func (a *App) handleImageDelete(event *broker.ProductEvent) error {
 }
 
 func (a *App) Run(ctx context.Context) error {
-	if err := a.messageBroker.SubscribeToImageUpload(ctx, a.handleImageUpload); err != nil {
+	if err := a.messageBroker.SubscribeToImageUpload(ctx, broker.ImageExchange, broker.EventTypeImageUploaded, a.handleImageUpload); err != nil {
 		return fmt.Errorf("failed to subscribe to image upload: %w", err)
 	}
 
-	if err := a.messageBroker.SubscribeToImageDelete(ctx, broker.ProductImageExchange,  broker.EventTypeProductDeleted, a.handleImageDelete); err != nil {
+	if err := a.messageBroker.SubscribeToImageDelete(ctx, broker.ProductImageDeletingExchange,  broker.EventTypeProductDeleted, a.handleImageDelete); err != nil {
 		return fmt.Errorf("failed to subscribe to image delete: %w", err)
 	}
 

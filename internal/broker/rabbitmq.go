@@ -13,7 +13,9 @@ import (
 const (
 	ProductExchange      = "products"
 	ImageExchange        = "images"
-	ProductImageExchange = "products_images"
+	ProductImageDeletingExchange = "products_images_deleting"
+	ProductImageUpdatingExchange = "products_images_updating"
+	ProductImageCreatingExchange = "products_images_creating"
 )
 
 type RabbitMQBroker struct {
@@ -89,7 +91,7 @@ func declareExchanges(channel *amqp.Channel) error {
 	}
 
 	err = channel.ExchangeDeclare(
-		ProductImageExchange,
+		ProductImageDeletingExchange,
 		"fanout",
 		true,
 		false,
@@ -100,6 +102,34 @@ func declareExchanges(channel *amqp.Channel) error {
 
 	if err != nil {
 		return fmt.Errorf("failed to declare product_image exchange: %w", err)
+	}
+
+	err = channel.ExchangeDeclare(
+		ProductImageUpdatingExchange,
+		"fanout",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to declare product_image exchange: %w", err)
+	}
+
+	err = channel.ExchangeDeclare(
+		ProductImageCreatingExchange,
+		"fanout",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to declare product_image_creating exchange: %w", err)
 	}
 
 	return nil
@@ -203,7 +233,7 @@ func (b *RabbitMQBroker) PublishImage(ctx context.Context, exchange string, even
 }
 
 func (b *RabbitMQBroker) PublishProductImage(ctx context.Context, event *ProductImageEvent) error {
-	return publish(b, ctx, ProductImageExchange, event)
+	return publish(b, ctx, ImageExchange, event)
 }
 
 func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler func(*ProductImageEvent) error) error {
@@ -211,10 +241,10 @@ func (b *RabbitMQBroker) SubscribeToImageProcessed(ctx context.Context, handler 
 }
 
 func (b *RabbitMQBroker) SubscribeToProductUpdate(ctx context.Context, handler func(*ProductEvent) error) error {
-	return subscribe(b, ctx, ProductExchange, EventTypeProductUpdated, handler)
+	return subscribe(b, ctx, ProductImageUpdatingExchange, EventTypeProductUpdating, handler)
 }
 
-func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, handler func(*ImageEvent) error) error {
+func (b *RabbitMQBroker) SubscribeToImageUpload(ctx context.Context, exchange string, eventType EventType, handler func(*ImageEvent) error) error {
 	return subscribe(b, ctx, ImageExchange, EventTypeImageUploaded, handler)
 }
 
