@@ -159,6 +159,13 @@ func (h *Handler) productCreatePage(c *gin.Context) {
 		return
 	}
 
+	params := admin_templates.ProductFormPageParams{
+		BaseParams: admin_templates.BaseParams{
+			Title: "Создание товара - " + product.Name,
+		},
+		Action: fmt.Sprintf("/admin/products/create")
+	}
+
 	if err := h.templates.RenderProductEdit(c.Writer, admin_templates.ProductEditParams{
 		BaseParams: admin_templates.BaseParams{
 			Title: "Создание товара",
@@ -191,7 +198,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 		Description: description,
 	}
 
-	imageReader, _, _, err := h.handleImage(c)
+	imageReader, err := h.handleImage(c)
 	if err != nil {
 		h.redirectWithError(c, "", "Failed to handle image")
 		return
@@ -302,43 +309,44 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/admin/products")
 }
 
-func (h *Handler) handleImage(c *gin.Context) (io.ReadCloser, string, int64, error) {
+func (h *Handler) handleImage(c *gin.Context) (io.ReadCloser, error) {
 	file, err := c.FormFile("image")
 	if err == http.ErrMissingFile {
-		return nil, "", 0, nil
+		return nil, nil
 	}
 	if err != nil {
-		return nil, "", 0, fmt.Errorf("failed to get image: %w", err)
+		return nil, fmt.Errorf("failed to get image: %w", err)
 	}
 	if file == nil {
-		return nil, "", 0, fmt.Errorf("file not found")
+		return nil, fmt.Errorf("file not found")
 	}
 
 	imageData, err := file.Open()
 	if err != nil {
-		return nil, "", 0, fmt.Errorf("failed to open image: %w", err)
+		return nil, fmt.Errorf("failed to open image: %w", err)
 	}
-	return imageData, file.Filename, file.Size, nil
+	return imageData, nil
 }
 
 func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
-	imageReader, _, _, err := h.handleImage(c)
+	imageReader, err := h.handleImage(c)
 	if err != nil {
 		return fmt.Errorf("failed to read image: %w", err)
+	}
+	if imageReader == nil {
+		return nil
 	}
 	imageEvent := &broker.ImageEvent{
 		EventType: broker.EventTypeImageUploaded,
 		ProductID: int32(productIDInt),
 	}
 
-	if imageReader != nil {
-		defer imageReader.Close()
-		imageBytes, err := io.ReadAll(imageReader)
-		if err != nil {
-			return fmt.Errorf("failed to read image: %w", err)
-		}
-		imageEvent.ImageData = imageBytes
+	defer imageReader.Close()
+	imageBytes, err := io.ReadAll(imageReader)
+	if err != nil {
+		return fmt.Errorf("failed to read image: %w", err)
 	}
+	imageEvent.ImageData = imageBytes
 
 	if err := h.messageBroker.PublishImage(c.Request.Context(), broker.ImageExchange, imageEvent); err != nil {
 		h.logger.Errorf("Failed to publish image event: %v", err)
