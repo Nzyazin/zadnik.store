@@ -17,6 +17,19 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+
+const (
+    ProductsPath           = "/admin/products"
+    ProductCreatePath      = "/admin/products/create"
+    ProductEditPathFormat  = "/admin/products/%d/edit"
+    ProductDeletePathFormat = "/admin/products/%d/delete"
+    
+    LoginPath              = "/admin/login"
+    LogoutPath             = "/admin/logout"
+    
+    AdminIndexPath         = "/admin"
+)
+
 type Handler struct {
 	authService          auth.AuthService
 	templates            *admin_templates.Templates
@@ -119,7 +132,7 @@ func (h *Handler) productDelete(c *gin.Context) {
 
 	select {
 	case <-done:
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 	case <-time.After(10 * time.Second):
 		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
 			Error: "Did not can delete product",
@@ -133,14 +146,23 @@ func (h *Handler) productDelete(c *gin.Context) {
 }
 
 func (h *Handler) redirectWithError(c *gin.Context, productID, message string) {
-	c.Redirect(http.StatusFound, fmt.Sprintf("/admin/products/%s/edit?error=%s",
-		productID, url.QueryEscape(message)))
+	if productID == "" {
+		c.Redirect(http.StatusFound, ProductCreatePath + "?error=" + url.QueryEscape(message))
+		return
+	}
+	productIDInt, err := strconv.Atoi(productID)
+	if err != nil {
+		c.Redirect(http.StatusFound, ProductsPath)
+		return
+	}
+	c.Redirect(http.StatusFound, fmt.Sprintf(ProductEditPathFormat + "?error=%s",
+		productIDInt, url.QueryEscape(message)))
 }
 
 func (h *Handler) checkAuth(c *gin.Context) bool {
 	_, err := c.Cookie("access_token")
 	if err != nil {
-		c.Redirect(http.StatusFound, "/admin/login")
+		c.Redirect(http.StatusFound, LoginPath)
 		return false
 	}
 	return true
@@ -161,17 +183,16 @@ func (h *Handler) productCreatePage(c *gin.Context) {
 
 	params := admin_templates.ProductFormPageParams{
 		BaseParams: admin_templates.BaseParams{
-			Title: "Создание товара - " + product.Name,
-		},
-		Action: fmt.Sprintf("/admin/products/create")
-	}
-
-	if err := h.templates.RenderProductEdit(c.Writer, admin_templates.ProductEditParams{
-		BaseParams: admin_templates.BaseParams{
 			Title: "Создание товара",
 		},
+		Action: ProductCreatePath,
+		IsEdit: false,
+		Product: &admin_templates.Product{},
+		ButtonText: "Создать",
 		Error: c.Query("error"),
-	}); err != nil {
+	}
+
+	if err := h.templates.RenderProductFormPage(c.Writer, params); err != nil {
 		h.logger.Errorf("Failed to render product create page: %v", err)
 		c.String(http.StatusInternalServerError, "Internal Server Error")
 		return
@@ -240,7 +261,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 
 	select {
 	case <-done:
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 	case <-time.After(9 * time.Second):
 		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
 			Error: "Did not can create product",
@@ -260,7 +281,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	productIDInt, err := h.validateProductID(c)
 	if err != nil {
 		h.logger.Errorf("Product ID validation failed: %v", err)
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 		return
 	}
 
@@ -306,7 +327,7 @@ func (h *Handler) productUpdate(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusFound, "/admin/products")
+	c.Redirect(http.StatusFound, ProductsPath)
 }
 
 func (h *Handler) handleImage(c *gin.Context) (io.ReadCloser, error) {
@@ -380,21 +401,21 @@ func (h *Handler) handlePrice(productIDStr, originalPrice string) (decimal.Decim
 func (h *Handler) productEditPage(c *gin.Context) {
 	_, err := c.Cookie("access_token")
 	if err != nil {
-		c.Redirect(http.StatusFound, "/admin/login")
+		c.Redirect(http.StatusFound, LoginPath)
 		return
 	}
 
 	productID := c.Param("id")
 	if productID == "" {
 		h.logger.Errorf("Product ID is empty")
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 		return
 	}
 
 	req, err := http.NewRequest(http.MethodGet, h.productServiceUrl+"/products/"+productID, nil)
 	if err != nil {
 		h.logger.Errorf("Failed to create request: %v", err)
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -403,35 +424,38 @@ func (h *Handler) productEditPage(c *gin.Context) {
 	resp, err := h.httpClient.Do(req)
 	if err != nil {
 		h.logger.Errorf("Failed to get product: %v", err)
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		h.logger.Errorf("Product service returned non-200 status: %d", resp.Status)
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 		return
 	}
 
 	var product admin_templates.Product
 	if err := json.NewDecoder(resp.Body).Decode(&product); err != nil {
 		h.logger.Errorf("failed to decode product: " + err.Error())
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 		return
 	}
 
-	params := admin_templates.ProductEditParams{
+	params := admin_templates.ProductFormPageParams{
 		BaseParams: admin_templates.BaseParams{
 			Title: "Редактирование товара - " + product.Name,
 		},
+		Action: fmt.Sprintf(ProductEditPathFormat, product.ID),
+		IsEdit: true,
 		Product: &product,
+		ButtonText: "Сохранить",
 		Error:   c.Query("error"),
 	}
 
-	if err := h.templates.RenderProductEdit(c.Writer, params); err != nil {
+	if err := h.templates.RenderProductFormPage(c.Writer, params); err != nil {
 		h.logger.Errorf("Failed to render product template: %v", err)
-		c.Redirect(http.StatusFound, "/admin/products")
+		c.Redirect(http.StatusFound, ProductsPath)
 		return
 	}
 }
@@ -439,11 +463,11 @@ func (h *Handler) productEditPage(c *gin.Context) {
 func (h *Handler) adminIndex(c *gin.Context) {
 	_, err := c.Cookie("access_token")
 	if err != nil {
-		c.Redirect(http.StatusFound, "/admin/login")
+		c.Redirect(http.StatusFound, LoginPath)
 		return
 	}
 
-	c.Redirect(http.StatusFound, "/admin/products")
+	c.Redirect(http.StatusFound, ProductsPath)
 }
 
 func (h *Handler) loginPage(c *gin.Context) {
@@ -481,7 +505,7 @@ func (h *Handler) login(c *gin.Context) {
 		true,  // httpOnly
 	)
 
-	c.Redirect(http.StatusFound, "/admin/products")
+	c.Redirect(http.StatusFound, ProductsPath)
 }
 
 func (h *Handler) logout(c *gin.Context) {
@@ -495,14 +519,14 @@ func (h *Handler) logout(c *gin.Context) {
 		true,
 	)
 
-	c.Redirect(http.StatusFound, "/admin/login")
+	c.Redirect(http.StatusFound, LoginPath)
 }
 
 func (h *Handler) authMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := c.Cookie("access_token")
 		if err != nil {
-			c.Redirect(http.StatusFound, "/admin/login")
+			c.Redirect(http.StatusFound, LoginPath)
 			c.Abort()
 			return
 		}
@@ -510,7 +534,7 @@ func (h *Handler) authMiddleware() gin.HandlerFunc {
 		// Проверяем токен
 		resp, err := h.authService.ValidateToken(c.Request.Context(), token)
 		if err != nil || !resp.Valid {
-			c.Redirect(http.StatusFound, "/admin/login")
+			c.Redirect(http.StatusFound, LoginPath)
 			c.Abort()
 			return
 		}

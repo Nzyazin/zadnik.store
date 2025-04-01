@@ -105,7 +105,7 @@ func (t *Templates) parseTemplates() error {
 			Funcs(t.funcs).
 			ParseFS(files, 
 				"templates/layout/base.html", 
-				"templates/pages/product-edit.html",
+				"templates/pages/product-form-page.html",
 				"templates/components/product-header.html",
 				"templates/components/product-form.html",
 			),
@@ -121,6 +121,12 @@ func (t *Templates) RenderAuth(w io.Writer, p AuthParams) error {
 	p.HideHeader = true
 	
 	return t.auth.Execute(w, p)
+}
+
+func (t *Templates) RenderProductFormPage(w io.Writer, p ProductFormPageParams) error {
+	p.View = "product-form"
+	
+	return t.productEdit.Execute(w, p)
 }
 
 func (t *Templates) RenderProductEdit(w io.Writer, p ProductEditParams) error {
