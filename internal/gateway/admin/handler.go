@@ -96,7 +96,7 @@ func (h *Handler) productDelete(c *gin.Context) {
 	}
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageDeletingExchange, broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageDeletingCompletedExchange, broker.EventTypeProductDeleteCompleted, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received delete completed event for product %d", productIDint)
 		if pe.ProductID == int32(productIDint) {
 			done <- nil
@@ -214,7 +214,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 	}
 
 	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductCreatedCompleted(c.Request.Context(), broker.ProductImageDeletingExchange, broker.EventTypeProductCreatedCompleted, func(pe *broker.ProductEvent) error {
+	if err := h.messageBroker.SubscribeToProductCreatedCompleted(c.Request.Context(), broker.ProductImageCreatingCompletedExchange, broker.EventTypeProductCreatedCompleted, func(pe *broker.ProductEvent) error {
 		h.logger.Infof("Received add completed event for product %d", pe.ProductID)
 		done <- nil
 		return nil

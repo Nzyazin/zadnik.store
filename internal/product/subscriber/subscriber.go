@@ -96,7 +96,7 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 			EventType: broker.EventTypeProductCreatedCompleted,
 			ProductID: event.ProductID,
 		}
-		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageDeletingExchange, completedEvent); err != nil {
+		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageCreatingCompletedExchange, completedEvent); err != nil {
 			s.logger.Errorf("Failed to publish create completed event: %v", err)
 		}
 		s.logger.Infof("Successfully created product %d", event.ProductID)
@@ -137,10 +137,10 @@ func (s *Subscriber) subscribeToProductUpdate(ctx context.Context) error {
 
 func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduct chan result) error {
 	return s.messageBroker.SubscribeToProductDelete(ctx, broker.ProductImageDeletingExchange, broker.EventTypeProductDeleted, func(event *broker.ProductEvent) error {
-		s.logger.Infof("Started product deletion for product %d", event.ProductID)
 		if event.EventType != broker.EventTypeProductDeleted {
 			return nil
 		}
+		s.logger.Infof("Started product deletion for product %d", event.ProductID)
 
 		if event.ImageURL == "" {
 			if err := s.useCase.BeginDelete(ctx, event.ProductID); err != nil {
@@ -173,7 +173,7 @@ func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduc
 			EventType: broker.EventTypeProductDeleteCompleted,
 			ProductID: event.ProductID,
 		}
-		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageDeletingExchange, completedEvent); err != nil {
+		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageDeletingCompletedExchange, completedEvent); err != nil {
 			s.logger.Errorf("Failed to publish delete completed event: %v", err)
 		}
 		s.logger.Infof("Successfully deleted product %d", event.ProductID)

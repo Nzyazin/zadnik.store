@@ -16,6 +16,8 @@ const (
 	ProductImageDeletingExchange = "products_images_deleting"
 	ProductImageUpdatingExchange = "products_images_updating"
 	ProductImageCreatingExchange = "products_images_creating"
+	ProductImageCreatingCompletedExchange = "products_images_creating_completed"
+	ProductImageDeletingCompletedExchange = "products_images_deleting_completed"
 )
 
 type RabbitMQBroker struct {
@@ -105,6 +107,20 @@ func declareExchanges(channel *amqp.Channel) error {
 	}
 
 	err = channel.ExchangeDeclare(
+		ProductImageDeletingCompletedExchange,
+		"fanout",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to declare product_image_deleting_completed exchange: %w", err)
+	}
+
+	err = channel.ExchangeDeclare(
 		ProductImageUpdatingExchange,
 		"fanout",
 		true,
@@ -130,6 +146,20 @@ func declareExchanges(channel *amqp.Channel) error {
 
 	if err != nil {
 		return fmt.Errorf("failed to declare product_image_creating exchange: %w", err)
+	}
+
+	err = channel.ExchangeDeclare(
+		ProductImageCreatingCompletedExchange,
+		"fanout",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to declare product_image_creating_completed exchange: %w", err)
 	}
 
 	return nil
