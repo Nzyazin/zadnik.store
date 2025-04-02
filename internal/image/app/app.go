@@ -96,6 +96,8 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to subscribe to image delete: %w", err)
 	}
 
+	//TODO подписка для добавления картинки при создании продуктаif err := a.messageBroker.SubscribeToImageCreating
+
 	a.logger.Infof("Starting image service")
 	<-ctx.Done()
 	return nil
