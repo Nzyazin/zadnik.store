@@ -38,7 +38,7 @@ func NewApp(config *config.Config) (*App, error) {
 		log.Fatalf("Failed to initialize file storage: %v", err)
 	}
 
-	imageUseCase := usecase.NewImageUseCase(imageStorage, messageBroker, logger)
+	imageUseCase := usecase.NewImageUseCase(imageStorage, logger)
 
 	return &App{
 		imageUseCase: imageUseCase,
@@ -52,9 +52,23 @@ func (a *App) handleImageUpload(event *broker.ImageEvent) error {
 
 	ctx := context.Background()
 
-	if err := a.imageUseCase.ProcessImage(ctx, event.ImageData, event.ProductID); err != nil {
+	imageUrl, err := a.imageUseCase.ProcessImage(ctx, event.ImageData, event.ProductID); 
+	if err != nil {
 		a.logger.Errorf("Failed to process image %v", err)
 		return err
+	}
+
+	eventFinished := &broker.ProductImageEvent{
+		EventType: broker.EventTypeImageProcessed,
+		ProductID: event.ProductID,
+		ImageURL: imageUrl,
+	}
+
+	if err := a.messageBroker.PublishProductImage(ctx, eventFinished); err != nil {
+		if delErr := a.imageUseCase.DeleteImage(ctx, event.ProductID); delErr != nil {
+			a.logger.Errorf("Failed to delete image: %v", delErr)
+		}
+		return fmt.Errorf("failed to publish image processed event: %w", err)
 	}
 
 	a.logger.Infof("Successfully proccessed image for product %d", event.ProductID)
@@ -87,6 +101,35 @@ func (a *App) handleImageDelete(event *broker.ProductEvent) error {
 	return a.messageBroker.PublishProduct(ctx, broker.ImageExchange, successEvent)
 }
 
+func (a *App) handleImageCreating(event *broker.ProductEvent) error {
+	a.logger.Infof("Received image creating event for product %d", event.ProductID)
+
+	ctx := context.Background()
+
+	imageUrl, err := a.imageUseCase.ProcessImage(ctx, event.ImageData, event.ProductID); 
+	if err != nil {
+		a.logger.Errorf("Failed to process image %v", err)
+		return err
+	}
+
+	eventFinished := &broker.ProductImageEvent{
+		EventType: broker.EventTypeImageCreated,
+		ProductID: event.ProductID,
+		ImageURL: imageUrl,
+	}
+
+	if err := a.messageBroker.PublishProductImage(ctx, eventFinished); err != nil {
+		if delErr := a.imageUseCase.DeleteImage(ctx, event.ProductID); delErr != nil {
+			a.logger.Errorf("Failed to delete image: %v", delErr)
+		}
+		return fmt.Errorf("failed to publish image processed event: %w", err)
+	}
+
+	a.logger.Infof("Successfully proccessed image for product %d", event.ProductID)
+
+	return nil
+}
+
 func (a *App) Run(ctx context.Context) error {
 	if err := a.messageBroker.SubscribeToImageUpload(ctx, broker.ImageExchange, broker.EventTypeImageUploaded, a.handleImageUpload); err != nil {
 		return fmt.Errorf("failed to subscribe to image upload: %w", err)
@@ -96,7 +139,9 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to subscribe to image delete: %w", err)
 	}
 
-	//TODO подписка для добавления картинки при создании продуктаif err := a.messageBroker.SubscribeToImageCreating
+	if err := a.messageBroker.SubscribeToImageCreating(ctx, broker.ProductImageCreatingExchange, broker.EventTypeProductCreating, a.handleImageCreating); err != nil {
+		return fmt.Errorf("failed to subscribe to image creating: %w", err)
+	}
 
 	a.logger.Infof("Starting image service")
 	<-ctx.Done()

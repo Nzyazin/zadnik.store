@@ -282,6 +282,10 @@ func (b *RabbitMQBroker) SubscribeToImageDelete(ctx context.Context, exchange st
 	return subscribe(b, ctx, exchange, eventType, handler)
 }
 
+func (b *RabbitMQBroker) SubscribeToImageCreating(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error {
+	return subscribe(b, ctx, exchange, eventType, handler)
+}
+
 func (b *RabbitMQBroker) SubscribeToProductDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error {
 	return subscribe(b, ctx, exchange, eventType, handler)
 }

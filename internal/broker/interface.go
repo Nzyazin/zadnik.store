@@ -9,14 +9,15 @@ import (
 type EventType string
 
 const (
-	EventTypeProductCreated   EventType = "product.creating"
+	EventTypeProductCreating   EventType = "product.creating"
 	EventTypeProductUpdating   EventType = "product.updating"
 	EventTypeProductDeleted   EventType = "product.deleted"
 	EventTypeImageUploaded    EventType = "image.uploaded"
 	EventTypeImageProcessed   EventType = "image.processed"
 	EventTypeImageDeleted EventType = "image.deleted"
-	EventTypeProductCreatedCompleted EventType = "product.created.completed"
-	EventTypeProductDeleteCompleted EventType = "product.deleted.completed"
+	EventTypeImageCreated EventType = "image.created"
+	EventTypeProductCreatingCompleted EventType = "product.creating.completed"
+	EventTypeProductDeletingCompleted EventType = "product.deleted.completed"
 )
 
 type Event interface {
@@ -65,6 +66,7 @@ type MessageBroker interface {
 	SubscribeToImageProcessed(ctx context.Context, handler func(*ProductImageEvent) error) error
 	SubscribeToImageUpload(ctx context.Context, exchange string, eventType EventType, handler func(*ImageEvent) error) error
 	SubscribeToImageDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
+	SubscribeToImageCreating(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	SubscribeToProductDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	SubscribeToProductCreated(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	SubscribeToProductCreatedCompleted(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error

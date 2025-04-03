@@ -30,7 +30,8 @@ func NewSubscriber(useCase usecase.ProductUseCase, messageBroker broker.MessageB
 }
 
 func (s *Subscriber) Subscribe(ctx context.Context) error {
-	chImageProduct := make(chan result, 1)
+	chImageProductDelete:= make(chan result, 1)
+	chImageProductCreate:= make(chan result, 1)
 
 	if err := s.subscribeToImageProcessed(ctx); err != nil {
 		return err
@@ -38,13 +39,16 @@ func (s *Subscriber) Subscribe(ctx context.Context) error {
 	if err := s.subscribeToProductUpdate(ctx); err != nil {
 		return err
 	}
-	if err := s.subscribeToProductDelete(ctx, chImageProduct); err != nil {
+	if err := s.subscribeToProductDelete(ctx, chImageProductDelete); err != nil {
 		return err
 	}
-	if err := s.subscribeToImageDelete(ctx, chImageProduct); err != nil {
+	if err := s.subscribeToImageDelete(ctx, chImageProductDelete); err != nil {
 		return err
 	}
-	if err := s.subscribeToProductCreated(ctx, chImageProduct); err != nil {
+	if err := s.subscribeToProductCreated(ctx, chImageProductCreate); err != nil {
+		return err
+	}
+	if err := s.subscribeToImageCreated(ctx, chImageProductCreate); err != nil {
 		return err
 	}
 
@@ -65,8 +69,36 @@ func (s *Subscriber) subscribeToImageProcessed(ctx context.Context) error {
 	})
 }
 
-func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProduct chan result) error {
-	return s.messageBroker.SubscribeToProductCreated(ctx, broker.ProductImageCreatingExchange, broker.EventTypeProductCreated, func(event *broker.ProductEvent) error {
+func (s *Subscriber) subscribeToImageCreated(ctx context.Context, chImageProductCreate chan result) error {
+	return s.messageBroker.SubscribeToImageCreated(ctx, broker.ImageExchange,broker.EventTypeImageCreated, func(event *broker.ProductImageEvent) error {
+		s.logger.Infof("Received image created event for product %d with URL %s", event.ProductID, event.ImageURL)
+
+		if event.EventType != broker.EventTypeImageDeleted {
+			return nil
+		}
+
+		var deleteErr error
+		if event.Error != "" {
+			deleteErr = errors.New(event.Error)
+		}
+		chImageProduct <- result{
+			productID: int64(event.ProductID),
+			err: deleteErr,
+		}
+
+		if deleteErr == nil {
+			s.logger.Infof("Successfully deleted image for product %d", event.ProductID)
+		} else {
+			s.logger.Errorf("Failed to delete image for product %d: %v", event.ProductID, deleteErr)
+		}
+		
+		return nil
+	})
+}
+	
+
+func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProductCreate chan result) error {
+	return s.messageBroker.SubscribeToProductCreated(ctx, broker.ProductImageCreatingExchange, broker.EventTypeProductCreating, func(event *broker.ProductEvent) error {
 
 		s.logger.Infof("Received data product event")
 
@@ -76,7 +108,7 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 			}
 
 			completedEvent := &broker.ProductEvent{
-				EventType: broker.EventTypeProductCreatedCompleted,
+				EventType: broker.EventTypeProductCreatingCompleted,
 				ProductID: event.ProductID,
 			}
 			if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageCreatingCompletedExchange, completedEvent); err != nil {
@@ -90,7 +122,7 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 				return fmt.Errorf("failed to begin create product: %d: %w", event.ProductID, err)
 			}
 
-			result := <-chImageProduct
+			result := <-chImageProductCreate
 			if result.err != nil {
 				if err := s.useCase.RollbackCreate(ctx, product.ID); err != nil {
 					s.logger.Errorf("Failed to rollback create product: %d: %v", event.ProductID, err)
@@ -103,7 +135,7 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 			}
 
 			completedEvent := &broker.ProductEvent{
-				EventType: broker.EventTypeProductCreatedCompleted,
+				EventType: broker.EventTypeProductCreatingCompleted,
 				ProductID: event.ProductID,
 			}
 			if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageCreatingCompletedExchange, completedEvent); err != nil {
@@ -181,7 +213,7 @@ func (s *Subscriber) subscribeToProductDelete(ctx context.Context, chImageProduc
 		}
 
 		completedEvent := &broker.ProductEvent{
-			EventType: broker.EventTypeProductDeleteCompleted,
+			EventType: broker.EventTypeProductDeletingCompleted,
 			ProductID: event.ProductID,
 		}
 		if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageDeletingCompletedExchange, completedEvent); err != nil {
