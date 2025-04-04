@@ -52,6 +52,7 @@ type ProductImageEvent struct {
 	EventType EventType `json:"event_type"`
 	ProductID int32    `json:"product_id"`
 	ImageURL string    `json:"image_url"`
+	Error string `json:"error,omitempty"`
 }
 
 func (e *ProductImageEvent) Type() EventType {
@@ -67,6 +68,7 @@ type MessageBroker interface {
 	SubscribeToImageUpload(ctx context.Context, exchange string, eventType EventType, handler func(*ImageEvent) error) error
 	SubscribeToImageDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	SubscribeToImageCreating(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
+	SubscribeToImageCreated(ctx context.Context, exchange string, eventType EventType, handler func(*ProductImageEvent) error) error
 	SubscribeToProductDelete(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	SubscribeToProductCreated(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error
 	SubscribeToProductCreatedCompleted(ctx context.Context, exchange string, eventType EventType, handler func(*ProductEvent) error) error

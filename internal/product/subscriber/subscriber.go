@@ -70,7 +70,7 @@ func (s *Subscriber) subscribeToImageProcessed(ctx context.Context) error {
 }
 
 func (s *Subscriber) subscribeToImageCreated(ctx context.Context, chImageProductCreate chan result) error {
-	return s.messageBroker.SubscribeToImageCreated(ctx, broker.ImageExchange,broker.EventTypeImageCreated, func(event *broker.ProductImageEvent) error {
+	return s.messageBroker.SubscribeToImageCreated(ctx, broker.ImageExchange, broker.EventTypeImageCreated, func(event *broker.ProductImageEvent) error {
 		s.logger.Infof("Received image created event for product %d with URL %s", event.ProductID, event.ImageURL)
 
 		if event.EventType != broker.EventTypeImageDeleted {
@@ -81,7 +81,7 @@ func (s *Subscriber) subscribeToImageCreated(ctx context.Context, chImageProduct
 		if event.Error != "" {
 			deleteErr = errors.New(event.Error)
 		}
-		chImageProduct <- result{
+		chImageProductCreate <- result{
 			productID: int64(event.ProductID),
 			err: deleteErr,
 		}

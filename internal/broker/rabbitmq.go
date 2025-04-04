@@ -298,6 +298,10 @@ func (b *RabbitMQBroker) SubscribeToProductCreatedCompleted(ctx context.Context,
 	return subscribe(b, ctx, exchange, eventType, handler)
 }
 
+func (b *RabbitMQBroker) SubscribeToImageCreated(ctx context.Context, exchange string, eventType EventType, handler func(*ProductImageEvent) error) error {
+	return subscribe(b, ctx, exchange, eventType, handler)
+}
+
 func (b *RabbitMQBroker) Close() error {
 	if b.channel != nil {
 		b.channel.Close()

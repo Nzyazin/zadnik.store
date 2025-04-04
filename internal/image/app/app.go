@@ -105,24 +105,31 @@ func (a *App) handleImageCreating(event *broker.ProductEvent) error {
 	a.logger.Infof("Received image creating event for product %d", event.ProductID)
 
 	ctx := context.Background()
+	eventFinished := &broker.ProductImageEvent{
+		EventType: broker.EventTypeImageCreated,
+		ProductID: event.ProductID,
+	}
 
 	imageUrl, err := a.imageUseCase.ProcessImage(ctx, event.ImageData, event.ProductID); 
 	if err != nil {
 		a.logger.Errorf("Failed to process image %v", err)
+		eventFinished.Error = err.Error()
+		if err := a.messageBroker.PublishProductImage(ctx, eventFinished); err != nil {
+			if delErr := a.imageUseCase.DeleteImage(ctx, event.ProductID); delErr != nil {
+				a.logger.Errorf("Failed to delete image after error publishProductImage: %v", delErr)
+			}
+			return fmt.Errorf("failed to publish EventTypeImageCreated: %w", err)
+		}
 		return err
 	}
 
-	eventFinished := &broker.ProductImageEvent{
-		EventType: broker.EventTypeImageCreated,
-		ProductID: event.ProductID,
-		ImageURL: imageUrl,
-	}
+	eventFinished.ImageURL = imageUrl
 
 	if err := a.messageBroker.PublishProductImage(ctx, eventFinished); err != nil {
 		if delErr := a.imageUseCase.DeleteImage(ctx, event.ProductID); delErr != nil {
-			a.logger.Errorf("Failed to delete image: %v", delErr)
+			a.logger.Errorf("Failed to delete image after error publishProductImage: %v", delErr)
 		}
-		return fmt.Errorf("failed to publish image processed event: %w", err)
+		return fmt.Errorf("failed to publish EventTypeImageCreated: %w", err)
 	}
 
 	a.logger.Infof("Successfully proccessed image for product %d", event.ProductID)
