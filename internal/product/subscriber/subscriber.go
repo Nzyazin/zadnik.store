@@ -73,7 +73,7 @@ func (s *Subscriber) subscribeToImageCreated(ctx context.Context, chImageProduct
 	return s.messageBroker.SubscribeToImageCreated(ctx, broker.ImageExchange, broker.EventTypeImageCreated, func(event *broker.ProductImageEvent) error {
 		s.logger.Infof("Received image created event for product %d with URL %s", event.ProductID, event.ImageURL)
 
-		if event.EventType != broker.EventTypeImageDeleted {
+		if event.EventType != broker.EventTypeImageCreated {
 			return nil
 		}
 
@@ -87,9 +87,9 @@ func (s *Subscriber) subscribeToImageCreated(ctx context.Context, chImageProduct
 		}
 
 		if deleteErr == nil {
-			s.logger.Infof("Successfully deleted image for product %d", event.ProductID)
+			s.logger.Infof("Successfully created image for product %d", event.ProductID)
 		} else {
-			s.logger.Errorf("Failed to delete image for product %d: %v", event.ProductID, deleteErr)
+			s.logger.Errorf("Failed to create image for product %d: %v", event.ProductID, deleteErr)
 		}
 		
 		return nil
@@ -117,7 +117,7 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 			s.logger.Infof("Successfully created product %d without image", event.ProductID)
 			return nil
 		} else {
-			product,err := s.useCase.BeginCreate(ctx, event)
+			product, err := s.useCase.BeginCreate(ctx, event)
 			if err != nil {
 				return fmt.Errorf("failed to begin create product: %d: %w", event.ProductID, err)
 			}
@@ -125,23 +125,23 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 			result := <-chImageProductCreate
 			if result.err != nil {
 				if err := s.useCase.RollbackCreate(ctx, product.ID); err != nil {
-					s.logger.Errorf("Failed to rollback create product: %d: %v", event.ProductID, err)
+					s.logger.Errorf("Failed to rollback create product: %d: %v", product.ID, err)
 				}
-				return fmt.Errorf("failed to create image for product %d: %w", event.ProductID, result.err)
+				return fmt.Errorf("failed to create image for product %d: %w", product.ID, result.err)
 			}
 
-			if err := s.useCase.CompleteCreate(ctx, event.ProductID); err != nil {
-				return fmt.Errorf("failed to complete create product: %d: %w", event.ProductID, err)
+			if err := s.useCase.CompleteCreate(ctx, product.ID); err != nil {
+				return fmt.Errorf("failed to complete create product: %d: %w", product.ID, err)
 			}
 
 			completedEvent := &broker.ProductEvent{
 				EventType: broker.EventTypeProductCreatingCompleted,
-				ProductID: event.ProductID,
+				ProductID: product.ID,
 			}
 			if err := s.messageBroker.PublishProduct(ctx, broker.ProductImageCreatingCompletedExchange, completedEvent); err != nil {
 				s.logger.Errorf("Failed to publish create completed event: %v", err)
 			}
-			s.logger.Infof("Successfully created product %d", event.ProductID)
+			s.logger.Infof("Successfully created product %d", product.ID)
 			return nil
 		}
 	})

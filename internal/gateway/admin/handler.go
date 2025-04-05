@@ -262,7 +262,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 	select {
 	case <-done:
 		c.Redirect(http.StatusFound, ProductsPath)
-	case <-time.After(9 * time.Second):
+	case <-time.After(3 * time.Second):
 		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
 			Error: "Did not can create product",
 		})

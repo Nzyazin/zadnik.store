@@ -70,6 +70,7 @@ func (puc *productUseCase) CreateFromEvent(ctx context.Context, event *broker.Pr
 		Description: event.Description,
 		Price:       event.Price,
 		Status:      domain.ProductStatusPending,
+		Slug:        common.GenerateSlug(event.Name),
 	}
 	return puc.repo.Create(ctx, product)
 }

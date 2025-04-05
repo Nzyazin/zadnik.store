@@ -173,8 +173,8 @@ func (r *productRepository) RollbackCreate(ctx context.Context, productID int32)
 
 func (r *productRepository) Create(ctx context.Context, product *domain.Product) error {
 	query := `
-		INSERT INTO products (name, description, price, status)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO products (name, description, price, status, slug)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id;
 	`
 
@@ -183,6 +183,7 @@ func (r *productRepository) Create(ctx context.Context, product *domain.Product)
 		product.Description,
 		product.Price,
 		domain.ProductStatusPending,
+		product.Slug,
 	)
 
 	if err != nil {
@@ -214,8 +215,8 @@ func (r *productRepository) CompleteCreate(ctx context.Context, productID int32)
 
 func (r *productRepository) BeginCreate(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	query := `
-		INSERT INTO products (name, description, price, status)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO products (name, description, price, status, slug)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id;
 	`
 
@@ -224,6 +225,7 @@ func (r *productRepository) BeginCreate(ctx context.Context, product *domain.Pro
 		product.Description,
 		product.Price,
 		domain.ProductStatusPending,
+		product.Slug,
 	).Scan(&product.ID)
 
 	if err != nil {
