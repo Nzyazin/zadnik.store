@@ -234,10 +234,13 @@ func (h *Handler) productCreate(c *gin.Context) {
 		productEvent.ImageData = imageBytes
 	}
 
-	if priceDecimal, err := h.handlePrice(priceStr, priceStr); err != nil {
-		h.redirectWithError(c, "", "Failed to create price")
+	if priceDecimal, err := decimal.NewFromString(priceStr); err != nil {
+		h.redirectWithError(c, "", "Invalid price format")
 		return
-	} else if priceDecimal != decimal.Zero {
+	} else if priceDecimal.IsNegative() || priceDecimal.IsZero() {
+		h.redirectWithError(c, "", "Invalid price value")
+		return
+	} else {
 		productEvent.Price = priceDecimal
 	}
 
