@@ -193,10 +193,11 @@ func (r *productRepository) Create(ctx context.Context, product *domain.Product)
 	return nil
 }
 
-func (r *productRepository) CompleteCreate(ctx context.Context, productID int32) error {
+func (r *productRepository) CompleteCreate(ctx context.Context, productID int32, imageURL string) error {
 	result, err := r.db.ExecContext(ctx,
-		"UPDATE products SET status = $1 WHERE id = $2 AND status = $3",
+		"UPDATE products SET status = $1, image_url = $2 WHERE id = $3 AND status = $4",
 		domain.ProductStatusActive,
+		imageURL,
 		productID,
 		domain.ProductStatusPending)
 	if  err != nil {

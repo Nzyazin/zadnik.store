@@ -38,5 +38,5 @@ type ProductRepository interface {
 	Create(ctx context.Context, product *Product) error
 	BeginCreate(ctx context.Context, product *Product) (*Product, error)
 	RollbackCreate(ctx context.Context, productID int32) error
-	CompleteCreate(ctx context.Context, productID int32) error
+	CompleteCreate(ctx context.Context, productID int32, imageURL string) error
 }

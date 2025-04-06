@@ -19,7 +19,7 @@ type ProductUseCase interface {
 	RollbackCreate(ctx context.Context, productID int32) error
 	BeginCreate(ctx context.Context, event *broker.ProductEvent) (*domain.Product, error)
 	CreateFromEvent(ctx context.Context, event *broker.ProductEvent) error
-	CompleteCreate(ctx context.Context, productID int32) error
+	CompleteCreate(ctx context.Context, productID int32, imageURL string) error
 }
 
 type productUseCase struct {
@@ -87,6 +87,6 @@ func (puc *productUseCase) BeginCreate(ctx context.Context, event *broker.Produc
 	return puc.repo.BeginCreate(ctx, product)
 }
 
-func (puc *productUseCase) CompleteCreate(ctx context.Context, productID int32) error {
-	return puc.repo.CompleteCreate(ctx, productID)
+func (puc *productUseCase) CompleteCreate(ctx context.Context, productID int32, imageURL string) error {
+	return puc.repo.CompleteCreate(ctx, productID, imageURL)
 }

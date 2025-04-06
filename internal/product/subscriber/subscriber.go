@@ -19,6 +19,7 @@ type Subscriber struct {
 type result struct {
 	productID int64
 	err       error
+	imageURL  string
 }
 
 func NewSubscriber(useCase usecase.ProductUseCase, messageBroker broker.MessageBroker, logger common.Logger) *Subscriber {
@@ -84,6 +85,7 @@ func (s *Subscriber) subscribeToImageCreated(ctx context.Context, chImageProduct
 		chImageProductCreate <- result{
 			productID: int64(event.ProductID),
 			err: deleteErr,
+			imageURL: event.ImageURL,
 		}
 
 		if deleteErr == nil {
@@ -130,7 +132,7 @@ func (s *Subscriber) subscribeToProductCreated(ctx context.Context, chImageProdu
 				return fmt.Errorf("failed to create image for product %d: %w", product.ID, result.err)
 			}
 
-			if err := s.useCase.CompleteCreate(ctx, product.ID); err != nil {
+			if err := s.useCase.CompleteCreate(ctx, product.ID, result.imageURL); err != nil {
 				return fmt.Errorf("failed to complete create product: %d: %w", product.ID, err)
 			}
 
