@@ -83,6 +83,7 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	}
 }
 
+//TODO: иногда удаляет товар, но не переаправляет на страницу с товарами
 func (h *Handler) productDelete(c *gin.Context) {
 	if !h.checkAuth(c) {
 		h.logger.Errorf("Unauthorized attempt to delete product")
