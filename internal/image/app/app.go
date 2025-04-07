@@ -110,7 +110,7 @@ func (a *App) handleImageCreating(event *broker.ProductEvent) error {
 		ProductID: event.ProductID,
 	}
 
-	imageUrl, err := a.imageUseCase.ProcessImage(ctx, event.ImageData, event.ProductID); 
+	imageUrl, err := a.imageUseCase.CreateImage(ctx, event.ImageData, event.Filename, event.ProductID); 
 	if err != nil {
 		a.logger.Errorf("Failed to process image %v", err)
 		eventFinished.Error = err.Error()

@@ -370,7 +370,7 @@ func (h *Handler) handleImage(c *gin.Context) (io.ReadCloser, string, error) {
 }
 
 func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
-	imageReader, err := h.handleImage(c)
+	imageReader, _, err := h.handleImage(c)
 	if err != nil {
 		return fmt.Errorf("failed to read image: %w", err)
 	}
