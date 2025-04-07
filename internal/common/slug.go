@@ -1,7 +1,9 @@
 package common
 
 import (
+	"fmt"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -24,5 +26,7 @@ func GenerateSlug(s string) string {
 
 	s = strings.Trim(s, "-")
 
-	return s
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+
+	return fmt.Sprintf("%s-%d", s, timestamp)
 }

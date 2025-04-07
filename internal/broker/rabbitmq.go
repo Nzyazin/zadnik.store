@@ -230,7 +230,9 @@ func subscribe[T any](b *RabbitMQBroker, ctx context.Context, exchange string, e
 		return fmt.Errorf("failed to consume queue: %w", err)
 	}
 
+	ready := make(chan struct{})
 	go func() {
+		close(ready)
 		for {
 			select {
 			case <-ctx.Done():
@@ -251,7 +253,13 @@ func subscribe[T any](b *RabbitMQBroker, ctx context.Context, exchange string, e
 			}
 		}
 	}()
-	return nil
+	
+	select {
+	case <-ready:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 func (b *RabbitMQBroker) PublishProduct(ctx context.Context, exchange string, event *ProductEvent) error {

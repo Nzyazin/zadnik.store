@@ -83,69 +83,6 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	}
 }
 
-//TODO: иногда удаляет товар, но не переаправляет на страницу с товарами
-func (h *Handler) productDelete(c *gin.Context) {
-	if !h.checkAuth(c) {
-		h.logger.Errorf("Unauthorized attempt to delete product")
-		return
-	}
-
-	productIDint, err := h.validateProductID(c)
-	if err != nil {
-		h.logger.Errorf("Product ID validation failed: %v", err)
-		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
-			Error: "ID is not valid",
-		})
-		return
-	}
-
-	imageURL := c.PostForm("image_url")
-
-	h.logger.Infof("Starting deletion process for product %d", productIDint)
-
-	productEvent := &broker.ProductEvent{
-		EventType: broker.EventTypeProductDeleted,
-		ProductID: int32(productIDint),
-		ImageURL:  imageURL,
-	}
-
-	done := make(chan error, 1)
-	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageDeletingCompletedExchange, broker.EventTypeProductDeletingCompleted, func(pe *broker.ProductEvent) error {
-		h.logger.Infof("Received delete completed event for product %d", productIDint)
-		if pe.ProductID == int32(productIDint) {
-			done <- nil
-		}
-		return nil
-	}); err != nil {
-		h.logger.Errorf("Failed to subscribe to image delete: %v", err)
-		return
-	}
-
-	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageDeletingExchange, productEvent); err != nil {
-		h.logger.Errorf("Failed to publish product event: %v", err)
-		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
-			Error: "Did not can delete product",
-		})
-		return
-	}
-
-	h.logger.Infof("Successfully published delete event for product %d", productIDint)
-
-	select {
-	case <-done:
-		c.Redirect(http.StatusFound, ProductsPath)
-	case <-time.After(10 * time.Second):
-		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
-			Error: "Did not can delete product",
-		})
-	case <-c.Request.Context().Done():
-		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
-			Error: "Request cancelled",
-		})
-	}
-
-}
-
 func (h *Handler) redirectWithError(c *gin.Context, productID, message string) {
 	if productID == "" {
 		c.Redirect(http.StatusFound, ProductCreatePath + "?error=" + url.QueryEscape(message))
@@ -332,6 +269,85 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusFound, ProductsPath)
+}
+
+//TODO: иногда удаляет товар, но не переаправляет на страницу с товарами
+func (h *Handler) productDelete(c *gin.Context) {
+	if !h.checkAuth(c) {
+		h.logger.Errorf("Unauthorized attempt to delete product")
+		return
+	}
+
+	productIDint, err := h.validateProductID(c)
+	if err != nil {
+		h.logger.Errorf("Product ID validation failed: %v", err)
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "ID is not valid",
+		})
+		return
+	}
+
+	imageURL := c.PostForm("image_url")
+	h.logger.Infof("Starting deletion process for product %d", productIDint)	
+
+	done := make(chan error, 1)
+	cleanup := make(chan struct{})
+	defer close(cleanup)
+	if err := h.messageBroker.SubscribeToProductDelete(c.Request.Context(), broker.ProductImageDeletingCompletedExchange, broker.EventTypeProductDeletingCompleted, func(pe *broker.ProductEvent) error {
+		select {
+		case <-cleanup:
+			return nil
+		default:
+			if pe.ProductID == int32(productIDint) {
+				done <- nil
+				return nil
+			}
+			return nil
+		}
+	}); err != nil {
+		h.logger.Errorf("Failed to subscribe to image delete: %v", err)
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "failed to set up product deletion",
+		})
+		return
+	}
+
+	productEvent := &broker.ProductEvent{
+		EventType: broker.EventTypeProductDeleted,
+		ProductID: int32(productIDint),
+		ImageURL:  imageURL,
+	}
+
+	if err := h.messageBroker.PublishProduct(c.Request.Context(), broker.ProductImageDeletingExchange, productEvent); err != nil {
+		h.logger.Errorf("Failed to publish product event: %v", err)
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "Failed to initiate product deletion",
+		})
+		return
+	}
+
+	h.logger.Infof("Successfully published delete event for product %d", productIDint)
+
+	select {
+	case err :=<-done:
+		if err != nil {
+			h.logger.Errorf("Error during product deletion: %v", err)
+			h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+				Error: "Failed to delete product",
+			})
+			return
+		}
+		c.Redirect(http.StatusFound, ProductsPath)
+	case <-time.After(9 * time.Second):
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "Product deletion timeout",
+		})
+	case <-c.Request.Context().Done():
+		h.renderProductsIndex(c, admin_templates.ProductsIndexParams{
+			Error: "Request cancelled",
+		})
+	}
+
 }
 
 func (h *Handler) handleImage(c *gin.Context) (io.ReadCloser, error) {
