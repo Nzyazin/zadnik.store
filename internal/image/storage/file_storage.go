@@ -25,8 +25,11 @@ func NewFileStorage(basePath string, baseURL string) (domain.ImageStorage, error
 	}, nil
 }
 
-func (fs *fileStorage) Store(ctx context.Context, imageData []byte, productID int32) (string, error) {
-    filename := fmt.Sprintf("%d.jpg", productID)
+func (fs *fileStorage) Store(ctx context.Context, filename string, imageData []byte, productID int32) (string, error) {
+	if filename == "" {
+		filename = fmt.Sprintf("%d.jpg", productID)
+	}
+   
     filePath := filepath.Join(fs.basePath, filename)
 	
 	if err := os.WriteFile(filePath, imageData, 0644); err != nil {

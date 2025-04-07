@@ -9,6 +9,7 @@ import (
 )
 
 type ImageUseCase interface {
+	CreateImage(ctx context.Context, imageData []byte, filename string, productID int32) (string, error)
 	ProcessImage(ctx context.Context, imageData []byte, productID int32) (string, error)
 	DeleteImage(ctx context.Context, productID int32) error
 }
@@ -28,8 +29,17 @@ func NewImageUseCase(
 	}
 }
 
+func (iuc *imageUseCase) CreateImage(ctx context.Context, imageData []byte, filename string, productID int32) (string, error) {
+	imageURL, err := iuc.storage.Store(ctx, filename, imageData, productID)
+	if err != nil {
+		return "", fmt.Errorf("failed to store image: %w", err)
+	}
+
+	return imageURL, nil
+}
+
 func (iuc *imageUseCase) ProcessImage(ctx context.Context, imageData []byte, productID int32) (string, error) {
-	imageURL, err := iuc.storage.Store(ctx, imageData, productID)
+	imageURL, err := iuc.storage.Store(ctx, "", imageData, productID)
 	if err != nil {
 		return "", fmt.Errorf("failed to store image: %w", err)
 	}

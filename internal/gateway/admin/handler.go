@@ -157,7 +157,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 		Description: description,
 	}
 
-	imageReader, err := h.handleImage(c)
+	imageReader, filename, err := h.handleImage(c)
 	if err != nil {
 		h.redirectWithError(c, "", "Failed to handle image")
 		return
@@ -169,6 +169,7 @@ func (h *Handler) productCreate(c *gin.Context) {
 			h.redirectWithError(c, "", "Failed to read image")
 			return
 		}
+		productEvent.Filename = filename
 		productEvent.ImageData = imageBytes
 	}
 
@@ -271,7 +272,6 @@ func (h *Handler) productUpdate(c *gin.Context) {
 	c.Redirect(http.StatusFound, ProductsPath)
 }
 
-//TODO: иногда удаляет товар, но не переаправляет на страницу с товарами
 func (h *Handler) productDelete(c *gin.Context) {
 	if !h.checkAuth(c) {
 		h.logger.Errorf("Unauthorized attempt to delete product")
@@ -350,23 +350,23 @@ func (h *Handler) productDelete(c *gin.Context) {
 
 }
 
-func (h *Handler) handleImage(c *gin.Context) (io.ReadCloser, error) {
+func (h *Handler) handleImage(c *gin.Context) (io.ReadCloser, string, error) {
 	file, err := c.FormFile("image")
 	if err == http.ErrMissingFile {
-		return nil, nil
+		return nil, "", nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get image: %w", err)
+		return nil, "", fmt.Errorf("failed to get image: %w", err)
 	}
 	if file == nil {
-		return nil, fmt.Errorf("file not found")
+		return nil, "", fmt.Errorf("file not found")
 	}
 
 	imageData, err := file.Open()
 	if err != nil {
-		return nil, fmt.Errorf("failed to open image: %w", err)
+		return nil, "", fmt.Errorf("failed to open image: %w", err)
 	}
-	return imageData, nil
+	return imageData, file.Filename, nil
 }
 
 func (h *Handler) handleImageUpload(c *gin.Context, productIDInt int64) error {
