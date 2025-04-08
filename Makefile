@@ -110,8 +110,12 @@ build-frontend:
 	cd web/frontend-admin && npm run build
 
 .PHONY: dev-frontend
-dev-frontend:
+dev-frontend-admin:
 	cd web/frontend-admin && npm run dev
+
+.PHONY: dev-frontend-client
+dev-frontend-client:
+	cd web/frontend-client && npm run dev
 
 # Static files
 .PHONY: setup-static
