@@ -2,23 +2,16 @@
   const pathStatics = '/statics'
   const pathImage = `${pathStatics}/images`
 
-  const phone = { link: 'tel:+79229802015', mask: '+79229802015' }
-  const mail = { link: 'mailto:chiedocover@gmail.com', mask: 'chiedocover@gmail.com' }
-  const address = 'г. Киров, ул. Орловская, 4Г'
-
-  const menuList = [
-    {text: 'Модели', link: '#products'},
-    {text: 'Материалы', link: '#materials-fittings'},
-    {text: 'Отзывы', link: '#reviews'},
-    {text: 'Вопросы', link: '#faq-questions'},
-  ]
+  const phone = { link: 'tel:+79536799464', mask: '+79536799464' }
+  const mail = { link: 'mailto:zyazin.nikita@yandex.ru', mask: 'zyazin.nikita@yandex.ru' }
+  const address = 'Кировская обл., п. Вахруши, ул. Рабочая, д. 30'
 
   function staticImage(image) {
     return `${pathImage}${image}`
   }
 
   const pages = [
-    { view: 'home', name: 'Главная', style: 'home', priority: 2, link: '/' },
+    { view: 'index', name: 'Главная', style: 'index', priority: 2, link: '/' },
   ]
 
   function getPage(view) {

@@ -10,29 +10,6 @@ import env from './env.js'
 
 const dataView = { URL: env.url }
 
-function htaccess () {
-  return gulp.src('assets/files/.htaccess.pug', { encoding: false })
-    .pipe(plumber())
-    .pipe(data(dataView))
-    .pipe(pug())
-    .pipe(rename({ extname: '' }))
-    .pipe(gulp.dest(`${env.outputFolder}`))
-}
-
-function robots () {
-  return gulp.src('assets/files/robots.pug', { encoding: false })
-    .pipe(plumber())
-    .pipe(data(dataView))
-    .pipe(pug())
-    .pipe(rename({ extname: '.txt' }))
-    .pipe(gulp.dest(`${env.outputFolder}`))
-}
-
-function mail () {
-  return gulp.src('assets/files/mail.php', { encoding: false })
-    .pipe(gulp.dest(`${env.outputFolder}`))
-}
-
 export default {
-  build: gulp.series(htaccess, robots, mail)
+  build: gulp.series()
 }

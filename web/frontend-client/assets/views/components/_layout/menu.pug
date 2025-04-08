@@ -1,0 +1,10 @@
+.header__menu-mobile(data-element="menu")
+  span.header__menu-text Стулья Хит от производителя
+  a.header__phone.header__phone_mobile.link_gray(href=phone.link)= phone.mask
+  ul.menu__list-mobile
+    each item in menuMobileList
+      li.menu__item-mobile
+        if VIEW === item.view
+          span.menu__span.menu__link_nav= item.name
+        else
+          a.menu__link.menu__link_nav(href=`${item.link}`)= item.name

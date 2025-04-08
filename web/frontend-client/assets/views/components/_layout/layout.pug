@@ -10,12 +10,8 @@ html(lang='ru')
     include _head
     block head
   body
-    if !hideHeader
-      include header
-    if !hideWrapper
-      .wrapper
-        block body
-    else
+    include header
+    main.wrapper
       block body
     include scripts
     each style in prefetchStyle()
