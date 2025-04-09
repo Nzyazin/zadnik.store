@@ -6,7 +6,6 @@
 import gulp from 'gulp'
 import { runServe } from './tasks/browserSync.js'
 import clean from './tasks/clean.js'
-import copy from './tasks/copy.js'
 import fonts from './tasks/fonts.js'
 import img from './tasks/images.js'
 import scripts from './tasks/scripts.js'
@@ -35,7 +34,6 @@ gulp.task('build', gulp.series(
   styles.build,
   scripts.build,
   img.build,
-  copy.build,
   view.build
 ))
 
