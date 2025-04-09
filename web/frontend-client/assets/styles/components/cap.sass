@@ -1,0 +1,115 @@
+.cap
+  position: relative
+  margin-bottom: 60px
+  background: linear-gradient(rgba($dark, .05), rgba($dark, .03))
+  @include media(950)
+    margin-bottom: 20px
+    background: linear-gradient(rgba($dark, .03), transparent)
+
+.cap_index
+  .cap__block
+    padding: 81px 715px 128px 0
+    @include media(1240)
+      padding: 20px 606px 20px 0
+    @include media(950)
+      padding: 20px 404px 20px 0
+    @include media(700)
+      padding: 20px 0 27px
+  .cap__picture
+    top: 20px
+    @include media(700)
+      top: auto
+      bottom: 26px
+  .cap__caption
+    @include media(1240)
+      margin-bottom: 12px
+  .cap__subtitle
+    @include media(1240)
+      display: block
+      margin-bottom: 30px
+      font-size: 25px
+      line-height: 30px
+    @include media(700)
+      margin-bottom: 183px
+
+.cap__block
+  padding: 81px 650px 128px 0
+  @include media(1240)
+    padding: 20px 606px 20px 0
+  @include media(950)
+    padding: 20px 404px 20px 0
+  @include media(700)
+    padding: 20px 0 27px
+
+
+
+.cap__caption
+  margin-bottom: 26px
+  @include media(1240)
+    margin-bottom: 30px
+    span
+      display: block
+      margin-top: 12px
+      font-size: 25px
+      line-height: 30px
+      white-space: nowrap
+      &:first-letter
+        text-transform: uppercase
+  @include media(700)
+    max-width: 240px
+    margin-bottom: 183px
+
+.cap__subtitle
+  display: block
+  margin-bottom: 53px
+  font-size: 25px
+  @include media(1240)
+    display: none
+
+.cap__button
+  display: block
+  padding: 16px 33px
+  max-width: 266px
+  width: 100%
+  border-radius: 6px
+  @include media(1240)
+    border-radius: 3px
+    font-size: 20px
+  @include media(700)
+    max-width: 100%
+
+.cap__picture-block
+  position: absolute
+  top: 60px
+  right: calc(30% - 208px)
+  @include media(1240)
+    top: 5px
+    right: 250px
+    width: 264px
+    height: 227px
+
+.cap__picture
+  position: absolute
+  top: 60px
+  right: calc(30% - 279px)
+  z-index: -1
+  display: block
+  width: 572px
+  @include media(1240)
+    top: 5px
+    right: 250px
+    width: 264px
+    height: 227px
+  @include media(950)
+    right: 120px
+  @include media(700)
+    width: 258px
+    height: 222px
+    top: 152px
+    right: calc(50% - 129px)
+
+.cap__image
+  height: 493px
+  object-fit: cover
+  @include media(1240)
+    height: 227px

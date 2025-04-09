@@ -13,11 +13,11 @@
   if VIEW === "index"
     .header__logo
       picture.header__picture
-        img.header__image(src=`${pathImage}logo.svg`, alt="Лого магазин задников")
+        img.header__image(src=`${pathImage}/logo.png`, alt="Лого магазин задников")
   else
     a.header__logo(href=getLinkPage('index'))
       picture.header__picture
-        img.header__image(src=`${pathImage}logo.svg`, alt="Лого магазин задников")
+        img.header__image(src=`${pathImage}/logo.png`, alt="Лого магазин задников")
   a.header__phone.link_gray(href=phone.link)= phone.mask
   a.header__contacts-link_phone(href=phone.link)
   .header__contacts
