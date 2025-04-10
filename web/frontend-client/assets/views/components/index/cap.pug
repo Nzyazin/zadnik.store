@@ -1,13 +1,9 @@
 section.cap(class = VIEW === 'index' ? 'cap_index' : '')
   .cap__cont.cont
     .cap__block
-      h1.cap__caption.caption!= `${VIEW === 'index' ? 'Банкетные стулья Хит' : `Банкетные стулья Хит <span>${currentCategory.name.menu}</span>`}`
+      h1.cap__caption.caption!= 'Задник из кожкартона'
       h2.cap__subtitle.text от производителя
-      a.cap__button.button_green.text-big(href="#book-discount", data-role="scroll-to-anchor") Получить каталог
+      a.cap__button.button-orange.text-big(href="#book-discount", data-role="scroll-to-anchor") Получить каталог
     picture.cap__picture
-      - const capImagePath = `${pathImage}/cap/cap-${VIEW === "index" ? 'index' : currentCategory.id}`
-        source(srcset=`${capImagePath}_258.webp 1x, ${capImagePath}_516.webp 2x`, type='image/webp', media="(max-width: 700px)")
-        source(srcset=`${capImagePath}_264.webp 1x, ${capImagePath}_528.webp 2x`, type='image/webp', media="(max-width: 1240px)")
-        source(srcset=`${capImagePath}_572.webp 1x, ${capImagePath}_858.webp 1.5x`, type='image/webp')
-        source(srcset=`${capImagePath}_572.png 1x, ${capImagePath}_858.png 1.5x`)
-        img.cap__image(src=`${capImagePath}_572.png`, alt=`${VIEW === "index" ? 'Банкетный стул Хит' : `Банкетный стул Хит ${currentCategory.name.menu}`}`, loading="lazy")
+      - const capImagePath = `${pathImage}/cap/`
+        img.cap__image(src=`${capImagePath}zadnik-cap.png`, alt="Задник из кожкартона", loading="lazy")
