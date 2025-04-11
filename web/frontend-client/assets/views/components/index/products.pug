@@ -1,0 +1,26 @@
+-
+  const productList = [{
+      images: [
+        { path: 'products-19', name: 'Стол Лофт-1', price: '29990' },
+        { path: 'products-18', name: 'Стол Лофт А1', price: '29990' },
+        { path: 'products-17', name: 'Стол Лофт-2', price: '29990' },
+        { path: 'products-16', name: 'Стол Лофт-4', price: '29990' },
+        { path: 'products-15', name: 'Стол Лофт-7', price: '29990' },
+        { path: 'products-14', name: 'Барный стол Леморей', price: '29990' },
+        { path: 'products-13', name: 'Барная стойка Парсон', price: '29990' },
+        { path: 'products-12', name: 'Журнальный стол Мэдисон', price: '29990' },
+        { path: 'products-11', name: 'Стол обеденный Boone 190', price: '29990' },
+      ]
+    }
+  ]
+
+.products(data-element="products", id="products")
+  .products__cont.cont
+    h2.products__title.title Изготовленные товары
+    each item in productList
+      ul.products__list
+        each image in item.images
+          li.products__item
+            img.products__image(srcset=placeholder(120, 120), alt=`${image.name} - фото`, loading="lazy")
+            span.products__name= image.name
+            span.products__price= image.price + ' ₽'
