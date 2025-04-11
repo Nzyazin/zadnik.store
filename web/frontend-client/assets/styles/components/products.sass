@@ -32,6 +32,8 @@
     margin: 0
     column-gap: 36px
   @include media(950)
+    column-gap: 108px
+  @include media(700)
     column-gap: 12px
   @include media(520)
     column-gap: unset
@@ -46,23 +48,8 @@
   @include media(520)
     margin: 0 6px 20px
     width: calc(50% - 12px)
-
-.products__picture
-  display: block
-  margin-bottom: 12px
-  cursor: pointer
-  width: 276px
-  @include media(1240)
-    width: 260px
-    margin-bottom: 12px
-  @include media(950)
-    width: 318px
-  @include media(700)
-    width: 228px
-  @include media(520)
     position: relative
-    width: 100%
-    padding-top: 100%
+    padding-top: 50%
 
 .products__image
   height: 270px
@@ -70,7 +57,7 @@
   @include media(1240)
     height: 260px
   @include media(950)
-    height: 318px
+    height: 270px
   @include media(700)
     height: 228px
   @include media(520)
