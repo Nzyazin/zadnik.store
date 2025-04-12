@@ -18,6 +18,11 @@
     return pages.find(page => page.view === view)
   }
 
+  function getLinkPage (view) {
+    const currentPage = getPage(view)
+    return currentPage?.link || `/${view}.html`
+  }
+
   function prefetchStyle() {
     const style = []
     const list = pages
