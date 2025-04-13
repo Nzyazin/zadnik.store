@@ -1,0 +1,37 @@
+-
+  const whatFamousList = [
+    {
+      img: pathImage + 'what-famous/what-famous-1',
+      text: 'Высокое качество'
+    },
+    {
+      img: pathImage + 'what-famous/what-famous-2',
+      text: 'Повышенная надежность'
+    },
+    {
+      img: pathImage + 'what-famous/what-famous-3',
+      text: 'Стильный дизайн'
+    },
+    {
+      img: pathImage + 'what-famous/what-famous-4',
+      text: 'Эргономичность'
+    },
+    {
+      img: pathImage + 'what-famous/what-famous-5',
+      text: 'Устойчивость'
+    },
+    {
+      img: pathImage + 'what-famous/what-famous-6',
+      text: 'Универсальность'
+    },
+  ]
+
+article.what-famous
+  .what-famous__cont.cont
+    span.what-famous__title.title
+      | Чем хорош задник из кожкартона?
+    .what-famous__list
+      each item in whatFamousList
+        .what-famous__item
+          img.what-famous__image(src=`${item.img}.svg`, alt="#")
+          span.what-famous__headline.headline= item.text
