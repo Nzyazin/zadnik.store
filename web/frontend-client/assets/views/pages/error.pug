@@ -1,0 +1,9 @@
+extends ../components/_layout/layout
+
+block head
+  +title('Страница не найдена')
+  +description("К сожалению, запрашиваемая Вами страница не найдена. Попробуйте вернуться на главную")
+
+block body
+  include ../components/thank&error/thank
+  +thanks404('Ошибка', ['Такой страницы нет.'])

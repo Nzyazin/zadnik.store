@@ -1,0 +1,8 @@
+mixin thanks404 (caption, textArr)
+  .thanks
+    .thanks__cont.cont
+      h1.thanks__caption.caption= caption
+      each text in textArr
+        p.thanks__text= text
+      .thanks__btn-box
+        a.thanks__button.button_green(href=getLinkPage('index')) На главную
