@@ -1,23 +1,23 @@
-.faq-questions
+.faq
   margin-bottom: 100px
   @include media(1240)
     margin-bottom: 48px
 
-//.faq-questions__cont
+//.faq__cont
 
-.faq-questions__title
+.faq__title
   margin-bottom: 40px
   @include media(1240)
     margin-bottom: 24px
 
-.faq-questions__area
+.faq__area
   display: flex
   column-gap: 24px
   @include media(950)
     flex-direction: column
     row-gap: 10px
 
-.faq-questions__area-column
+.faq__area-column
   display: flex
   flex-direction: column
   width: calc(50% - 12px)
@@ -25,12 +25,13 @@
   @include media(950)
     width: 100%
 
-.faq-questions__item
+.faq__item
   width: 100%
   background-color: $gray-light
   padding: 21px 16px 19px
+  border-radius: 18px
 
-.faq-questions__question
+.faq__question
   display: flex
   justify-content: space-between
   align-items: center
@@ -50,19 +51,19 @@
       &::after
         background: #FD9479
 
-.faq-questions__answer
+.faq__answer
   padding-right: 30px
   height: 0
   opacity: 0
   transition: opacity 0s
   color: rgba($dark, 0.8)
 
-.faq-questions__item-active
+.faq__item-active
   height: auto
-  .faq-questions__question
+  .faq__question
     &::after
       transform: rotate(135deg)
-  .faq-questions__answer
+  .faq__answer
     padding-top: 9px
     height: auto
     opacity: 1

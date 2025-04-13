@@ -1,0 +1,37 @@
+-
+  const showcaseList = [
+    {
+      img: pathImage + 'showcase/showcase-1',
+      text: 'Повышенная прочность'
+    },
+    {
+      img: pathImage + 'showcase/showcase-2',
+      text: 'Анатомическая форма'
+    },
+    {
+      img: pathImage + 'showcase/showcase-3',
+      text: 'Влагоустойчивость'
+    },
+    {
+      img: pathImage + 'showcase/showcase-4',
+      text: 'Экологичность'
+    },
+    {
+      img: pathImage + 'showcase/showcase-5',
+      text: 'Комфорт при носке'
+    },
+    {
+      img: pathImage + 'showcase/showcase-6',
+      text: 'Легкость'
+    },
+  ]
+
+article.showcase
+  .showcase__cont.cont
+    span.showcase__title.title
+      | Чем хорош задник из кожкартона?
+    .showcase__list
+      each item in showcaseList
+        .showcase__item
+          img.showcase__image(src=`${item.img}.svg`, alt="#")
+          span.showcase__headline.headline= item.text

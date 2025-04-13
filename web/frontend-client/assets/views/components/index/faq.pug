@@ -22,13 +22,13 @@
     ]
   ]
 
-.faq-questions#faq-questions(data-element="faq-questions")
-  .faq-questions__cont.cont
-    h2.faq-questions__title.title Вопросы
-    .faq-questions__area
+.faq#faq(data-element="faq")
+  .faq__cont.cont
+    h2.faq__title.title Вопросы
+    .faq__area
       each item in faqQuestionsList
-        .faq-questions__area-column
+        .faq__area-column
           each faq in item
-            .faq-questions__item
-              p.faq-questions__question.text(data-element='faq__question')= faq.question
-              p.faq-questions__answer.text-small(data-element='faq__answer')= faq.answer
+            .faq__item
+              p.faq__question.text(data-element='faq__question')= faq.question
+              p.faq__answer.text-small(data-element='faq__answer')= faq.answer

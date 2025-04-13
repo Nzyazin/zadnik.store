@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Основной щит -->
+<path d="M32 4L8 14V30C8 47 32 60 32 60C32 60 56 47 56 30V14L32 4Z" stroke="#888888" stroke-width="2" fill="none"/>
+
+<!-- Герб внутри щита -->
+<path d="M32 12L18 18V28C18 38 32 46 32 46C32 46 46 38 46 28V18L32 12Z" stroke="#888888" stroke-width="1.5" fill="none"/>
+
+<!-- Детали герба -->
+<path d="M32 20L26 24V30C26 34 32 38 32 38C32 38 38 34 38 30V24L32 20Z" stroke="#888888" stroke-width="1.5" fill="none"/>
+
+<!-- Декоративные линии -->
+<line x1="32" y1="12" x2="32" y2="20" stroke="#888888" stroke-width="1.5"/>
+<line x1="18" y1="28" x2="26" y2="30" stroke="#888888" stroke-width="1.5"/>
+<line x1="46" y1="28" x2="38" y2="30" stroke="#888888" stroke-width="1.5"/>
+
+<!-- Дополнительные декоративные элементы -->
+<path d="M24 28C24 28 28 32 32 32C36 32 40 28 40 28" stroke="#888888" stroke-width="1.5" fill="none"/>
+</svg>

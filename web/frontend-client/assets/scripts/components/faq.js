@@ -1,4 +1,4 @@
-const faqQuestions = document.querySelector('[data-element="faq-questions"]')
+const faqQuestions = document.querySelector('[data-element="faq"]')
 
 if (faqQuestions) setTimeout(faqInit, 0)
 
@@ -15,7 +15,7 @@ function faqInit () {
     const parent = this.parentNode
 
     if (parent) {
-      parent.classList.toggle('faq-questions__item-active')
+      parent.classList.toggle('faq__item-active')
     }
   }
 }
