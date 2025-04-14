@@ -19,9 +19,3 @@
       picture.header__picture
         img.header__image(src=`${pathImage}/logo.png`, alt="Лого магазин задников")
   a.header__phone.link_gray(href=phone.link)= phone.mask
-  a.header__contacts-link_phone(href=phone.link)
-  .header__contacts
-    if VIEW === "contacts"
-      span.menu__span Контакты
-    else
-      a.menu__link(href="#") Контакты
