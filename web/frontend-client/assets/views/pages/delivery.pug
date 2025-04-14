@@ -1,0 +1,12 @@
+extends ../components/_layout/layout
+
+block head
+  +title('Доставка и упаковка офисных стульев Хит')
+  +description('Способы доставки и упаковки стульев Хит от производителя')
+
+block body
+  include ../components/delivery/delivery
+  include ../components/delivery/courier
+  include ../components/delivery/transport
+  include ../components/delivery/packaging
+  include ../components/delivery/dimensions

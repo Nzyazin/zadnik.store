@@ -1,0 +1,66 @@
+.dimensions
+  margin-bottom: 114px
+  @include media(1240)
+    margin-bottom: 43px
+
+//.dimensions__cont
+
+.dimensions__title
+  margin-bottom: 42px
+  @include media(1240)
+    margin-bottom: 20px
+
+.dimensions__list
+  display: flex
+  margin: 0 -20px
+  @include media(1240)
+    margin: 0 -12px
+    overflow: auto
+    -webkit-overflow-scrolling: touch
+  &::before, &::after
+    content: ''
+    flex-shrink: 0
+    width: 16px
+  &::before
+    margin-right: -16px
+  &::after
+    margin-left: -16px
+
+.dimensions__item
+  position: relative
+  margin: 0 20px
+  flex-shrink: 0
+  @include media(1240)
+    margin: 0 12px 20px
+  &:last-of-type::before
+    right: 0
+  &::before
+    content: ''
+    position: absolute
+    top: 35px
+    right: -40px
+    left: 0
+    height: 1px
+    background-color: rgba($dark, .1)
+    @include media(1240)
+      top: 24px
+      right: -24px
+
+.dimensions__name
+  margin-bottom: 25px
+  display: block
+  color: rgba($dark, .7)
+  @include media(1240)
+    margin-bottom: 11px
+
+.dimensions__value
+  margin-bottom: 16px
+  display: block
+  white-space: nowrap
+  font-size: 24px
+  line-height: 32px
+  font-weight: 400
+  @include media(1240)
+    margin-bottom: 8px
+    font-size: 20px
+    line-height: 27px

@@ -1,0 +1,42 @@
+-
+  const deliveryRegionCompanies = [
+    {img: 'delivery-1', name: 'ПЭК'},
+    {img: 'delivery-2', name: 'Деловые Линии'},
+    {img: 'delivery-3', name: 'Энергия'},
+    {img: 'delivery-4', name: 'Кашалот'},
+    {img: 'delivery-5', name: 'Байкал Сервис'},
+    {img: 'delivery-6', name: 'DPD'},
+    {img: 'delivery-7', name: 'СДЭК'},
+    {img: 'delivery-8', name: 'Dimex'},
+    {img: 'delivery-9', name: 'Pony Express '},
+    {img: 'delivery-10', name: 'Главдоставка'},
+    {img: 'delivery-11', name: 'Транс Карго'},
+    {img: 'delivery-12', name: 'Рейл Континент'},
+    {img: 'delivery-13', name: 'Инком Карго'},
+    {img: 'delivery-14', name: 'ТЭС'},
+    {img: 'delivery-15', name: 'ТК Экспресс'},
+    {img: 'delivery-16', name: 'Восточный транзит'},
+    {img: 'delivery-17', name: 'Мы с Камчатки'},
+    {img: 'delivery-18', name: 'ДК Транзит'},
+    {img: 'delivery-19', name: 'Возовоз'},
+    {img: 'delivery-20', name: 'От Белого до Черного Моря'},
+    {img: 'delivery-21', name: 'Magic Trans'},
+    {img: 'delivery-22', name: 'СЛТК'},
+    {img: 'delivery-23', name: 'АТА'},
+    {img: 'delivery-24', name: 'Самком'}
+  ];
+
+article.transport
+  .transport__cont.cont
+    h3.transport__headline.headline Транспортными компаниями по России и СНГ
+    .transport__area
+      ul.transport__companies
+        each item, index in deliveryRegionCompanies
+          li.transport__company
+            picture.transport__picture
+              source(srcset=`${pathImage}delivery/${item.img}_88.webp 1x, ${pathImage}delivery/${item.img}_176.webp 2x`, media="(max-width: 1240px)")
+              source(srcset=`${pathImage}delivery/${item.img}.webp`, type='image/webp')
+              source(srcset=`${pathImage}delivery/${item.img}_88.jpg 1x, ${pathImage}delivery/${item.img}_176.jpg 2x`, media="(max-width: 1240px)")
+              img.transport__image(src=`${pathImage}delivery/${item.img}.jpg`, alt=`${item.name} логотип`, loading="lazy")
+            span.transport__name= item.name
+
