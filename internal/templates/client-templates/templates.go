@@ -1,1 +1,1 @@
-package client
+package client_templates
