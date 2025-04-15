@@ -1,0 +1,93 @@
+.guarantee
+  margin-top: 36px
+  margin-bottom: 47px
+  @include media(1240)
+    margin-top: 33px
+    margin-bottom: 31px
+
+//.guarantee__cont
+
+.guarantee__caption
+  margin-bottom: 24px
+  @include media(1240)
+    margin-bottom: 11px
+
+.guarantee__title
+  margin-bottom: 24px
+  margin-top: 72px
+  @include media(1240)
+    margin-top: 48px
+    margin-bottom: 12px
+
+.guarantee__text
+  max-width: 876px
+  margin-bottom: 20px
+  @include media(1240)
+    margin-bottom: 12px
+
+.guarantee__text_big
+  margin-bottom: 16px
+  font-size: 24px
+  line-height: 32px
+  @include media(1240)
+    margin-bottom: 12px
+    font-size: 20px
+    line-height: 27px
+
+//.guarantee__list
+
+.guarantee__item
+  position: relative
+  max-width: 876px
+  padding-left: 23px
+  margin-bottom: 20px
+  @include media(1240)
+    margin-bottom: 12px
+    padding-left: 20px
+  &::before
+    content: ''
+    position: absolute
+    top: 9px
+    left: 0
+    width: 8px
+    height: 8px
+    border-radius: 50%
+    background-color: $orange
+    @include media(1240)
+      width: 6px
+      height: 6px
+      top: 9px
+
+.guarantee__area
+  display: flex
+  flex-wrap: wrap
+  margin: 32px -12px 0
+  @include media(1240)
+    margin: 20px -6px 0
+
+.guarantee__box
+  display: block
+  margin: 0 12px 24px
+  width: 276px
+  @include media(1240)
+    margin: 0 6px 12px
+    width: 204px
+  @include media(950)
+    width: 153px
+  @include media(700)
+    width: 148px
+  @include media(520)
+    width: calc(50% - 12px)
+
+.guarantee__picture
+  position: relative
+  padding-top: 143%
+
+.guarantee__image
+  position: absolute
+  top: 0
+  right: 0
+  left: 0
+  display: block
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.17)
+  border-radius: 4px
