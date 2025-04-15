@@ -1,0 +1,52 @@
+{{define "header"}}
+<header class="header" data-element="menu">
+  <div class="header__layer" data-element="header__layer"></div>
+  <div class="header__cont cont">
+    <div class="header-mob__burger-box">
+      <button class="header-mob__burger" data-element="header-mob__burger">
+        <span class="header-mob__burger-line"></span>
+      </button>
+    </div>
+    <div class="header__nav">
+      <ul class="menu__list">
+        <li class="menu__item">
+          <a class="menu__link menu__link_nav {{if eq .View "index"}}menu__span{{end}}" href="/">Главная</a>
+        </li>
+        <li class="menu__item">
+          <a class="menu__link menu__link_nav {{if eq .View "delivery"}}menu__span{{end}}" href="/delivery">Доставка</a>
+        </li>
+        <li class="menu__item">
+          <a class="menu__link menu__link_nav {{if eq .View "payment"}}menu__span{{end}}" href="/payment">Оплата</a>
+        </li>
+        <li class="menu__item">
+          <a class="menu__link menu__link_nav {{if eq .View "guarantee"}}menu__span{{end}}" href="/guarantee">Гарантия</a>
+        </li>
+      </ul>
+    </div>
+    <div class="header__logo">
+      <picture class="header__picture">
+        <img class="header__image" src="/statics/images/logo.png" alt="Лого магазин задников">
+      </picture>
+    </div>
+    <a class="header__phone link_gray" href="tel:+79536799464">+7 953 679-94-64</a>
+  </div>
+  <div class="header__menu-mobile" data-element="menu">
+    <span class="header__menu-text">Задник из кожкартона от производителя</span>
+    <a class="header__phone header__phone_mobile link_gray" href="tel:+79536799464">+7 953 679-94-64</a>
+    <ul class="menu__list-mobile">
+      <li class="menu__item-mobile">
+        <span class="menu__span menu__link_nav">Главная</span>
+      </li>
+      <li class="menu__item-mobile">
+        <a class="menu__link menu__link_nav" href="/delivery">Доставка</a>
+      </li>
+      <li class="menu__item-mobile">
+        <a class="menu__link menu__link_nav" href="/payment">Оплата</a>
+      </li>
+      <li class="menu__item-mobile">
+        <a class="menu__link menu__link_nav" href="/guarantee">Гарантия</a>
+      </li>
+    </ul>
+  </div>
+</header>
+{{end}}

@@ -102,6 +102,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 
 	productServiceUrl := fmt.Sprintf("%s://%s", protocol, cfg.ProductServiceAddr)
 	adminHandler := admin.NewHandler(authService, templates, productServiceUrl, cfg.ProductServiceAPIKey, messageBroker)
+	clientHandler := client.NewHandler(authService, templates, productServiceUrl, cfg.ProductServiceAPIKey, messageBroker)
 	adminHandler.RegisterRoutes(s.router)
 
 	return s, nil
