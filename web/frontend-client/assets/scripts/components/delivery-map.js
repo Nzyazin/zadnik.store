@@ -1,12 +1,12 @@
-export function exportDeliveryMap () {
+export function exportMap () {
   if (document.getElementById('delivery-map')) {
-    setTimeout(initDeliveryMap, 0)
+    setTimeout(initMap, 0)
   }
 }
 
-function initDeliveryMap () {
+function initMap () {
 
-  const centerMap = [56.996127, 46.106405]
+  const centerMap = [58.684647, 50.025364]
   const zoom = window.innerWidth > 950 ? 5 : 3
   const contactMapControls = window.innerWidth > 950 ? [] : ['zoomControl']
   const contactMapBehaviors = window.innerWidth > 950 ? ['drag', 'dblClickZoom', 'multiTouch'] : ['dblClickZoom', 'multiTouch']
@@ -37,14 +37,9 @@ function initDeliveryMap () {
       behaviors: contactMapBehaviors
     })
 
-    const kirov = new ymaps.Placemark([58.603591, 49.668014], {
-      iconCaption: 'Орловская, 4Г'
+    const vahrushi = new ymaps.Placemark([58.684647, 50.025364], {
+      iconCaption: 'п. Вахруши, ул. Рабочая 30'
     })
-    map.geoObjects.add(kirov)
-
-    const moscow = new ymaps.Placemark([55.709312, 37.798017], {
-      iconCaption: 'Москва, Сормовский проезд, 7А'
-    })
-    map.geoObjects.add(moscow)
+    map.geoObjects.add(vahrushi)
   }
 }
