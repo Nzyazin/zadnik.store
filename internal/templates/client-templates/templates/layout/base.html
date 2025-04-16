@@ -27,11 +27,11 @@
   {{template "footer" .}}
   {{template "cookies" .}}
   
-  <script src="/static/client/scripts/script.js"></script>
-  <link rel="prefetch" href="/static/client/styles/error.css" as="style">
-  <link rel="prefetch" href="/static/client/styles/policy.css" as="style">
-  <link rel="prefetch" href="/static/client/styles/delivery.css" as="style">
-  <link rel="prefetch" href="/static/client/styles/payment.css" as="style">
-  <link rel="prefetch" href="/static/client/styles/guarantee.css" as="style">
+  <script src="{{staticWithHash "/static/client/js/script.js"}}"></script>
+  <link rel="prefetch" href="{{staticWithHash "/static/client/css/error.css"}}" as="style">
+  <link rel="prefetch" href="{{staticWithHash "/static/client/css/policy.css"}}" as="style">
+  <link rel="prefetch" href="{{staticWithHash "/static/client/css/delivery.css"}}" as="style">
+  <link rel="prefetch" href="{{staticWithHash "/static/client/css/payment.css"}}" as="style">
+  <link rel="prefetch" href="{{staticWithHash "/static/client/css/guarantee.css"}}" as="style">
 </body>
 </html>
