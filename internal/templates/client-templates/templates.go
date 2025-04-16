@@ -3,6 +3,8 @@ package client_templates
 import (
 	"embed"
 	"text/template"
+	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
+	"io"
 )
 
 //go:embed templates/*
@@ -17,7 +19,7 @@ type BaseParams struct {
 type IndexParams struct {
 	BaseParams
 	Error string
-	Products []Product
+	Products []admin_templates.Product
 }
 
 
@@ -45,7 +47,25 @@ func NewTemplates(tf TemplateFunctions) (*Templates, error) {
 }
 
 func (t *Templates) parseTemplates() error {
+	baseTemplates := []string{
+		"templates/layout/base.html",
+		"templates/components/header.html",
+		"templates/components/footer.html",
+		"templates/components/cookies.html",
+		"templates/components/meta.html",
+	}
+
 	t.index = template.Must(
-		template.New("index.html").
+		template.New("base.html").
+			Funcs(t.funcs).
+			ParseFS(files, append(baseTemplates, "templates/pages/index.html")...),
 	)
+
+	return nil
+}
+
+func (t *Templates) RenderIndex(w io.Writer, p IndexParams) error {
+	p.View = "index"
+
+	return t.index.Execute(w, p)
 }

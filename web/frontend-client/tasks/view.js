@@ -16,7 +16,7 @@ import { browserSyncInstance } from './browserSync.js'
 const path = {
   pages: 'assets/views/pages/*.pug',
   watch: 'assets/views/**/*.pug',
-  error: 'assets/views/pages/404.pug',
+  error: 'assets/views/pages/error.pug',
   siteMap: 'assets/views/pages/_site-map.pug'
 }
 

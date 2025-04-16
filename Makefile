@@ -102,12 +102,20 @@ run-auth:
 
 # Frontend
 .PHONY: install-frontend
-install-frontend:
+install-frontend-admin:
 	cd web/frontend-admin && npm install
 
+.PHONY: install-frontend-client
+install-frontend-client:
+	cd web/frontend-client && npm install
+
 .PHONY: build-frontend
-build-frontend:
+build-frontend-admin:
 	cd web/frontend-admin && npm run build
+
+.PHONY: build-frontend-client
+build-frontend-client:
+	cd web/frontend-client && npm run build
 
 .PHONY: dev-frontend
 dev-frontend-admin:
@@ -117,20 +125,34 @@ dev-frontend-admin:
 dev-frontend-client:
 	cd web/frontend-client && npm run dev
 
+.PHONY: setup-static-client
+setup-static-client: build-frontend-client
+	@echo "==> Setting up client static files..."
+	@rm -rf bin/static/client/
+	@mkdir -p bin/static/client/js
+	@mkdir -p bin/static/client/css
+	@mkdir -p bin/static/client/images
+	@mkdir -p bin/static/client/fonts
+	@cp web/frontend-client/build/statics/scripts/*.js bin/static/client/js/
+	@cp web/frontend-client/build/statics/styles/*.css bin/static/client/css/
+	@cp web/frontend-client/build/statics/fonts/* bin/static/client/fonts/
+	@cp -r web/frontend-client/build/statics/images/* bin/static/client/images/
+	@git rev-parse --short HEAD > bin/static/client/hash.txt
+
 # Static files
-.PHONY: setup-static
-setup-static: build-frontend
-	@echo "==> Setting up static files..."
-	@rm -rf bin/static
-	@mkdir -p bin/static/js
-	@mkdir -p bin/static/css
-	@mkdir -p bin/static/images
-	@mkdir -p bin/static/fonts
-	@cp web/frontend-admin/build/statics/scripts/*.js bin/static/js/
-	@cp web/frontend-admin/build/statics/styles/*.css bin/static/css/
-	@cp web/frontend-admin/build/statics/fonts/* bin/static/fonts/
-	@cp -r web/frontend-admin/build/statics/images/* bin/static/images/
-	@git rev-parse --short HEAD > bin/static/hash.txt
+.PHONY: setup-static-admin
+setup-static-admin: build-frontend-admin
+	@echo "==> Setting up admin static files..."
+	@rm -rf bin/static/admin/
+	@mkdir -p bin/static/admin/js
+	@mkdir -p bin/static/admin/css
+	@mkdir -p bin/static/admin/images
+	@mkdir -p bin/static/admin/fonts
+	@cp web/frontend-admin/build/statics/scripts/*.js bin/static/admin/js/
+	@cp web/frontend-admin/build/statics/styles/*.css bin/static/admin/css/
+	@cp web/frontend-admin/build/statics/fonts/* bin/static/admin/fonts/
+	@cp -r web/frontend-admin/build/statics/images/* bin/static/admin/images/
+	@git rev-parse --short HEAD > bin/static/admin/hash.txt
 
 # Build commands
 .PHONY: build-auth
@@ -214,5 +236,3 @@ stop-all:
 generate-mocks: install-mockgen
 	@echo "==> Generating mocks..."
 	@mockgen -source=internal/auth/domain/user.go -destination=internal/auth/mocks/mock_repositories.go -package=mocks
-
-.PHONY: proto migrate-up migrate-down migrate-create create-db drop-db run-auth install-frontend build-frontend dev-frontend run-gateway run-all run-services migrate-clean migrate-force rabbitmq-start rabbitmq-stop rabbitmq-restart rabbitmq-status

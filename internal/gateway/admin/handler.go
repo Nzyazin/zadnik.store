@@ -53,7 +53,7 @@ func NewHandler(
 		productServiceUrl:    productServiceUrl,
 		productServiceAPIKey: productServiceAPIKey,
 		httpClient: &http.Client{
-			Timeout: time.Second * 10,
+			Timeout: time.Second * 9,
 		},
 		logger:        common.NewSimpleLogger(),
 		messageBroker: messageBroker,

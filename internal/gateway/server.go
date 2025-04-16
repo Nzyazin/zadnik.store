@@ -14,9 +14,11 @@ import (
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
 	"github.com/Nzyazin/zadnik.store/internal/broker"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
+	"github.com/Nzyazin/zadnik.store/internal/gateway/client"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/auth"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/middleware"
 	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
+	client_templates "github.com/Nzyazin/zadnik.store/internal/templates/client-templates"
 )
 
 type ServerConfig struct {
@@ -57,10 +59,11 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	})
 
 	// Static files
-	s.router.Static("/static", "./bin/static")
+	s.router.Static("/static/admin", "./bin/static/admin")
+	s.router.Static("/static/client", "./bin/static/client")
 	s.router.Static("/storage/images", "./storage/images")
 	s.router.GET("/favicon.ico", func(c *gin.Context) {
-		c.File("./bin/images/favicon/favicon.ico")
+		c.File("./bin/static/admin/images/favicon/favicon.ico")
 	})
 	s.router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
@@ -86,10 +89,17 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	authService := auth.NewGRPCAuthService(authClient)
 
 	
-	templates, err := admin_templates.NewTemplates(admin_templates.TemplateFunctions{
+	adminTemplates, err := admin_templates.NewTemplates(admin_templates.TemplateFunctions{
 		StaticWithHash: StaticWithHash,
 		Add: Add,
 		Dict: Dict,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	clientTemplates, err := client_templates.NewTemplates(client_templates.TemplateFunctions{
+		StaticWithHash: StaticWithHash,
 	})
 	if err != nil {
 		return nil, err
@@ -101,8 +111,9 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	}
 
 	productServiceUrl := fmt.Sprintf("%s://%s", protocol, cfg.ProductServiceAddr)
-	adminHandler := admin.NewHandler(authService, templates, productServiceUrl, cfg.ProductServiceAPIKey, messageBroker)
-	clientHandler := client.NewHandler(authService, templates, productServiceUrl, cfg.ProductServiceAPIKey, messageBroker)
+	adminHandler := admin.NewHandler(authService, adminTemplates, productServiceUrl, cfg.ProductServiceAPIKey, messageBroker)
+	clientHandler := client.NewHandler(clientTemplates, productServiceUrl, cfg.ProductServiceAPIKey)
+	clientHandler.RegisterRoutes(s.router)
 	adminHandler.RegisterRoutes(s.router)
 
 	return s, nil
