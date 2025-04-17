@@ -39,8 +39,8 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 func (h *Handler) indexPage(c *gin.Context) {
 	params := client_templates.IndexParams{
 		BaseParams: client_templates.BaseParams{
-			Title: "Задник из кожкартона саламандер от производителя, доставка по всей России",
-            Description: "Задник из кожкартона саламандер от производителя. Доступные цены, 7 видов задника, оптовая продажа с доставкой по России, заказать можно прямо на сайте",
+			Title: "Задник из кожкартона саламандер от производителя для обуви, доставка по всей России",
+            Description: "Задник из кожкартона саламандер от производителя для обуви. Доступные цены, 7 видов задника, оптовая продажа с доставкой по России, заказать можно прямо на сайте",
 		},
 	}
 	req, err := http.NewRequest(http.MethodGet, h.productServiceUrl+"/products", nil)
@@ -96,8 +96,8 @@ func (h *Handler) indexPage(c *gin.Context) {
 func (h *Handler) deliveryPage(c *gin.Context) {
 	params := client_templates.DeliveryParams{
 		BaseParams: client_templates.BaseParams{
-			Title: "Доставка задников для обуви",
-			Description: "Мы предлагаем быструю и надежную доставку задников для обуви по всей России. Выбираем оптимальный способ доставки с учетом срочности и стоимости. Задники тщательно упакованы для сохранности формы и качества.",
+			Title: "Доставка задников для обуви из кожартона саламандер",
+			Description: "Мы предлагаем быструю и надежную доставку задников для обуви из кожартона саламандер по всей России. Выбираем оптимальный способ доставки с учетом срочности и стоимости. Задники тщательно упакованы для сохранности формы и качества.",
 		},
 	}
 	if err := h.templates.RenderDelivery(c.Writer, params); err != nil {
@@ -122,8 +122,8 @@ func (h *Handler) paymentPage(c *gin.Context) {
 func (h *Handler) guaranteePage(c *gin.Context) {
 	params := client_templates.GuaranteeParams{
 		BaseParams: client_templates.BaseParams{
-			Title: "Гарантия на задники из кожкартона Саламандер для обуви",
-			Description: "Гарантийные обязательства и порядок возврата задников для обуви из кожкартона Саламандер от производителя для обуви",
+			Title: "Гарантия на задники из кожкартона саламандер для обуви",
+			Description: "Гарантийные обязательства и порядок возврата задников для обуви из кожкартона саламандер от производителя для обуви",
 		},
 	}
 	if err := h.templates.RenderGuarantee(c.Writer, params); err != nil {
