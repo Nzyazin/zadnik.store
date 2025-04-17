@@ -3,7 +3,6 @@ package client
 import (
 	"net/http"
 	client_templates "github.com/Nzyazin/zadnik.store/internal/templates/client-templates"
-	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/gin-gonic/gin"
 	"time"
@@ -14,16 +13,15 @@ type Handler struct {
 	templates *client_templates.Templates
 	productServiceUrl string
 	productServiceAPIKey string
-	apiKey string
 	logger common.Logger
 	httpClient *http.Client
 }
 
-func NewHandler(templates *client_templates.Templates, productServiceUrl string, apiKey string) *Handler {
+func NewHandler(templates *client_templates.Templates, productServiceUrl string, productServiceAPIKey string) *Handler {
 	return &Handler{
 		templates: templates,
 		productServiceUrl: productServiceUrl,
-		apiKey: apiKey,
+		productServiceAPIKey: productServiceAPIKey,
 		logger: common.NewSimpleLogger(),
 		httpClient: &http.Client{
 			Timeout: time.Second * 9,
@@ -67,7 +65,7 @@ func (h *Handler) index(c *gin.Context) {
 		return
 	}
 
-	var apiProducts []admin_templates.Product
+	var apiProducts []client_templates.Product
 	if err := json.NewDecoder(resp.Body).Decode(&apiProducts); err != nil {
 		h.logger.Errorf("Failed to decode products response: %v", err)
 		params.Error = "Ошибка при обработке данных"
@@ -75,9 +73,9 @@ func (h *Handler) index(c *gin.Context) {
 		return
 	}
 
-	products := make([]admin_templates.Product, len(apiProducts))
+	products := make([]client_templates.Product, len(apiProducts))
 	for i, p := range apiProducts {
-		products[i] = admin_templates.Product{
+		products[i] = client_templates.Product{
 			ID:          p.ID,
 			Name:        p.Name,
 			Slug:        p.Slug,

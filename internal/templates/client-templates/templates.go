@@ -3,7 +3,6 @@ package client_templates
 import (
 	"embed"
 	"text/template"
-	admin_templates "github.com/Nzyazin/zadnik.store/internal/templates/admin-templates"
 	"io"
 )
 
@@ -19,7 +18,7 @@ type BaseParams struct {
 type IndexParams struct {
 	BaseParams
 	Error string
-	Products []admin_templates.Product
+	Products []Product
 }
 
 

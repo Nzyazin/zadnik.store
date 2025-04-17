@@ -17,8 +17,8 @@
       <ul class="products__list">
         {{range .Products}}
         <li class="products__item">
-          <img class="products__image" srcset="{{.ImageURL}}" alt="{{.Name}} - фото" loading="lazy">
-          <span class="products__name">{{.Name}}</span>
+          <img class="products__image" src="{{.ImageURL.String}}" alt="{{.Name}} - фото" loading="lazy">
+          <span class="products__name">Модель: {{.Name}}</span>
           <span class="products__price">{{.Price}} ₽</span>
         </li>
         {{end}}
