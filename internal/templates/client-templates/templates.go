@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-//go:embed templates/*
+//go:embed templates/**/*
 var files embed.FS
 
 type BaseParams struct {
@@ -21,6 +21,20 @@ type IndexParams struct {
 	Products []Product
 }
 
+type DeliveryParams struct {
+	BaseParams
+	Error string
+}
+
+type PaymentParams struct {
+	BaseParams
+	Error string
+}
+
+type GuaranteeParams struct {
+	BaseParams
+	Error string
+}
 
 type TemplateFunctions struct {
 	StaticWithHash func(string) string
@@ -28,6 +42,9 @@ type TemplateFunctions struct {
 
 type Templates struct {
 	index *template.Template
+	delivery *template.Template
+	payment *template.Template
+	guarantee *template.Template
 	funcs template.FuncMap
 }
 
@@ -48,16 +65,60 @@ func NewTemplates(tf TemplateFunctions) (*Templates, error) {
 func (t *Templates) parseTemplates() error {
 	baseTemplates := []string{
 		"templates/layout/base.html",
-		"templates/components/header.html",
-		"templates/components/footer.html",
-		"templates/components/cookies.html",
-		"templates/components/meta.html",
+		"templates/components/_layout/header.html",
+		"templates/components/_layout/footer.html",
+		"templates/components/_layout/cookies.html",
+		"templates/components/_layout/meta.html",
+	}
+
+	indexTemplates := []string{
+		"templates/pages/index.html",
+		"templates/components/index/cap.html",
+		"templates/components/index/products.html",
+		"templates/components/index/showcase.html",
+		"templates/components/index/production.html",
+		"templates/components/index/order-steps.html",
+		"templates/components/index/order-form.html",
+		"templates/components/index/faq.html",
 	}
 
 	t.index = template.Must(
 		template.New("base.html").
 			Funcs(t.funcs).
-			ParseFS(files, append(baseTemplates, "templates/pages/index.html")...),
+			ParseFS(files, append(baseTemplates, indexTemplates...)...),
+	)
+
+	deliveryTemplates := []string{
+		"templates/pages/delivery.html",
+		"templates/components/delivery/delivery.html",
+	}
+
+	t.delivery = template.Must(
+		template.New("base.html").
+			Funcs(t.funcs).
+			ParseFS(files, append(baseTemplates, deliveryTemplates...)...),
+	)
+
+	paymentTemplates := []string{
+		"templates/pages/payment.html",
+		"templates/components/payment/payment.html",
+	}
+
+	t.payment = template.Must(
+		template.New("base.html").
+			Funcs(t.funcs).
+			ParseFS(files, append(baseTemplates, paymentTemplates...)...),
+	)
+
+	guaranteeTemplates := []string{
+		"templates/pages/guarantee.html",
+		"templates/components/guarantee/guarantee.html",
+	}
+
+	t.guarantee = template.Must(
+		template.New("base.html").
+			Funcs(t.funcs).
+			ParseFS(files, append(baseTemplates, guaranteeTemplates...)...),
 	)
 
 	return nil
@@ -68,3 +129,23 @@ func (t *Templates) RenderIndex(w io.Writer, p IndexParams) error {
 
 	return t.index.Execute(w, p)
 }
+
+func (t *Templates) RenderDelivery(w io.Writer, p DeliveryParams) error {
+	p.View = "delivery"
+
+	return t.delivery.Execute(w, p)
+}
+
+func (t *Templates) RenderPayment(w io.Writer, p PaymentParams) error {
+	p.View = "payment"
+
+	return t.payment.Execute(w, p)
+}
+
+func (t *Templates) RenderGuarantee(w io.Writer, p GuaranteeParams) error {
+	p.View = "guarantee"
+
+	return t.guarantee.Execute(w, p)
+}
+
+

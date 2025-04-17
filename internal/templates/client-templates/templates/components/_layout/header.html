@@ -10,16 +10,32 @@
     <div class="header__nav">
       <ul class="menu__list">
         <li class="menu__item">
-          <a class="menu__link menu__link_nav {{if eq .View "index"}}menu__span{{end}}" href="/">Главная</a>
+          {{if eq .View "index"}}
+            <span class="menu__span menu__link_nav">Главная</span>
+          {{else}}
+            <a class="menu__link menu__link_nav" href="/">Главная</a>
+          {{end}}
         </li>
         <li class="menu__item">
-          <a class="menu__link menu__link_nav {{if eq .View "delivery"}}menu__span{{end}}" href="/delivery">Доставка</a>
+          {{if eq .View "delivery"}}
+            <span class="menu__span menu__link_nav">Доставка</span>
+          {{else}}
+            <a class="menu__link menu__link_nav" href="/delivery">Доставка</a>
+          {{end}}
         </li>
         <li class="menu__item">
-          <a class="menu__link menu__link_nav {{if eq .View "payment"}}menu__span{{end}}" href="/payment">Оплата</a>
+          {{if eq .View "payment"}}
+            <span class="menu__span menu__link_nav">Оплата</span>
+          {{else}}
+            <a class="menu__link menu__link_nav" href="/payment">Оплата</a>
+          {{end}}
         </li>
         <li class="menu__item">
-          <a class="menu__link menu__link_nav {{if eq .View "guarantee"}}menu__span{{end}}" href="/guarantee">Гарантия</a>
+          {{if eq .View "guarantee"}}
+            <span class="menu__span menu__link_nav">Гарантия</span>
+          {{else}}
+            <a class="menu__link menu__link_nav" href="/guarantee">Гарантия</a>
+          {{end}}
         </li>
       </ul>
     </div>

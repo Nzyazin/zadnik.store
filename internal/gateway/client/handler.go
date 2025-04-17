@@ -30,10 +30,13 @@ func NewHandler(templates *client_templates.Templates, productServiceUrl string,
 }
 
 func (h *Handler) RegisterRoutes(r *gin.Engine) {
-	r.GET("/", h.index)
+	r.GET("/", h.indexPage)
+	r.GET("/delivery", h.deliveryPage)
+	r.GET("/payment", h.paymentPage)
+	r.GET("/guarantee", h.guaranteePage)
 }
 
-func (h *Handler) index(c *gin.Context) {
+func (h *Handler) indexPage(c *gin.Context) {
 	params := client_templates.IndexParams{
 		BaseParams: client_templates.BaseParams{
 			Title: "Задник из кожкартона саламандер от производителя, доставка по всей России",
@@ -88,6 +91,45 @@ func (h *Handler) index(c *gin.Context) {
 	params.Products = products
 	h.renderIndex(c, params)
 
+}
+
+func (h *Handler) deliveryPage(c *gin.Context) {
+	params := client_templates.DeliveryParams{
+		BaseParams: client_templates.BaseParams{
+			Title: "Доставка задников для обуви",
+			Description: "Мы предлагаем быструю и надежную доставку задников для обуви по всей России. Выбираем оптимальный способ доставки с учетом срочности и стоимости. Задники тщательно упакованы для сохранности формы и качества.",
+		},
+	}
+	if err := h.templates.RenderDelivery(c.Writer, params); err != nil {
+		h.logger.Errorf("Failed to render delivery template: %v", err)
+		c.String(http.StatusInternalServerError, "Internal Server Error")
+	}
+}
+
+func (h *Handler) paymentPage(c *gin.Context) {
+	params := client_templates.PaymentParams{
+		BaseParams: client_templates.BaseParams{
+			Title: "Оплата задников из кожкартона саламандер для обуви",
+			Description: "Способы оплаты задников из кожкартона саламандер от производителя для обуви",
+		},
+	}
+	if err := h.templates.RenderPayment(c.Writer, params); err != nil {
+		h.logger.Errorf("Failed to render payment template: %v", err)
+		c.String(http.StatusInternalServerError, "Internal Server Error")
+	}
+}
+
+func (h *Handler) guaranteePage(c *gin.Context) {
+	params := client_templates.GuaranteeParams{
+		BaseParams: client_templates.BaseParams{
+			Title: "Гарантия на задники из кожкартона Саламандер для обуви",
+			Description: "Гарантийные обязательства и порядок возврата задников для обуви из кожкартона Саламандер от производителя для обуви",
+		},
+	}
+	if err := h.templates.RenderGuarantee(c.Writer, params); err != nil {
+		h.logger.Errorf("Failed to render guarantee template: %v", err)
+		c.String(http.StatusInternalServerError, "Internal Server Error")
+	}
 }
 
 func (h *Handler) renderIndex(c *gin.Context, params client_templates.IndexParams) {
