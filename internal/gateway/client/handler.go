@@ -10,12 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type OrderRequest struct {
-	Name string `json:"name"`
-	Phone string `json:"phone" binding:"required"`	
-}
-
-
 type EmailSender interface {
 	SendOrder(name, phone string) error
 }
@@ -52,19 +46,20 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 }
 
 func (h *Handler) sendOrder(c *gin.Context) {
-	var req OrderRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.Errorf("Invalid request body: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	name := c.PostForm("name")
+	phone := c.PostForm("phone")
+
+	if phone == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number is required"})
 		return
 	}
 
-	if !isValidPhone(req.Phone) {
+	if !isValidPhone(phone) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
 		return
 	}
 
-	err := h.emailSender.SendOrder(req.Name, req.Phone)
+	err := h.emailSender.SendOrder(name, phone)
 	if err != nil {
 		h.logger.Errorf("Failed to send order: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send order"})
