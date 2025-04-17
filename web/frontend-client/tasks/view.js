@@ -71,19 +71,7 @@ function sitemap () {
     .pipe(gulp.dest(env.outputFolder))
 }
 
-function error () {
-  return gulp.src(path.error)
-    .pipe(plumber())
-    .pipe(data(dataView))
-    .pipe(pug())
-    .pipe(htmlmin(htmlminConfig))
-    .pipe(typograf(typografConfig))
-    .pipe(header('<?php header($_SERVER[\'SERVER_PROTOCOL\']." 404 Not Found");?>'))
-    .pipe(rename({ extname: '.php' }))
-    .pipe(gulp.dest(env.outputFolder))
-}
-
 export default {
-  build: env.production ? gulp.series(view, sitemap, error) : view,
+  build: env.production ? gulp.series(view, sitemap) : view,
   watchPath: path.watch
 }
