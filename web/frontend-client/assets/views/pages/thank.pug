@@ -1,0 +1,9 @@
+extends ../components/_layout/layout
+
+block head
+  +title('Страница благодарности')
+  +description("Благодарим за заказ. Мы свяжемся с вами в ближайшее время.")
+
+block body
+  include ../components/thank&error/thank
+  +thanksOrError('Благодарим за заказ', ['Мы свяжемся с вами в ближайшее время.'])

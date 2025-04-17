@@ -1,13 +1,24 @@
 package client
 
 import (
-	"net/http"
-	client_templates "github.com/Nzyazin/zadnik.store/internal/templates/client-templates"
-	"github.com/Nzyazin/zadnik.store/internal/common"
-	"github.com/gin-gonic/gin"
-	"time"
 	"encoding/json"
+	"net/http"
+	"time"
+
+	"github.com/Nzyazin/zadnik.store/internal/common"
+	client_templates "github.com/Nzyazin/zadnik.store/internal/templates/client-templates"
+	"github.com/gin-gonic/gin"
 )
+
+type OrderRequest struct {
+	Name string `json:"name"`
+	Phone string `json:"phone" binding:"required"`	
+}
+
+
+type EmailSender interface {
+	SendOrder(name, phone string) error
+}
 
 type Handler struct {
 	templates *client_templates.Templates
@@ -15,9 +26,10 @@ type Handler struct {
 	productServiceAPIKey string
 	logger common.Logger
 	httpClient *http.Client
+	emailSender EmailSender
 }
 
-func NewHandler(templates *client_templates.Templates, productServiceUrl string, productServiceAPIKey string) *Handler {
+func NewHandler(templates *client_templates.Templates, productServiceUrl string, productServiceAPIKey string, emailSender EmailSender) *Handler {
 	return &Handler{
 		templates: templates,
 		productServiceUrl: productServiceUrl,
@@ -26,6 +38,7 @@ func NewHandler(templates *client_templates.Templates, productServiceUrl string,
 		httpClient: &http.Client{
 			Timeout: time.Second * 9,
 		},
+		emailSender: emailSender,
 	}
 }
 
@@ -34,6 +47,31 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/delivery", h.deliveryPage)
 	r.GET("/payment", h.paymentPage)
 	r.GET("/guarantee", h.guaranteePage)
+	r.GET("/policy", h.policyPage)
+	r.POST("/send-order", h.sendOrder)
+}
+
+func (h *Handler) sendOrder(c *gin.Context) {
+	var req OrderRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Errorf("Invalid request body: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if !isValidPhone(req.Phone) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
+		return
+	}
+
+	err := h.emailSender.SendOrder(req.Name, req.Phone)
+	if err != nil {
+		h.logger.Errorf("Failed to send order: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send order"})
+		return
+	}
+	
+	c.JSON(http.StatusOK, gin.H{"message": "Order sent successfully"})
 }
 
 func (h *Handler) indexPage(c *gin.Context) {
@@ -132,9 +170,23 @@ func (h *Handler) guaranteePage(c *gin.Context) {
 	}
 }
 
+func (h *Handler) policyPage(c *gin.Context) {
+	params := client_templates.PolicyParams{
+		BaseParams: client_templates.BaseParams{
+			Title: "Политика конфиденциальности",
+			Description: "Политика конфиденциальности",
+		},
+	}
+	if err := h.templates.RenderPolicy(c.Writer, params); err != nil {
+		h.logger.Errorf("Failed to render policy template: %v", err)
+		c.String(http.StatusInternalServerError, "Internal Server Error")
+	}
+}
+
 func (h *Handler) renderIndex(c *gin.Context, params client_templates.IndexParams) {
 	if err := h.templates.RenderIndex(c.Writer, params); err != nil {
 		h.logger.Errorf("Failed to render index template: %v", err)
 		c.String(http.StatusInternalServerError, "Internal Server Errror")
 	}
 }
+

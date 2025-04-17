@@ -12,6 +12,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
+	common "github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/broker"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/admin"
 	"github.com/Nzyazin/zadnik.store/internal/gateway/client"
@@ -21,6 +22,13 @@ import (
 	client_templates "github.com/Nzyazin/zadnik.store/internal/templates/client-templates"
 )
 
+type SMTPConfig struct {
+	Host string
+	Port int
+	From string
+	Password string
+}
+
 type ServerConfig struct {
 	AuthServiceAddr string
 	ProductServiceAddr string
@@ -28,6 +36,7 @@ type ServerConfig struct {
 	Development    bool
 	UserHTTPS      bool
 	RabbitMQ broker.RabbitMQConfig
+	SMTPConfig SMTPConfig
 }
 
 type Server struct {
@@ -110,9 +119,17 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		protocol = "https"
 	}
 
+	emailSender := client.NewSMTPEmailSender(
+		cfg.SMTPConfig.Host,
+		cfg.SMTPConfig.Port,
+		cfg.SMTPConfig.From,
+		cfg.SMTPConfig.Password,
+		common.NewSimpleLogger(),
+	)
+
 	productServiceUrl := fmt.Sprintf("%s://%s", protocol, cfg.ProductServiceAddr)
 	adminHandler := admin.NewHandler(authService, adminTemplates, productServiceUrl, cfg.ProductServiceAPIKey, messageBroker)
-	clientHandler := client.NewHandler(clientTemplates, productServiceUrl, cfg.ProductServiceAPIKey)
+	clientHandler := client.NewHandler(clientTemplates, productServiceUrl, cfg.ProductServiceAPIKey, emailSender)
 	clientHandler.RegisterRoutes(s.router)
 	adminHandler.RegisterRoutes(s.router)
 

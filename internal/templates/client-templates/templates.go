@@ -36,6 +36,10 @@ type GuaranteeParams struct {
 	Error string
 }
 
+type PolicyParams struct {
+	BaseParams
+}
+
 type TemplateFunctions struct {
 	StaticWithHash func(string) string
 }
@@ -45,6 +49,7 @@ type Templates struct {
 	delivery *template.Template
 	payment *template.Template
 	guarantee *template.Template
+	policy *template.Template
 	funcs template.FuncMap
 }
 
@@ -121,6 +126,17 @@ func (t *Templates) parseTemplates() error {
 			ParseFS(files, append(baseTemplates, guaranteeTemplates...)...),
 	)
 
+	policyTemplates := []string{
+		"templates/pages/policy.html",
+		"templates/components/policy/policy.html",
+	}
+
+	t.policy = template.Must(
+		template.New("base.html").
+			Funcs(t.funcs).
+			ParseFS(files, append(baseTemplates, policyTemplates...)...),
+	)
+
 	return nil
 }
 
@@ -147,5 +163,12 @@ func (t *Templates) RenderGuarantee(w io.Writer, p GuaranteeParams) error {
 
 	return t.guarantee.Execute(w, p)
 }
+
+func (t *Templates) RenderPolicy(w io.Writer, p PolicyParams) error {
+	p.View = "policy"
+
+	return t.policy.Execute(w, p)
+}
+
 
 

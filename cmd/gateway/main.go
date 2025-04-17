@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"syscall"
 	"time"
+	"strconv"
 
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway"
@@ -26,6 +27,12 @@ func main() {
 
 	logger := common.NewSimpleLogger()
 
+	portStrSMTP := os.Getenv("EMAIL_SMTP_PORT")
+	portSMTP, err := strconv.Atoi(portStrSMTP)
+	if err != nil {
+		portSMTP = 587 // Значение по умолчанию, если преобразование не удалось
+	}
+
 	// Создаем конфигурацию
 	cfg := &gateway.ServerConfig{
 		AuthServiceAddr: os.Getenv("AUTH_SERVICE_ADDRESS"),
@@ -38,6 +45,12 @@ func main() {
 			URL: os.Getenv("RABBITMQ_URL"),
 		},
 		Development:    os.Getenv("DEVELOPMENT") == "true",
+		SMTPConfig: gateway.SMTPConfig{
+			Host: os.Getenv("EMAIL_SMTP_HOST"),
+			Port: portSMTP,
+			From: os.Getenv("EMAIL_FROM"),
+			Password: os.Getenv("EMAIL_PASSWORD"),
+		},
 	}
 
 	// Создаем сервер
