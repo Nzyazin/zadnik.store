@@ -80,8 +80,21 @@ func (s *SMTPEmailSender) sendEmail(email, subject, body string) error {
 }
 
 func isValidPhone(phone string) bool {
-	re := regexp.MustCompile(`\D`)
-	digitsOnly := re.ReplaceAllString(phone, "")
+	// Проверяем длину телефона
+	if len(phone) < 6 || len(phone) > 15 {
+		return false
+	}
 
-	return len(digitsOnly) >= 10 && len(digitsOnly) <= 15
+	// Проверяем соответствие регулярному выражению
+	pattern := `^[+]?([0-9]+(\(|\)|\-|\s)?)+$`
+	re := regexp.MustCompile(pattern)
+	if !re.MatchString(phone) {
+		return false
+	}
+
+	// Проверяем, что в телефоне есть хотя бы 6 цифр
+	digitsRe := regexp.MustCompile(`\D`)
+	digitsOnly := digitsRe.ReplaceAllString(phone, "")
+
+	return len(digitsOnly) >= 6
 }

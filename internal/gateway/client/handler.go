@@ -50,23 +50,23 @@ func (h *Handler) sendOrder(c *gin.Context) {
 	phone := c.PostForm("phone")
 
 	if phone == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number is required"})
+		h.renderError(c, "Номер телефона обязателен")
 		return
 	}
 
 	if !isValidPhone(phone) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone number"})
+		h.renderError(c, "Неверный формат номера телефона")
 		return
 	}
 
 	err := h.emailSender.SendOrder(name, phone)
 	if err != nil {
 		h.logger.Errorf("Failed to send order: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send order"})
+		h.renderError(c, "Не удалось отправить заказ. Пожалуйста, попробуйте позже")
 		return
 	}
 	
-	c.JSON(http.StatusOK, gin.H{"message": "Order sent successfully"})
+	h.renderThank(c, name)
 }
 
 func (h *Handler) indexPage(c *gin.Context) {
@@ -182,6 +182,36 @@ func (h *Handler) renderIndex(c *gin.Context, params client_templates.IndexParam
 	if err := h.templates.RenderIndex(c.Writer, params); err != nil {
 		h.logger.Errorf("Failed to render index template: %v", err)
 		c.String(http.StatusInternalServerError, "Internal Server Errror")
+	}
+}
+
+func (h *Handler) renderError(c *gin.Context, message string) {
+	params := client_templates.ErrorParams{
+		BaseParams: client_templates.BaseParams{
+			Title: "Ошибка",
+			Description: "Произошла ошибка",
+		},
+		Message: message,
+	}
+
+	if err := h.templates.RenderError(c.Writer, params); err != nil {
+		h.logger.Errorf("Failed to render error template: %v", err)
+		c.String(http.StatusInternalServerError, "Internal Server Error")
+	}
+}
+
+func (h *Handler) renderThank(c *gin.Context, name string) {
+	params := client_templates.ThankParams{
+		BaseParams: client_templates.BaseParams{
+			Title: "Благодарим за заказ",
+			Description: "Мы свяжемся с вами в ближайшее время.",
+		},
+		Name: name,
+	}
+
+	if err := h.templates.RenderThank(c.Writer, params); err != nil {
+		h.logger.Errorf("Failed to render thank template: %v", err)
+		c.String(http.StatusInternalServerError, "Internal Server Error")
 	}
 }
 

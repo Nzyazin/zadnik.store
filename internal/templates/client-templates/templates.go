@@ -40,6 +40,16 @@ type PolicyParams struct {
 	BaseParams
 }
 
+type ThankParams struct {
+	BaseParams
+	Name string
+}
+
+type ErrorParams struct {
+	BaseParams
+	Message string
+}
+
 type TemplateFunctions struct {
 	StaticWithHash func(string) string
 }
@@ -50,6 +60,8 @@ type Templates struct {
 	payment *template.Template
 	guarantee *template.Template
 	policy *template.Template
+	thank *template.Template
+	error *template.Template
 	funcs template.FuncMap
 }
 
@@ -137,6 +149,28 @@ func (t *Templates) parseTemplates() error {
 			ParseFS(files, append(baseTemplates, policyTemplates...)...),
 	)
 
+	thankTemplates := []string{
+		"templates/pages/thank.html",
+		"templates/components/thank/thank.html",
+	}
+
+	t.thank = template.Must(
+		template.New("base.html").
+			Funcs(t.funcs).
+			ParseFS(files, append(baseTemplates, thankTemplates...)...),
+	)
+
+	errorTemplates := []string{
+		"templates/pages/error.html",
+		"templates/components/error/error.html",
+	}
+
+	t.error = template.Must(
+		template.New("base.html").
+			Funcs(t.funcs).
+			ParseFS(files, append(baseTemplates, errorTemplates...)...),
+	)
+
 	return nil
 }
 
@@ -170,5 +204,14 @@ func (t *Templates) RenderPolicy(w io.Writer, p PolicyParams) error {
 	return t.policy.Execute(w, p)
 }
 
+func (t *Templates) RenderThank(w io.Writer, p ThankParams) error {
+	p.View = "thank"
 
+	return t.thank.Execute(w, p)
+}
 
+func (t *Templates) RenderError(w io.Writer, p ErrorParams) error {
+	p.View = "error"
+
+	return t.error.Execute(w, p)
+}
