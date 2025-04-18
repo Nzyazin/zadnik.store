@@ -1,4 +1,30 @@
-export { animateScrollToAnchor }
+if (document.querySelector('[data-role="scroll-to-anchor"]')) {
+  setTimeout(() => {
+    const anchorElements = document.querySelectorAll(
+      '[data-role="scroll-to-anchor"]'
+    );
+
+    for (let i = 0, len = anchorElements.length; i < len; i++)
+      _loopAddEventScrollToAnchor(i);
+
+    function _loopAddEventScrollToAnchor(theIndexNode) {
+      anchorElements[theIndexNode].addEventListener(
+        "click",
+        clickOnTheScrollElement
+      );
+    }
+
+    function clickOnTheScrollElement(event) {
+      event.preventDefault();
+      let elementId;
+      if (this.dataset.link) elementId = this.dataset.link.substr(1);
+      else elementId = this.hash.substr(1);
+      const element = document.getElementById(elementId);
+      if (element) animateScrollToAnchor(element);
+    }
+  }, 0);
+
+
 function animateScrollToAnchor(theElement) {
   const positionNow = window.pageYOffset;
   const positionElement =
@@ -17,4 +43,5 @@ function animateScrollToAnchor(theElement) {
       requestAnimationFrame(animate);
     }
   });
+}
 }

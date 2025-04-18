@@ -1,7 +1,5 @@
-export function exportCookies() {
-  if (document.querySelector('[data-element="cookies"]')) {
-    setTimeout(initCookies, 0)
-  }
+if (document.querySelector('[data-element="cookies"]')) {
+  setTimeout(initCookies, 0)
 }
 
 function initCookies () {

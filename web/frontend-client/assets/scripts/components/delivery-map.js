@@ -1,7 +1,5 @@
-export function exportMap () {
-  if (document.getElementById('delivery-map')) {
-    setTimeout(initMap, 0)
-  }
+if (document.getElementById('delivery-map')) {
+  setTimeout(initMap, 0)
 }
 
 function initMap () {

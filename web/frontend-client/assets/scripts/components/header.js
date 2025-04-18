@@ -1,7 +1,5 @@
-export function exportHeader() {
-  if (document.querySelector('[data-element="header-mob__burger"]')) {
-    setTimeout(headerInit, 0);
-  }
+if (document.querySelector('[data-element="header-mob__burger"]')) {
+  setTimeout(headerInit, 0);
 }
 
 function headerInit () {

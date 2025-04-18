@@ -9,12 +9,15 @@
         input(type="hidden", name="form_number", value="100")
         input(type="hidden", name="form_name", value="Форма заказать задник из кожкартона саламандер")
         .order-form__input-box
-          input.order-form__input.order-form__input_name.input.text(type="text", placeholder="Имя", name="name")
+          input.order-form__input.order-form__input_name.input.text(type="text", placeholder="Имя", maxlength="100", name="name")
         .order-form__input-box
           input.order-form__input.order-form__input_phone.input.text(
               type="tel",
               placeholder="Телефон*",
               name="phone",
+              pattern="^[+]?([0-9]+[\\(\\)\\-\\s]?)+$",
+              minlength="6",
+              maxlength="15",
               data-role="feedback-form__phone-input"
             )
           span.order-form__text-error.text-error.text-error_hide(data-role="feedback-form__text-error") *Неверный номер телефона

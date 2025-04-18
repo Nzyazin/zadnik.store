@@ -61,10 +61,13 @@ input[type=range]::-ms-track
     color: rgba($dark, 0.3)
     pointer-events: none
 
-input.input_error
+.input_error
   border: 1px solid $red
   &:hover, &:focus
     border: 1px solid $red
+
+.text-error_hide
+  display: none
 
 .textarea
   +_input
