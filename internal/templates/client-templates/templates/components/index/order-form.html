@@ -11,7 +11,7 @@
             <input class="order-form__input order-form__input_name input text" type="text" placeholder="Имя" maxlength="100" name="name">
           </div>
           <div class="order-form__input-box">
-            <input class="order-form__input order-form__input_phone input text" type="tel" placeholder="Телефон*" name="phone" data-role="feedback-form__phone-input" pattern="^\\+?[0-9]+(\\([0-9]+\\)|\\-|\\s)?[0-9]+$" minlength="6" maxlength="15">
+            <input class="order-form__input order-form__input_phone input text" type="tel" placeholder="Телефон*" name="phone" data-role="feedback-form__phone-input" pattern="^[+]?([0-9]+(\(|\)|\-|\s)?)+$" minlength="6" maxlength="15">
             <span class="order-form__text-error text-error text-error_hide" data-role="feedback-form__text-error">*Неверный номер телефона</span>
           </div>
           <div class="order-form__btn-box order-form__input-box_name">

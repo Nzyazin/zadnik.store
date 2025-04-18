@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/Nzyazin/zadnik.store/internal/common"
 	"net/smtp"
@@ -40,7 +41,7 @@ func (s *SMTPEmailSender) SendOrder(name, phone string) error {
 
 	err := s.sendEmail(s.From, subject, body)
 	if err != nil {
-		return fmt.Errorf("Failed to send order email: %v", err)
+		return fmt.Errorf("failed to send order email: %v", err)
 	}
 
 	s.Logger.Infof("Order email sent to %s", s.From)
@@ -49,11 +50,15 @@ func (s *SMTPEmailSender) SendOrder(name, phone string) error {
 
 func (s *SMTPEmailSender) sendEmail(email, subject, body string) error {
 	var message []byte
+	// Кодируем тему в Base64 для корректного отображения в почтовых клиентах
+	encodedSubject := base64.StdEncoding.EncodeToString([]byte(subject))
+	
 	message = fmt.Appendf(message, "From: %s\r\n", s.From)
 	message = fmt.Appendf(message, "To: %s\r\n", email)
-	message = fmt.Appendf(message, "Subject: %s\r\n", subject)
+	message = fmt.Appendf(message, "Subject: =?UTF-8?B?%s?=\r\n", encodedSubject)
 	message = fmt.Appendf(message, "MIME-Version: 1.0\r\n")
 	message = fmt.Appendf(message, "Content-Type: text/plain; charset=utf-8\r\n")
+	message = fmt.Appendf(message, "Content-Transfer-Encoding: 8bit\r\n")
 	message = fmt.Appendf(message, "\r\n%s\r\n", body)
 
 	auth := smtp.PlainAuth("", s.From, s.Password, s.Host)
@@ -67,7 +72,7 @@ func (s *SMTPEmailSender) sendEmail(email, subject, body string) error {
 	)
 
 	if err != nil {
-		return fmt.Errorf("Failed to send email: %v", err)
+		return fmt.Errorf("failed to send email: %v", err)
 	}
 
 	s.Logger.Infof("Email sent to %s", email)
