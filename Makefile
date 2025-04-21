@@ -177,20 +177,6 @@ setup-static-admin: build-frontend-admin
 	@cp -r web/frontend-admin/build/statics/images/* bin/static/admin/images/
 	@git rev-parse --short HEAD > bin/static/admin/hash.txt
 
-# Build commands
-.PHONY: build-auth
-build-auth:
-	@echo "==> Building auth service..."
-	@go build -o bin/auth.exe ./cmd/auth
-
-.PHONY: build-gateway
-build-gateway: setup-static
-	@echo "==> Building gateway service..."
-	@go build -o bin/gateway.exe ./cmd/gateway
-
-.PHONY: build
-build: build-auth build-gateway
-
 # Gateway
 .PHONY: run-gateway
 run-gateway:
