@@ -65,7 +65,7 @@ func main() {
 	if gatewayHost == "" {
 		gatewayHost = "localhost"
 	}
-	logger.Infof("Starting gateway server on :%s\n", port)
+	logger.Infof("Starting gateway server on host %s and port :%s\n", gatewayHost, port)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
