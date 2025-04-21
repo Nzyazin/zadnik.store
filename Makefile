@@ -117,14 +117,6 @@ drop-db:
 		exit 1; \
 	fi
 
-.PHONY: start-all-bin
-start-all-bin:
-	@echo "==> Starting all binaries in background..."
-	@nohup ./bin/auth.exe > auth.log 2>&1 &
-	@nohup ./bin/product.exe > product.log 2>&1 &
-	@nohup ./bin/gateway.exe > gateway.log 2>&1 &
-	@nohup ./bin/image.exe > image.log 2>&1 &
-
 # Service commands
 run-auth:
 	@echo "==> Starting auth service..."
@@ -239,6 +231,14 @@ check-ports:
 	@echo "\nImage Service (8084):"
 	@-lsof -i :8084 || echo "Port available"
 
+.PHONY: start-all-bin
+start-all-bin:
+	@echo "==> Starting all binaries in background..."
+	@./bin/auth.exe &
+	@./bin/product.exe &
+	@./bin/gateway.exe &
+	@./bin/image.exe &
+
 .PHONY: stop-all
 stop-all:
 	@echo "==> Stopping all services..."
@@ -248,6 +248,15 @@ stop-all:
 	@-pkill -f "cmd/image/main"
 	@echo "All services stopped"
 
+
+.PHONY: stop-all-bin
+stop-all-bin:
+	@echo "==> Stopping all binaries..."
+	@pkill -f ./bin/auth.exe || true
+	@pkill -f ./bin/product.exe || true
+	@pkill -f ./bin/gateway.exe || true
+	@pkill -f ./bin/image.exe || true
+	@echo "All binaries stopped"
 
 .PHONY: generate-mocks
 generate-mocks: install-mockgen
