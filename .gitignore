@@ -27,3 +27,8 @@ go.work.sum
 .idea
 
 bin/
+
+internal/product/config/.env-product
+internal/auth/config/.env-auth
+internal/image/config/.env-image
+internal/gateway/config/.env-gateway
