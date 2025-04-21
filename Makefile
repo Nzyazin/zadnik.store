@@ -117,6 +117,14 @@ drop-db:
 		exit 1; \
 	fi
 
+.PHONY: start-all-bin
+start-all-bin:
+	@echo "==> Starting all binaries in background..."
+	@nohup ./bin/auth.exe > auth.log 2>&1 &
+	@nohup ./bin/product.exe > product.log 2>&1 &
+	@nohup ./bin/gateway.exe > gateway.log 2>&1 &
+	@nohup ./bin/image.exe > image.log 2>&1 &
+
 # Service commands
 run-auth:
 	@echo "==> Starting auth service..."
