@@ -5,6 +5,29 @@ BINARY_NAME=app.exe
 PROTO_DIR=api
 PROTO_FILES=$(PROTO_DIR)/*.proto
 
+.PHONY: build-product
+build-product:
+	@echo "==> Building product service..."
+	@go build -o bin/product.exe ./cmd/product
+
+.PHONY: build-auth
+build-auth:
+	@echo "==> Building auth service..."
+	@go build -o bin/auth.exe ./cmd/auth
+
+.PHONY: build-gateway
+build-gateway:
+	@echo "==> Building gateway service..."
+	@go build -o bin/gateway.exe ./cmd/gateway
+
+.PHONY: build-image
+build-image:
+	@echo "==> Building image service..."
+	@go build -o bin/image.exe ./cmd/image
+
+.PHONY: build-all
+build-all: build-product build-auth build-gateway build-image
+
 proto:
 	@echo "==> Generation protobuf..."
 	@cd $(PROTO_DIR) && \
