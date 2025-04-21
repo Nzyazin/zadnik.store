@@ -1,0 +1,26 @@
+-
+  const productList = [{
+      images: [
+        { path: 'products-19', name: 'Задник 1', price: '33' },
+        { path: 'products-18', name: 'Задник 2', price: '33' },
+        { path: 'products-17', name: 'Задник 3', price: '33' },
+        { path: 'products-16', name: 'Задник 4', price: '33' },
+        { path: 'products-15', name: 'Задник 5', price: '33' },
+        { path: 'products-14', name: 'Задник 6', price: '33' },
+        { path: 'products-13', name: 'Задник 7', price: '33' },
+        { path: 'products-12', name: 'Задник 8', price: '33' },
+        { path: 'products-11', name: 'Задник 9', price: '33' },
+      ]
+    }
+  ]
+
+.products(data-element="products", id="products")
+  .products__cont.cont
+    h2.products__title.title Товары
+    each item in productList
+      ul.products__list
+        each image in item.images
+          li.products__item
+            img.products__image(srcset=placeholder(270, 203), alt=`${image.name} - фото`, loading="lazy")
+            span.products__name= `Модель : ${image.name}`
+            span.products__price= image.price + ' ₽'

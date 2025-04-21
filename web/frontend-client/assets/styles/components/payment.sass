@@ -1,0 +1,51 @@
+.payment
+  margin-top: 36px
+  margin-bottom: 252px
+  @include media(1240)
+    margin-top: 33px
+    margin-bottom: 43px
+
+//.payment__cont
+
+.payment__caption
+  margin-bottom: 40px
+  @include media(1240)
+    margin-bottom: 32px
+
+.payment__area
+  display: flex
+  margin: 0 -12px
+  @include media(950)
+    display: block
+    margin: 0
+
+.payment__box
+  margin: 0 12px
+  width: calc(50% - 24px)
+  padding-top: 100px
+  background-repeat: no-repeat
+  background-size: 80px 80px
+  @include media(1240)
+    padding-top: 78px
+    background-size: 64px 64px
+  @include media(950)
+    margin: 0 0 34px
+    width: auto
+  &:last-of-type
+    margin-bottom: 0
+
+.payment__box_1
+  +bgImg('payment/ic_pay-1.svg')
+
+.payment__box_2
+  +bgImg('payment/ic_pay-2.svg')
+
+.payment__headline
+  margin-bottom: 12px
+  @include media(1240)
+    margin-bottom: 7px
+
+.payment__text
+  margin-bottom: 12px
+  @include media(1240)
+    margin-bottom: 4px

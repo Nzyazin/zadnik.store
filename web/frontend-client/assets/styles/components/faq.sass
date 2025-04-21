@@ -1,0 +1,73 @@
+.faq
+  margin-bottom: 100px
+  @include media(1240)
+    margin-bottom: 48px
+
+//.faq__cont
+
+.faq__title
+  margin-bottom: 40px
+  @include media(1240)
+    margin-bottom: 24px
+
+.faq__area
+  display: flex
+  column-gap: 24px
+  @include media(950)
+    flex-direction: column
+    row-gap: 10px
+
+.faq__area-column
+  display: flex
+  flex-direction: column
+  width: calc(50% - 12px)
+  row-gap: 10px
+  @include media(950)
+    width: 100%
+
+.faq__item
+  width: 100%
+  background-color: $gray-light
+  padding: 21px 16px 19px
+  border-radius: 18px
+
+.faq__question
+  display: flex
+  justify-content: space-between
+  align-items: center
+  gap: 10px
+  &::after
+    content: ''
+    flex-shrink: 0
+    width: 24px
+    height: 24px
+    +maskBgIcon('ic_cross.svg')
+    background: #E1E1E1
+    cursor: pointer
+    transition-property: opacity, transform
+    transition-duration: .2s
+  &:hover
+    @include hover
+      &::after
+        background: #FD9479
+
+.faq__answer
+  padding-right: 30px
+  height: 0
+  opacity: 0
+  transition: opacity 0s
+  color: rgba($dark, 0.8)
+
+.faq__item-active
+  height: auto
+  .faq__question
+    &::after
+      transform: rotate(135deg)
+  .faq__answer
+    padding-top: 9px
+    height: auto
+    opacity: 1
+    transition: opacity ease-in-out .05s .05s
+  @include media(1240)
+    .faq__question
+      padding-bottom: 4px

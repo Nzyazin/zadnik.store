@@ -1,0 +1,8 @@
+mixin thanksOrError (caption, textArr)
+  .thank
+    .thank__cont.cont
+      h1.thank__caption.caption= caption
+      each text in textArr
+        p.thank__text= text
+      .thank__btn-box
+        a.thank__button.button-orange(href=getLinkPage('index')) На главную

@@ -1,0 +1,33 @@
+@mixin link
+  text-decoration: none
+  cursor: pointer
+  @include hover
+    transition-property: color
+    transition-duration: .2s
+  &:hover
+    @include hover
+      transition-duration: .1s
+
+.link-orange
+  +link
+  &
+    color: $orange
+  &:hover
+    @include hover
+      color: $orange_hover
+
+.link-dark
+  +link
+  &
+    color: $dark
+  &:hover
+    @include hover
+      color: $orange_hover
+
+.link-white
+  +link
+  &
+    color: $white
+  &:hover
+    @include hover
+      color: $orange_hover

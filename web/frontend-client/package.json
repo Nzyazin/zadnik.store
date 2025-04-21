@@ -1,0 +1,42 @@
+{
+  "name": "stolyloft.rf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "gulp",
+    "build": "cross-env NODE_ENV=production gulp build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.9",
+    "@babel/preset-env": "^7.25.0",
+    "babel-loader": "^9.1.3",
+    "browser-sync": "^3.0.2",
+    "del": "^7.1.0",
+    "gulp": "^5.0.0",
+    "gulp-autoprefixer": "^9.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-data": "^1.3.1",
+    "gulp-format-html": "^2.3.0",
+    "gulp-group-css-media-queries": "^1.2.2",
+    "gulp-header": "^2.0.9",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-newer": "^1.4.0",
+    "gulp-plumber": "^1.2.1",
+    "gulp-pug": "^5.0.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^5.1.0",
+    "gulp-svgmin": "^4.1.0",
+    "gulp-typograf": "^4.1.0",
+    "sass": "^1.77.8",
+    "webpack": "^5.93.0",
+    "webpack-stream": "^7.0.0"
+  }
+}

@@ -1,0 +1,16 @@
+-
+  const paymentList = [
+    { headline: 'Безналичный расчет', texts: ['Для юридических лиц и ИП предлагаем удобную оплату по безналичному расчету. После оформления заказа мы свяжемся с вами для подтверждения деталей и выставления счета. Все необходимые документы (счет, договор, накладные) будут подготовлены оперативно.'] },
+    { headline: 'Наличный расчет', texts: ['Вы можете оплатить заказ наличными при получении товара. Наш курьер предоставит вам кассовый чек и все необходимые документы. Этот способ оплаты доступен как для физических, так и для юридических лиц.'] },
+  ]
+
+article.payment
+  .payment__cont.cont
+    h1.payment__caption.caption
+      | Оплата
+    .payment__area
+      each item, index in paymentList
+        .payment__box(class=`payment__box_${index + 1}`)
+          h3.payment__headline.headline= item.headline
+          each text in item.texts
+            p.payment__text.text= text

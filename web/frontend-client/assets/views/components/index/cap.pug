@@ -1,0 +1,9 @@
+section.cap(class = VIEW === 'index' ? 'cap_index' : '')
+  .cap__cont.cont
+    .cap__block
+      h1.cap__caption.caption!= 'Задник из кожкартона'
+      h2.cap__subtitle.text от производителя
+      a.cap__button.button-orange.text-big(href="#order-form", data-role="scroll-to-anchor") Заказать
+    picture.cap__picture
+      - const capImagePath = `${pathImage}/cap/`
+        img.cap__image(src=`${capImagePath}zadnik-cap.png`, alt="Задник из кожкартона", loading="lazy")

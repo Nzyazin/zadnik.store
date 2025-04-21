@@ -1,0 +1,16 @@
+{{define "products"}}
+<div class="products" data-element="products" id="products">
+    <div class="products__cont cont">
+      <h2 class="products__title title">Товары</h2>
+      <ul class="products__list">
+        {{range .Products}}
+        <li class="products__item">
+          <img class="products__image" src="{{.ImageURL.String}}" alt="{{.Name}} - фото" loading="lazy">
+          <span class="products__name">Модель: {{.Name}}</span>
+          <span class="products__price">{{.Price}} ₽</span>
+        </li>
+        {{end}}
+      </ul>
+    </div>
+</div>
+{{end}}

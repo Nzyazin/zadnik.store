@@ -1,0 +1,21 @@
+.header__cont.cont
+  .header-mob__burger-box
+    button.header-mob__burger(data-element="header-mob__burger")
+      span.header-mob__burger-line
+  .header__nav
+    ul.menu__list
+      each item in menuList
+        li.menu__item
+          if VIEW === item.view
+            span.menu__span.menu__link_nav= item.name
+          else
+            a.menu__link.menu__link_nav(href=`${item.link}`)= item.name
+  if VIEW === "index"
+    .header__logo
+      picture.header__picture
+        img.header__image(src=`${pathImage}/logo.png`, alt="Лого магазин задников")
+  else
+    a.header__logo(href=getLinkPage('index'))
+      picture.header__picture
+        img.header__image(src=`${pathImage}/logo.png`, alt="Лого магазин задников")
+  a.header__phone.link_gray(href=phone.link)= phone.mask

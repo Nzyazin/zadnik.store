@@ -1,0 +1,35 @@
+-  
+    const product = {
+      name: 'Механическая клавиатура Keychron K2',
+      price: 12999,
+      description: 'Надежная клавиатура для работы и разработки',
+      image: '/images/products/keyboard.jpg'
+    }
+
+mixin product-form()
+  .product-form    
+    .product-form__form
+      form.product-form__form-inner(method="POST" enctype="multipart/form-data")
+        .product-form__form-group
+          label.product-form__label Название
+          input.product-form__input(type="text" name="name" value=product.name required)
+        
+        .product-form__form-group
+          label.product-form__label Цена
+          input.product-form__input(type="number" name="price" value=product.price required)
+        
+        .product-form__form-group
+          label.product-form__label Описание
+          textarea.product-form__input(name="description" value=product.description required)
+
+        .product-form__form-group
+          label.product-form__label Изображение
+          input.product-form__input(type="file" name="image")
+          if product.image
+              picture.product-form__picture
+                  source(srcset=placeholder(120, 120), media="(max-width: 1240px)")      
+                  img.product-form__preview(src=placeholder(276, 276), alt="Изображение товара")
+        
+        .product-form__form-actions
+          button.btn.product-form__btn-save(type="submit")
+            span.text Сохранить

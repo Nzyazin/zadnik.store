@@ -1,0 +1,53 @@
+-
+  const pathStatics = '/statics'
+  const pathImage = `${pathStatics}/images/`
+
+  const phone = { link: 'tel:+79536799464', mask: '+79536799464' }
+  const mail = { link: 'mailto:zyazin.nikita@yandex.ru', mask: 'zyazin.nikita@yandex.ru' }
+  const address = 'Кировская обл., п. Вахруши, ул. Рабочая, д. 30'
+
+  function staticImage(image) {
+    return `${pathImage}${image}`
+  }
+
+  const pages = [
+    { view: 'index', name: 'Главная', style: 'index', priority: 2, link: '/' },
+    { view: 'error', name: 'Ошибка', style: 'error', priority: false, link: '/error.html' },
+    { view: 'policy', name: 'Политика конфиденциальности', style: 'policy',  priority: false, link: '/policy.html'},
+    { view: 'delivery', name: 'Доставка', style: 'delivery',  priority: false, link: '/delivery.html'},
+    { view: 'payment', name: 'Оплата', style: 'payment',  priority: false, link: '/payment.html'},
+    { view: 'guarantee', name: 'Гарантия', style: 'guarantee',  priority: false, link: '/guarantee.html'},
+    { view: 'error', name: 'Ошибка', style: 'error', priority: false, link: '/error.html' },
+    { view: 'thank', name: 'Благодарность', style: 'thank', priority: false, link: '/thank.html' },
+
+
+  ]
+
+  function getPage(view) {
+    return pages.find(page => page.view === view)
+  }
+
+  function getLinkPage (view) {
+    const currentPage = getPage(view)
+    return currentPage?.link || `/${view}.html`
+  }
+
+  function prefetchStyle() {
+    const style = []
+    const list = pages
+    const currentPage = getPage(VIEW)
+    list.forEach(page => {
+      if (page.view === currentPage.view) return
+      if (page.style && page.style === currentPage.style) return
+      if (!page.style) return style.push(page.view)
+      if (!style.includes(page.style)) style.push(page.style)
+    })
+    return style
+  }
+
+  function placeholder(width, height = width, x, text) {
+    if (x) {
+      return `https://placehold.co/${width}x${height}${text ? '?text=' + text : ''} 1x, https://placehold.co/${Math.round(width * x)}x${Math.round(height * x)}${text ? '?text=' + text : ''} ${x}x`
+    }
+    return `https://placehold.co/${width}x${height}${text ? '?text=' + text : ''}`
+  }

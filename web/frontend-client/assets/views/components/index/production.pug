@@ -1,0 +1,22 @@
+-
+  const aboutList = [
+    'Компания с 15-летней историей на рынке',
+    'С 2010 года компания осуществляет безперебойное производство задника из кожкартона и стелек для обуви',
+  ]
+
+article.production
+  .production__cont.cont
+    span.production__title.title О производстве
+    .production__area
+      .production__info
+        p.production__text.text-big Один из лидеров по продажам задника в Кировской области
+        ul.production__list
+          each item in aboutList
+            li.production__item.text-big= item
+        p.production__offer.text-big Изготовим задник из кожкартона специально для вас: изменим фасон, выберем модификацию и подберем индивидуальный размер
+      picture.production__picture
+        - const aboutImagePath = `${pathImage}about/about-1`
+        source(srcset=`${aboutImagePath}_476.webp 1x, ${aboutImagePath}_714.webp 1.5x`, type='image/webp')
+        source(srcset=`${aboutImagePath}_476.jpg 1x, ${aboutImagePath}_714.jpg 1.5x`)
+        img.production__image(src=`${aboutImagePath}_476.jpg`, alt='Производитель задника из кожкартона и стелек - фото', title="Производитель задника из кожкартона и стелек", loading="lazy")
+

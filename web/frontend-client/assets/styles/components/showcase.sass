@@ -1,0 +1,66 @@
+.showcase
+  margin-bottom: 80px
+  @include media(1240)
+    margin-bottom: 48px
+
+//.showcase__cont
+
+.showcase__title
+  display: block
+  font-weight: bold
+  margin-bottom: 80px
+  @include media(1240)
+    margin-bottom: 40px
+  @include media(700)
+    margin-bottom: 20px
+
+.showcase__text
+  margin-bottom: 48px
+  max-width: 880px
+  @include media(1240)
+    margin-bottom: 23px
+
+.showcase__list
+  display: flex
+  margin: 0 -8px
+  flex-wrap: wrap
+  @include media(520)
+    display: block
+    margin: 0
+
+.showcase__item
+  flex-grow: 1
+  margin: 0 8px
+  margin-bottom: 40px
+  width: calc(33.33% - 16px)
+  @include media(700)
+    width: calc(50% - 16px)
+    margin: 0 0 19px
+  @include media(520)
+    display: flex
+    justify-content: flex-start
+    align-items: center
+    width: 100%
+    margin-bottom: 16px
+
+.showcase__image
+  width: 106px
+  height: 106px
+  margin: 0 auto
+  margin-bottom: 16px
+  @include media(520)
+    width: 40px
+    height: 40px
+    margin: 0 16px 0 0
+
+.showcase__headline
+  display: block
+  text-align: center
+  max-width: 270px
+  margin: 0 auto
+  font-weight: 700
+  @include media(520)
+    max-width: 100%
+    margin: 0
+    line-height: 29px
+    text-align: left

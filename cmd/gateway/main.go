@@ -1,14 +1,20 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
+	"time"
+	"strconv"
 
+	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/internal/gateway"
-	"github.com/joho/godotenv"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -19,10 +25,32 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
+	logger := common.NewSimpleLogger()
+
+	portStrSMTP := os.Getenv("EMAIL_SMTP_PORT")
+	portSMTP, err := strconv.Atoi(portStrSMTP)
+	if err != nil {
+		portSMTP = 587 // Значение по умолчанию, если преобразование не удалось
+	}
+
 	// Создаем конфигурацию
 	cfg := &gateway.ServerConfig{
 		AuthServiceAddr: os.Getenv("AUTH_SERVICE_ADDRESS"),
+		ProductServiceAddr: os.Getenv("PRODUCT_SERVICE_ADDRESS"),
+		ProductServiceAPIKey: os.Getenv("PRODUCT_SERVICE_API_KEY"),
+		UserHTTPS: os.Getenv("USE_HTTPS") == "true",
+		RabbitMQ: struct {
+			URL string
+		}{
+			URL: os.Getenv("RABBITMQ_URL"),
+		},
 		Development:    os.Getenv("DEVELOPMENT") == "true",
+		SMTPConfig: gateway.SMTPConfig{
+			Host: os.Getenv("EMAIL_SMTP_HOST"),
+			Port: portSMTP,
+			From: os.Getenv("EMAIL_FROM"),
+			Password: os.Getenv("EMAIL_PASSWORD"),
+		},
 	}
 
 	// Создаем сервер
@@ -33,8 +61,25 @@ func main() {
 
 	// Запускаем сервер
 	port := os.Getenv("GATEWAY_PORT")
-	fmt.Printf("Starting gateway server on :%s\n", port)
-	if err := server.Run(":" + port); err != nil {
-		log.Fatalf("Failed to run server: %v", err)
+	logger.Infof("Starting gateway server on :%s\n", port)
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := server.Run(":" + port); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Failed to run server: %v", err)
+		}
+	}()
+
+	<-sigChan
+
+	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("Server shutdown failed: %v", err)
 	}
+
+	log.Println("Server gracefully stopped")
 }

@@ -1,0 +1,27 @@
+{{define "order-form"}}
+<div class="order-form" id="order-form">
+    <div class="order-form__cont cont">
+      <div class="order-form__wrapper">
+        <h2 class="order-form__title title">Заказать задник из кожкартона саламандер</h2>
+        <p class="order-form__text text-big">Оставьте заявку, менеджер свяжется с вами для уточнения деталей</p>
+        <form action="/send-order" method="POST" class="order-form__form" data-role="feedback-form">
+          <input type="hidden" name="form_number" value="99">
+          <input type="hidden" name="form_name" value="Форма заказать задник из кожкартона саламандер">
+          <div class="order-form__input-box">
+            <input class="order-form__input order-form__input_name input text" type="text" placeholder="Имя" maxlength="100" name="name">
+          </div>
+          <div class="order-form__input-box">
+            <input class="order-form__input order-form__input_phone input text" type="tel" placeholder="Телефон*" name="phone" data-role="feedback-form__phone-input" pattern="^[+]?([0-9]+(\(|\)|\-|\s)?)+$" minlength="6" maxlength="15">
+            <span class="order-form__text-error text-error text-error_hide" data-role="feedback-form__text-error">*Неверный номер телефона</span>
+          </div>
+          <div class="order-form__btn-box order-form__input-box_name">
+            <button class="order-form__button button-orange text" data-role="feedback-form__button">Заказать</button>
+            <span class="order-form__policy text-tiny">и принять
+              <a class="order-form__policy-link" href="/policy">Политику конфиденциальности</a>
+            </span>
+          </div>
+        </form>
+      </div>
+    </div>
+</div>
+{{end}}

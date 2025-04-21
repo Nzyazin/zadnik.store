@@ -1,0 +1,10 @@
+mixin connect-style (pageName)
+  -
+    function connectStyle (name) {
+      const currentPage = pages.find(page => page.view === name)
+      if (!currentPage) return name
+      if (currentPage.style) return currentPage.style
+      return currentPage.view
+    }
+
+  link(rel="stylesheet", href= PRODUCTION ? `${pathStatics}/styles/${connectStyle(pageName)}-${HASH}.css`: `${pathStatics}/styles/${connectStyle(pageName)}.css` )

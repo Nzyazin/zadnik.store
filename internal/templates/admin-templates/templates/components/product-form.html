@@ -1,0 +1,44 @@
+{{define "product-form"}}
+    <div class="product-form">
+        <div class="product-form__form">
+            <form action="{{.Action}}" method="POST" enctype="multipart/form-data">
+                {{if .Product}}
+                    {{if .IsEdit}}
+                        <input type="hidden" name="original_price" value="{{.Product.Price}}">
+                        <input type="hidden" name="original_name" value="{{.Product.Name}}">
+                        <input type="hidden" name="original_description" value="{{.Product.Description}}">
+                    {{end}}
+                {{end}}
+                <div class="product-form__form-group">
+                    <label class="product-form__label" for="name">Название</label>
+                    <input id="name" class="product-form__input" type="text" name="name" value="{{.Product.Name}}" required>
+                </div>
+                <div class="product-form__form-group">
+                    <label class="product-form__label" for="price">Цена</label>
+                    <input id="price" class="product-form__input" type="number" name="price" value="{{.Product.Price}}" required>
+                </div>
+                <div class="product-form__form-group">
+                    <label class="product-form__label" for="description">Описание</label>
+                    <textarea id="description" class="product-form__input" name="description" required>{{.Product.Description}}</textarea>
+                </div>
+                <div class="product-form__form-group">
+                    <label class="product-form__label" for="image">Изображение</label>
+                    <input id="image" class="product-form__input" type="file" name="image">
+                    {{if .Product}}
+                        <picture class="product-form__picture">
+                            {{if .Product.ImageURL.Valid}}
+                                <source srcset="{{.Product.ImageURL.String}}" media="(max-width: 1240px)" type="image/">
+                                <img src="{{.Product.ImageURL.String}}" alt="Изображение товара">
+                            {{end}}
+                        </picture>
+                    {{end}}
+                </div>
+                <div class="product-form__form-actions">
+                    <button class="btn product-form__btn-save" type="submit">
+                        <span class="text">{{.ButtonText}}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{{end}}

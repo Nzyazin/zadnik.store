@@ -1,0 +1,20 @@
+block variables
+include ../../_variables
+include _connect-style
+include _title
+include _description
+
+doctype html
+html(lang='ru')
+  head
+    include _head
+    block head
+  body
+    include header
+    main.wrapper
+      block body
+    include footer
+    include cookies
+    include scripts
+    each style in prefetchStyle()
+      link(rel="prefetch", href=`${pathStatics}/styles/${style}${PRODUCTION ? `-${HASH}` : ''}.css`, as="style")

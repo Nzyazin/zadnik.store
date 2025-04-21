@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 
-	"github.com/Nzyazin/zadnik.store/internal/auth"
-	"github.com/Nzyazin/zadnik.store/internal/auth/config"
-	"github.com/Nzyazin/zadnik.store/internal/common"
 	pb "github.com/Nzyazin/zadnik.store/api/generated/auth"
+	authgrpc "github.com/Nzyazin/zadnik.store/internal/auth/delivery/grpc"
+	"github.com/Nzyazin/zadnik.store/internal/auth/config"
+	"github.com/Nzyazin/zadnik.store/internal/auth/repository/postgres"
+	"github.com/Nzyazin/zadnik.store/internal/auth/usecase"
+	"github.com/Nzyazin/zadnik.store/internal/common"
 	"github.com/Nzyazin/zadnik.store/pkg/db"
 	"google.golang.org/grpc"
 )
@@ -30,26 +31,26 @@ func main() {
 	}
 	defer database.Close()
 
-	// Создаем репозиторий
-	repo := auth.NewRepository(database)
+	// Инициализируем репозитории
+	userRepo := postgres.NewUserRepository(database.DB)
 
-	// Создаем сервис
-	service := auth.NewService(repo, logger, cfg.JWTSecret)
+	// Инициализируем use case
+	authUseCase := usecase.NewAuthUseCase(userRepo, logger, cfg.JWTSecret)
 
-	// Создаем gRPC handler
-	handler := auth.NewGRPCHandler(service, logger)
+	// Инициализируем gRPC handler
+	authHandler := authgrpc.NewAuthHandler(authUseCase, logger)
 
-	// Запускаем gRPC сервер
+	// Создаем и запускаем gRPC сервер
 	listener, err := net.Listen("tcp", cfg.AuthServiceAddress)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
-	pb.RegisterAuthServiceServer(grpcServer, handler)
+	server := grpc.NewServer()
+	pb.RegisterAuthServiceServer(server, authHandler)
 
-	fmt.Printf("Starting auth service on %s\n", cfg.AuthServiceAddress)
-	if err := grpcServer.Serve(listener); err != nil {
+	logger.Infof("Starting gRPC server for authserivce on %s", cfg.AuthServiceAddress)
+	if err := server.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
 }

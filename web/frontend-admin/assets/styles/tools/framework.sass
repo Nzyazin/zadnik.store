@@ -1,0 +1,88 @@
+.wrapper
+  position: relative
+  scroll-behavior: smooth
+  flex: 1 0 auto
+  margin-top: 24px
+  @include media(1240)
+    margin-top: 9px
+
+.cont
+  margin: 0 auto
+  padding-right: 16px
+  padding-left: 16px
+  max-width: 1176px + 32px
+  @include media(1240)
+    max-width: 852px + 32px
+  @include media(950)
+    max-width: 648px + 32px
+  @include media(700)
+    max-width: 468px + 32px
+  @include media(520)
+    max-width: 392px + 32px
+
+.caption
+  font-size: 48px
+  line-height: 58px
+  font-weight: 400
+  @include media(1240)
+    font-size: 31px
+    line-height: 37px
+
+.title
+  font-size: 40px
+  line-height: 48px
+  font-weight: 400
+  @include media(1240)
+    font-size: 28px
+    line-height: 34px
+
+.headline
+  font-size: 28px
+  line-height: 34px
+  font-weight: 400
+  @include media(1240)
+    font-size: 24px
+    line-height: 29px
+  @include media(700)
+    font-size: 20px
+
+.text-big
+  font-size: 20px
+  line-height: 28px
+  @include media(1240)
+    font-size: 18px
+    line-height: 25px
+
+.text
+  font-size: 16px
+  line-height: 22px
+  @include media(1240)
+    font-size: 14px
+    line-height: 18px
+
+.text-small
+  font-size: 14px
+  line-height: 18px
+
+.text-tiny
+  font-size: 12px
+  line-height: 16px
+  letter-spacing: -0.01em
+
+.text-error
+  display: block
+  margin-top: 4px
+  color: $red
+  font-size: 12px
+  line-height: 16px
+
+.text-error_hide
+  display: none
+
+.alert
+  background: $red
+  border-radius: 12px
+  display: flex
+  justify-content: center
+  margin-bottom: 12px
+  padding: 9px 0

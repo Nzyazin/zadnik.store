@@ -1,0 +1,18 @@
+
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Основное облако с более плавными изгибами -->
+<path d="M20 40H44C50 40 54 36 54 30C54 24 50 20 44 20C42 14 36 10 30 10C22 10 16 16 16 24C10 24 6 28 6 34C6 40 10 44 16 44H20" stroke="#888888" stroke-width="2" fill="none"/>
+
+<!-- Дополнительные детали облака для объемности -->
+<path d="M30 16C26 16 22 18 20 22" stroke="#888888" stroke-width="1.5" fill="none"/>
+<path d="M44 24C46 25 48 27 48 30" stroke="#888888" stroke-width="1.5" fill="none"/>
+<path d="M12 34C12 31 14 28 16 28" stroke="#888888" stroke-width="1.5" fill="none"/>
+
+<!-- Капли дождя для символа влагоустойчивости -->
+<path d="M24 44L22 52" stroke="#888888" stroke-width="1.5" fill="none"/>
+<path d="M32 44L30 52" stroke="#888888" stroke-width="1.5" fill="none"/>
+<path d="M40 44L38 52" stroke="#888888" stroke-width="1.5" fill="none"/>
+
+<!-- Защитный барьер под каплями (символизирует влагоустойчивость) -->
+<path d="M18 54H42" stroke="#888888" stroke-width="2" fill="none"/>
+</svg>

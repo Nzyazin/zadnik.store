@@ -1,0 +1,35 @@
+-
+  const deliveryList = [
+    {
+      name: 'Производство',
+      address: 'п. Вахруши, ул. Рабочая, д. 30',
+      time: [
+        'ПН-ПТ: с 8:00 до 17:00 (мск)',
+        'СБ, ВС: с 11:00 до 15:00 (мск)'
+      ]
+    },
+  ]
+
+
+article.delivery
+  .delivery__cont.cont
+    h1.delivery__caption.caption Доставка задников для обуви
+    p.delivery__text-big.
+      Мы предлагаем быструю и надежную доставку задников для обуви по всей России. Выбираем оптимальный способ
+      доставки с учетом срочности и стоимости. Задники тщательно упакованы для сохранности формы и качества.
+    h2.delivery__title.title Способы доставки
+    p.delivery__text.text.
+      Отправляем задники для обуви во все регионы России через проверенные транспортные компании: СДЭК, Деловые Линии, ПЭК и Почту России.
+      Стоимость доставки можно включить в общий счет или оплатить при получении.
+    h3.delivery__headline.headline Самовывоз
+    p.delivery__text.text.
+     Вы можете забрать заказанные задники самостоятельно с нашего производства в Кировской области, п. Вахруши.
+    .delivery__area
+      ul.delivery__list
+        each item in deliveryList
+          li.delivery__item
+            h4.delivery__name= item.name
+            span.delivery__address= item.address
+            each elem in item.time
+              span.delivery__time= elem
+      .delivery__map#delivery-map(data-zoom="6")

@@ -6,7 +6,6 @@ option go_package = "/generated/auth/";
 
 service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse);
-  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
   rpc Logout(LogoutRequest) returns (LogoutResponse);
   rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
 }
@@ -17,27 +16,13 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  string user_id = 1;
-  string access_token = 2;  // JWT token, не хранится в БД
-  string refresh_token = 3; // Хранится в БД
+  int64 user_id = 1;
+  string access_token = 2;
 }
 
-message RefreshTokenRequest {
-  string refresh_token = 1;
-}
+message LogoutRequest {}
 
-message RefreshTokenResponse {
-  string access_token = 1;
-  string refresh_token = 2;
-}
-
-message LogoutRequest {
-  string refresh_token = 1;
-}
-
-message LogoutResponse {
-  bool success = 1;
-}
+message LogoutResponse {}
 
 message ValidateTokenRequest {
   string access_token = 1;
@@ -45,5 +30,5 @@ message ValidateTokenRequest {
 
 message ValidateTokenResponse {
   bool valid = 1;
-  string user_id = 2;
+  int64 user_id = 2;
 }

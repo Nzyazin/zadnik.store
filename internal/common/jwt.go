@@ -3,23 +3,16 @@ package common
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
-	"time"
 )
 
-var JWTSecret = []byte("supersecretkey252")
+var JWTSecret = []byte("supersecretkey252") //TODO: env файл
 
-func GenerateToken(userID, role string) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"role":    role,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	}
-
+func GenerateToken(claims jwt.MapClaims, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(JWTSecret)
 }
 
-func ParseToken(tokenString string) (jwt.MapClaims, error) {
+func ValidateJWT(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")

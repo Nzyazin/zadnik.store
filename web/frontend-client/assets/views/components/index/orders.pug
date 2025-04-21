@@ -1,0 +1,16 @@
+-
+  const ordersList = [
+    { headline: 'Оставьте заявку', text: 'Заполните форму заказа на сайте'},
+    { headline: 'Подтвердите заказ', text: 'Мы свяжемся с вами, поможем в выборе модели, согласуем характеристики и стоимость'},
+    { headline: 'Изготовление', text: 'Производство изготовит заказ'},
+    { headline: 'Получите заказ', text: 'Доставка по РФ от 6 рабочих дней'}
+  ]
+
+.orders
+  .orders__cont.cont
+    span.orders__title.title Как сделать заказ?
+    ol.orders__list
+      each item in ordersList
+        li.orders__item
+          span.orders__headline=item.headline
+          p.orders__text.text=item.text

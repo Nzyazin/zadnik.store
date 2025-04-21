@@ -1,0 +1,12 @@
+extends ../components/_layout/layout
+
+block variables
+  - const title = 'Управление товарами'
+  - const hideHeader = false
+
+block head
+  +title(title)
+  +description('')
+
+block body
+  include ../components/products/products-index

@@ -1,0 +1,113 @@
+.header
+  position: fixed
+  top: 0
+  left: 0
+  right: 0
+  z-index: 1000
+  background: $white
+  box-shadow: 0 4px 4px 0 rgba($black, 0.05)
+
+.header__layer
+  display: none
+  @include media(1240)
+    display: block
+    position: fixed
+    top: -50px
+    left: 0
+    right: 0
+    z-index: 10
+    height: 0
+    opacity: 0
+    background-color: rgba($black, .8)
+    cursor: pointer
+
+.header__layer_show
+  @include media(1240)
+    bottom: -50px
+    height: auto
+    opacity: 1
+    transition-property: opacity
+    transition-duration: .2s
+
+.header__cont
+  position: relative
+  z-index: 10000
+
+.header-mob__burger-box
+  position: absolute
+  display: none
+  @include media(1240)
+    display: block
+
+.header-mob__burger
+  position: relative
+  z-index: 2
+  display: block
+  margin-left: -15px
+  border: none
+  width: 64px
+  height: 64px
+  background-color: transparent
+  &::before, &::after, .header-mob__burger-line
+    position: absolute
+    left: 16px
+    border-radius: 1px
+    width: 22px
+    height: 2px
+    background-color: $dark
+  &::before
+    content: ''
+    top: 25px
+  &::after
+    content: ''
+    top: 37px
+
+.header-mob__burger-line
+  top: 31px
+
+.header__nav
+  position: absolute
+  top: 0
+  left: 0
+  @include media(1240)
+    display: none
+
+.menu__list
+  display: flex
+
+//.menu__item
+
+.header__logo
+  display: block
+  margin: 0 auto
+  padding: 27px 24px 23px
+  @include media(1240)
+    padding: 13px 16px 13px
+
+//.header__picture
+
+.header__image
+  width: 200px
+  height: 50px
+  @include media(1240)
+    width: 152px
+    height: 38px
+
+.header__contacts
+  position: absolute
+  top: 0
+  right: 0
+  @include media(1240)
+    top: 14px
+    max-width: 130px
+    text-align: right
+
+.header__contacts-link_phone
+  @include media(1240)
+    position: absolute
+    top: 20px
+    right: 16px
+    display: block
+    width: 24px
+    height: 24px
+    +bgIcon('ic_mobile.svg')

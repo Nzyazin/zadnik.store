@@ -1,0 +1,51 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="products-index">
+    <div class="products-index__header">
+        <h1 class="products-index__page-title">{{.Title}}</h1>
+        <a class="btn products-index__btn-primary" href="/admin/products/create">
+            <span>Добавить товар</span>
+        </a>
+    </div>
+
+    {{if .Error}}
+    <div class="alert alert-danger">{{.Error}}</div>
+    {{end}}
+
+    <div class="products-index__table">
+        <table class="products-index__table-inner">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Название</th>
+                    <th>Цена</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $index, $product := .Products}}
+                <tr>
+                    <td>{{add $index 1}}</td>
+                    <td>{{$product.Name}}</td>
+                    <td>{{$product.Price}} ₽</td>
+                    <td>
+                        <div class="products-index__actions">
+                            <a class="btn products-index__btn-edit" href="/admin/products/{{$product.ID}}/edit">
+                                <span>Редактировать</span>
+                            </a>
+                            <form class="products-index__delete-form" method="POST" action="/admin/products/{{$product.ID}}/delete">
+                                <input type="hidden" name="image_url" value="{{$product.ImageURL.String}}">
+                                <button class="btn products-index__btn-delete" type="submit">
+                                    <i class="products-index__btn-delete-icon"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{end}}
