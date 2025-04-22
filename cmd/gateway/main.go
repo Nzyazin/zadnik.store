@@ -61,13 +61,17 @@ func main() {
 
 	// Запускаем сервер
 	port := os.Getenv("GATEWAY_PORT")
-	logger.Infof("Starting gateway server on :%s\n", port)
+	gatewayHost := os.Getenv("GATEWAY_HOST")
+	if gatewayHost == "" {
+		gatewayHost = "localhost"
+	}
+	logger.Infof("Starting gateway server on host %s and port :%s\n", gatewayHost, port)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := server.Run(":" + port); err != nil && err != http.ErrServerClosed {
+		if err := server.Run(gatewayHost + ":" + port); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to run server: %v", err)
 		}
 	}()

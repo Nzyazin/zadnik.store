@@ -177,20 +177,6 @@ setup-static-admin: build-frontend-admin
 	@cp -r web/frontend-admin/build/statics/images/* bin/static/admin/images/
 	@git rev-parse --short HEAD > bin/static/admin/hash.txt
 
-# Build commands
-.PHONY: build-auth
-build-auth:
-	@echo "==> Building auth service..."
-	@go build -o bin/auth.exe ./cmd/auth
-
-.PHONY: build-gateway
-build-gateway: setup-static
-	@echo "==> Building gateway service..."
-	@go build -o bin/gateway.exe ./cmd/gateway
-
-.PHONY: build
-build: build-auth build-gateway
-
 # Gateway
 .PHONY: run-gateway
 run-gateway:
@@ -245,6 +231,14 @@ check-ports:
 	@echo "\nImage Service (8084):"
 	@-lsof -i :8084 || echo "Port available"
 
+.PHONY: start-all-bin
+start-all-bin:
+	@echo "==> Starting all binaries in background..."
+	@./bin/auth.exe &
+	@./bin/product.exe &
+	@./bin/gateway.exe &
+	@./bin/image.exe &
+
 .PHONY: stop-all
 stop-all:
 	@echo "==> Stopping all services..."
@@ -254,6 +248,15 @@ stop-all:
 	@-pkill -f "cmd/image/main"
 	@echo "All services stopped"
 
+
+.PHONY: stop-all-bin
+stop-all-bin:
+	@echo "==> Stopping all binaries..."
+	@pkill -f auth.exe || true
+	@pkill -f product.exe || true
+	@pkill -f gateway.exe || true
+	@pkill -f image.exe || true
+	@echo "All binaries stopped"
 
 .PHONY: generate-mocks
 generate-mocks: install-mockgen
