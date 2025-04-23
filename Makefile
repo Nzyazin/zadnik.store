@@ -8,22 +8,22 @@ PROTO_FILES=$(PROTO_DIR)/*.proto
 .PHONY: build-product
 build-product:
 	@echo "==> Building product service..."
-	@go build -o bin/product.exe ./cmd/product
+	@go build -o bin/product ./cmd/product
 
 .PHONY: build-auth
 build-auth:
 	@echo "==> Building auth service..."
-	@go build -o bin/auth.exe ./cmd/auth
+	@go build -o bin/auth ./cmd/auth
 
 .PHONY: build-gateway
 build-gateway:
 	@echo "==> Building gateway service..."
-	@go build -o bin/gateway.exe ./cmd/gateway
+	@go build -o bin/gateway ./cmd/gateway
 
 .PHONY: build-image
 build-image:
 	@echo "==> Building image service..."
-	@go build -o bin/image.exe ./cmd/image
+	@go build -o bin/image ./cmd/image
 
 .PHONY: build-all
 build-all: build-product build-auth build-gateway build-image
@@ -122,6 +122,7 @@ run-auth:
 	@echo "==> Starting auth service..."
 	@set -a && . ./internal/auth/config/.env-auth && set +a && \
 	go run ./cmd/auth/main.go
+
 
 # Frontend
 .PHONY: install-frontend
@@ -234,10 +235,10 @@ check-ports:
 .PHONY: start-all-bin
 start-all-bin:
 	@echo "==> Starting all binaries in background..."
-	@./bin/auth.exe &
-	@./bin/product.exe &
-	@./bin/gateway.exe &
-	@./bin/image.exe &
+	@./bin/auth &
+	@./bin/product &
+	@./bin/gateway &
+	@./bin/image &
 
 .PHONY: stop-all
 stop-all:
@@ -252,7 +253,7 @@ stop-all:
 .PHONY: stop-all-bin
 stop-all-bin:
 	@echo "==> Stopping all binaries..."
-	@ps aux | grep -E 'auth.exe|product.exe|gateway.exe|image.exe' | grep -v grep | awk '{print $$2}' | xargs kill -9 || true
+	@ps aux | grep -E 'auth|product|gateway|image' | grep -v grep | awk '{print $$2}' | xargs kill -9 || true
 	@echo "All binaries stopped"
 
 .PHONY: generate-mocks
