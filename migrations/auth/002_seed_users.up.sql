@@ -2,5 +2,5 @@
 -- Default password: admin123 (you should change this in production)
 INSERT INTO users (username, password_hash)
 VALUES 
-    ('admin', '$2a$10$aqtifq5lIBLZT8AckY.B0OU7PNW6xAgNIsZW21PU.53HFH1aci2AS')
+    ('admin', '$2a$10$RoWGjii1WP1hyhY1Su4XROcLkMwVKYpb1kCTFzY7JEivQrNcau9N6')
 ON CONFLICT (username) DO NOTHING;

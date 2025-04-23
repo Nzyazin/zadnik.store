@@ -252,10 +252,7 @@ stop-all:
 .PHONY: stop-all-bin
 stop-all-bin:
 	@echo "==> Stopping all binaries..."
-	@pkill -f auth.exe || true
-	@pkill -f product.exe || true
-	@pkill -f gateway.exe || true
-	@pkill -f image.exe || true
+	@ps aux | grep -E 'auth.exe|product.exe|gateway.exe|image.exe' | grep -v grep | awk '{print $$2}' | xargs kill -9 || true
 	@echo "All binaries stopped"
 
 .PHONY: generate-mocks
