@@ -1,15 +1,4 @@
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/golang-migrate/migrate/ci.yaml?branch=master)](https://github.com/golang-migrate/migrate/actions/workflows/ci.yaml?query=branch%3Amaster)
-[![GoDoc](https://pkg.go.dev/badge/github.com/golang-migrate/migrate)](https://pkg.go.dev/github.com/golang-migrate/migrate/v4)
-[![Coverage Status](https://img.shields.io/coveralls/github/golang-migrate/migrate/master.svg)](https://coveralls.io/github/golang-migrate/migrate?branch=master)
-[![packagecloud.io](https://img.shields.io/badge/deb-packagecloud.io-844fec.svg)](https://packagecloud.io/golang-migrate/migrate?filter=debs)
-[![Docker Pulls](https://img.shields.io/docker/pulls/migrate/migrate.svg)](https://hub.docker.com/r/migrate/migrate/)
-![Supported Go Versions](https://img.shields.io/badge/Go-1.21%2C%201.22-lightgrey.svg)
-[![GitHub Release](https://img.shields.io/github/release/golang-migrate/migrate.svg)](https://github.com/golang-migrate/migrate/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/golang-migrate/migrate/v4)](https://goreportcard.com/report/github.com/golang-migrate/migrate/v4)
-
-
 Современная микросервисная система управления интернет-магазином с административной панелью.
->>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 
 __Database migrations written in Go. Use as [CLI](#cli-usage) or import as [library](#use-in-your-go-project).__
 
@@ -25,7 +14,6 @@ __Database migrations written in Go. Use as [CLI](#cli-usage) or import as [libr
 
 - HTML/CSS/JavaScript
 - Шаблонизация Go
->>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 
 ## Databases
 
@@ -84,41 +72,6 @@ zadnik.store/
         │   └── views/
         └── tasks/
 ```
->>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
-
-* [PostgreSQL](database/postgres)
-* [PGX v4](database/pgx)
-* [PGX v5](database/pgx/v5)
-* [Redshift](database/redshift)
-* [Ql](database/ql)
-* [Cassandra / ScyllaDB](database/cassandra)
-* [SQLite](database/sqlite)
-* [SQLite3](database/sqlite3) ([todo #165](https://github.com/mattes/migrate/issues/165))
-* [SQLCipher](database/sqlcipher)
-* [MySQL / MariaDB](database/mysql)
-* [Neo4j](database/neo4j)
-* [MongoDB](database/mongodb)
-* [CrateDB](database/crate) ([todo #170](https://github.com/mattes/migrate/issues/170))
-* [Shell](database/shell) ([todo #171](https://github.com/mattes/migrate/issues/171))
-* [Google Cloud Spanner](database/spanner)
-* [CockroachDB](database/cockroachdb)
-* [YugabyteDB](database/yugabytedb)
-* [ClickHouse](database/clickhouse)
-* [Firebird](database/firebird)
-* [MS SQL Server](database/sqlserver)
-* [rqlite](database/rqlite)
-* [Add a new source?](source/driver.go)
-
-* [Filesystem](source/file) - read from filesystem
-* [io/fs](source/iofs) - read from a Go [io/fs](https://pkg.go.dev/io/fs#FS)
-* [Go-Bindata](source/go_bindata) - read from embedded binary data ([jteeuwen/go-bindata](https://github.com/jteeuwen/go-bindata))
-* [pkger](source/pkger) - read from embedded binary data ([markbates/pkger](https://github.com/markbates/pkger))
-* [GitHub](source/github) - read from remote GitHub repositories
-* [GitHub Enterprise](source/github_ee) - read from remote GitHub Enterprise repositories
-* [Bitbucket](source/bitbucket) - read from remote Bitbucket repositories
-* [Gitlab](source/gitlab) - read from remote Gitlab repositories
-* [AWS S3](source/aws_s3) - read from Amazon Web Services S3
-* [Google Cloud Storage](source/google_cloud_storage) - read from Google Cloud Platform Storage
 
 ## CLI usage
 
@@ -132,7 +85,7 @@ __[CLI Documentation](cmd/migrate)__
 
 ```bash
 $ migrate -source file://path/to/migrations -database postgres://localhost:5432/database up 2
-======
+
 ### Требования
 
 - Go 1.22.1+
@@ -157,7 +110,6 @@ npm run build  # Соберет в static/admin/
 cd web/html-css-js-client
 npm install
 npm run build  # Соберет в static/client/
->>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 ```
 
 ### Docker usage
@@ -187,7 +139,6 @@ make test-product
 ## 📊 Мониторинг
 
 Проект интегрирован с Prometheus для мониторинга производительности и состояния микросервисов.
->>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 
 ## Getting started
 
@@ -233,5 +184,4 @@ Also have a look at the [FAQ](FAQ.md).
 
 ---
 
-MIT License © 2024 Zadnik.Store
->>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
+MIT License © 2025 Zadnik

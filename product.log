@@ -1,8 +1,0 @@
-2025/04/21 19:46:19 [INFO] Subscribing to image.processed events
-2025/04/21 19:46:19 [INFO] Subscribing to product.updating events
-2025/04/21 19:46:19 [INFO] Subscribing to product.deleted events
-2025/04/21 19:46:19 [INFO] Subscribing to image.deleted events
-2025/04/21 19:46:19 [INFO] Subscribing to product.creating events
-2025/04/21 19:46:19 [INFO] Subscribing to image.created events
-2025/04/21 19:46:19 [INFO] Starting product service on localhost:50055
-2025/04/21 19:46:19 [ERROR] Server error: listen tcp 127.0.0.1:50055: bind: address already in use
