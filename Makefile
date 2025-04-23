@@ -232,6 +232,29 @@ check-ports:
 	@echo "\nImage Service (8084):"
 	@-lsof -i :8084 || echo "Port available"
 
+.PHONY: check-services
+check-services:
+	@echo "==> Checking running services..."
+	@echo "Auth service:"
+	@ps aux | grep -E "bin/auth" | grep -v grep || echo "Not running"
+	@echo "\nProduct service:"
+	@ps aux | grep -E "bin/product" | grep -v grep || echo "Not running"
+	@echo "\nGateway service:"
+	@ps aux | grep -E "bin/gateway" | grep -v grep || echo "Not running"
+	@echo "\nImage service:"
+	@ps aux | grep -E "bin/image" | grep -v grep || echo "Not running"
+	@echo "\nListening ports:"
+	@echo "Auth (50051):"
+	@lsof -i :50051 || echo "Port not in use"
+	@echo "\nProduct (50055):"
+	@lsof -i :50055 || echo "Port not in use"
+	@echo "\nGateway (HTTP):"
+	@lsof -i :80 || lsof -i :8082 || echo "HTTP port not in use"
+	@echo "\nGateway (HTTPS):"
+	@lsof -i :443 || lsof -i :8443 || echo "HTTPS port not in use"
+	@echo "\nImage service:"
+	@lsof -i :8084 || echo "Port not in use"
+
 .PHONY: start-all-bin
 start-all-bin:
 	@echo "==> Starting all binaries in background..."
