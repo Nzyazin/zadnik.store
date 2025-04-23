@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -34,9 +35,11 @@ type ServerConfig struct {
 	ProductServiceAddr string
 	ProductServiceAPIKey string
 	Development    bool
-	UserHTTPS      bool
+	UseHTTPS      bool
 	RabbitMQ broker.RabbitMQConfig
 	SMTPConfig SMTPConfig
+	CertFile string
+	KeyFile string
 }
 
 type Server struct {
@@ -115,7 +118,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	}
 
 	protocol := "http"
-	if cfg.UserHTTPS {
+	if cfg.UseHTTPS {
 		protocol = "https"
 	}
 
@@ -145,6 +148,38 @@ func (s *Server) Run(addr string) error {
 	s.httpServer = srv
 
 	return srv.ListenAndServe()
+}
+
+func (s *Server) RunWithTLS(addr, certFile, keyFile string) error {
+	srv := &http.Server{
+		Addr: addr,
+		Handler: s.router,
+	}
+
+	s.httpServer = srv
+
+	return srv.ListenAndServeTLS(certFile, keyFile)
+}
+
+func RunHTTPRedirect(httpAddr, httpsHost string) *http.Server {
+	srv := &http.Server{
+		Addr: httpAddr,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			target := "https://" + httpsHost + r.URL.Path
+			if len(r.URL.RawQuery) > 0 {
+				target += "?" + r.URL.RawQuery
+			}
+			http.Redirect(w, r, target, http.StatusMovedPermanently)
+		}),
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			log.Printf("HTTP redirect server error: %v", err)
+		}
+	}()
+
+	return srv
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {

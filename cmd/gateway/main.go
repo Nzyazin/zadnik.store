@@ -38,7 +38,7 @@ func main() {
 		AuthServiceAddr: os.Getenv("AUTH_SERVICE_ADDRESS"),
 		ProductServiceAddr: os.Getenv("PRODUCT_SERVICE_ADDRESS"),
 		ProductServiceAPIKey: os.Getenv("PRODUCT_SERVICE_API_KEY"),
-		UserHTTPS: os.Getenv("USE_HTTPS") == "true",
+		UseHTTPS: os.Getenv("USE_HTTPS") == "true",
 		RabbitMQ: struct {
 			URL string
 		}{
@@ -51,6 +51,8 @@ func main() {
 			From: os.Getenv("EMAIL_FROM"),
 			Password: os.Getenv("EMAIL_PASSWORD"),
 		},
+		CertFile: os.Getenv("CERT_FILE"),
+		KeyFile: os.Getenv("KEY_FILE"),
 	}
 
 	// Создаем сервер
@@ -67,14 +69,47 @@ func main() {
 	}
 	logger.Infof("Starting gateway server on host %s and port :%s\n", gatewayHost, port)
 
+	useHTTPS := cfg.UseHTTPS
+	httpsPort := os.Getenv("HTTPS_PORT")
+	if httpsPort == "" {
+		if cfg.Development {
+			httpsPort = "8443"
+		} else {
+			httpsPort = "443"
+		}
+	}
+
+	httpPort := os.Getenv("HTTP_PORT")
+	if httpPort == "" {
+		if cfg.Development {
+			httpPort = "8082"
+		} else {
+			httpPort = "80"
+		}
+	}
+
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	go func() {
-		if err := server.Run(gatewayHost + ":" + port); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Failed to run server: %v", err)
-		}
-	}()
+	if useHTTPS && cfg.CertFile != "" && cfg.KeyFile != "" {
+		srv := gateway.RunHTTPRedirect(":" + httpPort, gatewayHost)
+		defer srv.Shutdown(context.Background())
+
+		logger.Infof("Starting HTTPS gateway server on %s:%s\n", gatewayHost, httpsPort)
+		logger.Infof("HTTP to HTTPS redirect active on port %s\n", httpPort)
+		go func() {
+			if err := server.RunWithTLS(gatewayHost + ":" + httpsPort, cfg.CertFile, cfg.KeyFile); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("Failed to run server: %v", err)
+			}
+		}()
+	} else {
+		logger.Infof("Starting HTTP gateway server on %s:%s\n", gatewayHost, port)
+		go func() {
+			if err := server.Run(gatewayHost + ":" + port); err != nil && err != http.ErrServerClosed {
+				log.Fatalf("Failed to run server: %v", err)
+			}
+		}()
+	}
 
 	<-sigChan
 

@@ -226,8 +226,8 @@ check-ports:
 	@-lsof -i :50051 || echo "Port available"
 	@echo "\nProduct Service (50055):"
 	@-lsof -i :50055 || echo "Port available"
-	@echo "\nGateway Service (8083):"
-	@-lsof -i :8083 || echo "Port available"
+	@echo "\nGateway Service (8082):"
+	@-lsof -i :8082 || echo "Port available"
 	@echo "\nImage Service (8084):"
 	@-lsof -i :8084 || echo "Port available"
 
