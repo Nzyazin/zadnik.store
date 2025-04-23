@@ -11,12 +11,18 @@
         <header class="header">
             <div class="header__cont cont">
                 <nav class="header__nav">
-                    <a class="header__nav-link{{if eq .View "products-index"}} active{{end}}" href="/admin/products">
+                    {{if eq .View "products-index"}}
+                    <span class="header__nav-link active">
                         <i class="icon-box"></i>
                         <span>Товары</span>
-                    </a>
+                    </span>
+                    {{else}}
+                        <a class="header__nav-link" href="/admin/products">
+                            <i class="icon-box"></i>
+                            <span>Товары</span>
+                        </a>
+                    {{end}}
                     <a class="header__nav-link" href="/admin/logout">
-                        <i class="icon-box"></i>
                         <span>Выход</span>
                     </a>
                 </nav>

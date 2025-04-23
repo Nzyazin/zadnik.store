@@ -7,21 +7,84 @@
 [![GitHub Release](https://img.shields.io/github/release/golang-migrate/migrate.svg)](https://github.com/golang-migrate/migrate/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/golang-migrate/migrate/v4)](https://goreportcard.com/report/github.com/golang-migrate/migrate/v4)
 
-# migrate
+
+Современная микросервисная система управления интернет-магазином с административной панелью.
+>>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 
 __Database migrations written in Go. Use as [CLI](#cli-usage) or import as [library](#use-in-your-go-project).__
 
-* Migrate reads migrations from [sources](#migration-sources)
-   and applies them in correct order to a [database](#databases).
-* Drivers are "dumb", migrate glues everything together and makes sure the logic is bulletproof.
-   (Keeps the drivers lightweight, too.)
-* Database drivers don't assume things or try to correct user input. When in doubt, fail.
+### Бэкенд
 
-Forked from [mattes/migrate](https://github.com/mattes/migrate)
+- Go 1.22.1
+- gRPC
+- PostgreSQL
+- RabbitMQ
+- Docker
+
+### Фронтенд
+
+- HTML/CSS/JavaScript
+- Шаблонизация Go
+>>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 
 ## Databases
 
-Database drivers run migrations. [Add a new database?](database/driver.go)
+```
+zadnik.store/
+├── api/                    # gRPC API определения и сгенерированный код
+├── bin/                    # Скомпилированные бинарные файлы
+├── cmd/                    # Точки входа приложения
+│   ├── auth/               # Микросервис авторизации
+│   ├── gateway/            # API Gateway
+│   ├── image/              # Микросервис изображений
+│   └── product/            # Микросервис товаров
+├── deployments/            # Конфигурации для развертывания
+├── internal/               # Внутренняя логика приложения
+├── static/                 # Собранная статика
+│   ├── admin/             # Статика админ-панели
+│   │   ├── css/          # Стили
+│   │   ├── js/           # Скрипты
+│   │   ├── images/       # Изображения
+│   │   ├── fonts/        # Шрифты
+│   │   └── templates/    # HTML шаблоны
+│   └── client/           # Статика клиентской части
+│       ├── css/
+│       ├── js/
+│       ├── images/
+│       ├── fonts/
+│       └── templates/
+├── public/                # Публичная статика
+│   ├── admin/             # Статика админ-панели
+│   │   ├── css/          # Стили
+│   │   ├── js/           # Скрипты
+│   │   ├── images/       # Изображения
+│   │   ├── fonts/        # Шрифты
+│   │   └── templates/    # HTML шаблоны
+│   └── client/           # Статика клиентской части
+│       ├── css/
+│       ├── js/
+│       ├── images/
+│       ├── fonts/
+│       └── templates/
+└── web/                   # Исходники фронтенда
+    ├── html-css-js-admin/ # Исходники админ-панели
+    │   ├── assets/       # Исходные файлы
+    │   │   ├── fonts/
+    │   │   ├── images/
+    │   │   ├── scripts/
+    │   │   ├── styles/
+    │   │   └── views/
+    │   └── tasks/        # Gulp задачи
+    └── html-css-js-client/ # Исходники клиентской части
+        ├── assets/
+        │   ├── fonts/
+        │   ├── images/
+        │   ├── scripts/
+        │   ├── styles/
+        │   └── views/
+        └── tasks/
+```
+>>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 
 * [PostgreSQL](database/postgres)
 * [PGX v4](database/pgx)
@@ -44,31 +107,7 @@ Database drivers run migrations. [Add a new database?](database/driver.go)
 * [Firebird](database/firebird)
 * [MS SQL Server](database/sqlserver)
 * [rqlite](database/rqlite)
-
-### Database URLs
-
-Database connection strings are specified via URLs. The URL format is driver dependent but generally has the form: `dbdriver://username:password@host:port/dbname?param1=true&param2=false`
-
-Any [reserved URL characters](https://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_reserved_characters) need to be escaped. Note, the `%` character also [needs to be escaped](https://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_the_percent_character)
-
-Explicitly, the following characters need to be escaped:
-`!`, `#`, `$`, `%`, `&`, `'`, `(`, `)`, `*`, `+`, `,`, `/`, `:`, `;`, `=`, `?`, `@`, `[`, `]`
-
-It's easiest to always run the URL parts of your DB connection URL (e.g. username, password, etc) through an URL encoder. See the example Python snippets below:
-
-```bash
-$ python3 -c 'import urllib.parse; print(urllib.parse.quote(input("String to encode: "), ""))'
-String to encode: FAKEpassword!#$%&'()*+,/:;=?@[]
-FAKEpassword%21%23%24%25%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D
-$ python2 -c 'import urllib; print urllib.quote(raw_input("String to encode: "), "")'
-String to encode: FAKEpassword!#$%&'()*+,/:;=?@[]
-FAKEpassword%21%23%24%25%26%27%28%29%2A%2B%2C%2F%3A%3B%3D%3F%40%5B%5D
-$
-```
-
-## Migration Sources
-
-Source drivers read migrations from local or remote sources. [Add a new source?](source/driver.go)
+* [Add a new source?](source/driver.go)
 
 * [Filesystem](source/file) - read from filesystem
 * [io/fs](source/iofs) - read from a Go [io/fs](https://pkg.go.dev/io/fs#FS)
@@ -93,61 +132,62 @@ __[CLI Documentation](cmd/migrate)__
 
 ```bash
 $ migrate -source file://path/to/migrations -database postgres://localhost:5432/database up 2
+======
+### Требования
+
+- Go 1.22.1+
+- Docker
+- Docker Compose
+
+### Запуск инфраструктуры
+
+```bash
+# Запуск PostgreSQL и RabbitMQ
+docker-compose up -d
+```
+
+### Сборка фронтенда
+```bash
+# Сборка админ-панели
+cd web/html-css-js-admin
+npm install
+npm run build  # Соберет в static/admin/
+
+# Сборка клиентской части
+cd web/html-css-js-client
+npm install
+npm run build  # Соберет в static/client/
+>>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 ```
 
 ### Docker usage
+- 👤 Авторизация пользователей и администраторов
+- 📦 Управление товарами
+  - Просмотр списка товаров
+  - Добавление новых товаров
+  - Редактирование существующих товаров
+- 🖼️ Управление изображениями
+- 🛒 Оформление заказов
+- 🎨 Современный адаптивный дизайн
+- 🚀 Микросервисная архитектура для масштабируемости
+
+## 🧪 Тестирование
 
 ```bash
-$ docker run -v {{ migration dir }}:/migrations --network host migrate/migrate
-    -path=/migrations/ -database postgres://localhost:5432/database up 2
+# Запуск всех тестов
+make test
+
+# Запуск тестов для конкретного микросервиса
+make test-auth
+make test-gateway
+make test-image
+make test-product
 ```
 
-## Use in your Go project
+## 📊 Мониторинг
 
-* API is stable and frozen for this release (v3 & v4).
-* Uses [Go modules](https://golang.org/cmd/go/#hdr-Modules__module_versions__and_more) to manage dependencies.
-* To help prevent database corruptions, it supports graceful stops via `GracefulStop chan bool`.
-* Bring your own logger.
-* Uses `io.Reader` streams internally for low memory overhead.
-* Thread-safe and no goroutine leaks.
-
-__[Go Documentation](https://pkg.go.dev/github.com/golang-migrate/migrate/v4)__
-
-```go
-import (
-    "github.com/golang-migrate/migrate/v4"
-    _ "github.com/golang-migrate/migrate/v4/database/postgres"
-    _ "github.com/golang-migrate/migrate/v4/source/github"
-)
-
-func main() {
-    m, err := migrate.New(
-        "github://mattes:personal-access-token@mattes/migrate_test",
-        "postgres://localhost:5432/database?sslmode=enable")
-    m.Steps(2)
-}
-```
-
-Want to use an existing database client?
-
-```go
-import (
-    "database/sql"
-    _ "github.com/lib/pq"
-    "github.com/golang-migrate/migrate/v4"
-    "github.com/golang-migrate/migrate/v4/database/postgres"
-    _ "github.com/golang-migrate/migrate/v4/source/file"
-)
-
-func main() {
-    db, err := sql.Open("postgres", "postgres://localhost:5432/database?sslmode=enable")
-    driver, err := postgres.WithInstance(db, &postgres.Config{})
-    m, err := migrate.NewWithDatabaseInstance(
-        "file:///migrations",
-        "postgres", driver)
-    m.Up() // or m.Step(2) if you want to explicitly set the number of migrations to run
-}
-```
+Проект интегрирован с Prometheus для мониторинга производительности и состояния микросервисов.
+>>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
 
 ## Getting started
 
@@ -193,4 +233,5 @@ Also have a look at the [FAQ](FAQ.md).
 
 ---
 
-Looking for alternatives? [https://awesome-go.com/#database](https://awesome-go.com/#database).
+MIT License © 2024 Zadnik.Store
+>>>>>>> 912fe5004ac42482192cf2bfa8b3878caba4172e
