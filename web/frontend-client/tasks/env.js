@@ -5,6 +5,6 @@ export default {
   production,
   hash,
   outputFolder: production ? 'build' : 'dev',
-  url: 'https://xn--k1aahclgep4d.xn--p1ai/',
-  domain: 'задниксторе.рф'
+  url: 'https://задник-для-обуви.рф/',
+  domain: 'задник-для-обуви.рф'
 }
