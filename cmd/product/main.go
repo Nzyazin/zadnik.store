@@ -33,12 +33,12 @@ func main() {
 	}
 	defer db.Close()
 
-	logger := common.NewSimpleLogger()
+	logger := common.NewSimpleLogger(&common.LogConfig{FilePath: cfg.LOG_FILE})
 	productRepo := postgres.NewProductRepository(db)
 	productUseCase := usecase.NewProductUseCase(productRepo)
 	productHandler := delivery.NewProductHandler(productUseCase, logger, cfg.APIKey)
 
-	messageBroker, err := broker.NewRabbitMQBroker(broker.RabbitMQConfig{URL: cfg.RabbitMQ.URL})
+	messageBroker, err := broker.NewRabbitMQBroker(broker.RabbitMQConfig{URL: cfg.RabbitMQ.URL, LogFilePath: cfg.LOG_FILE})
 
 	if err != nil {
 		log.Fatalf("Failed to initialize message broker: %v", err)

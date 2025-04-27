@@ -15,6 +15,7 @@ import (
 	"github.com/Nzyazin/zadnik.store/internal/gateway"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/Nzyazin/zadnik.store/internal/broker"
 )
 
 func main() {
@@ -24,8 +25,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
-
-	logger := common.NewSimpleLogger()
 
 	portStrSMTP := os.Getenv("EMAIL_SMTP_PORT")
 	portSMTP, err := strconv.Atoi(portStrSMTP)
@@ -39,10 +38,9 @@ func main() {
 		ProductServiceAddr: os.Getenv("PRODUCT_SERVICE_ADDRESS"),
 		ProductServiceAPIKey: os.Getenv("PRODUCT_SERVICE_API_KEY"),
 		UseHTTPS: os.Getenv("USE_HTTPS") == "true",
-		RabbitMQ: struct {
-			URL string
-		}{
+		RabbitMQ: broker.RabbitMQConfig{
 			URL: os.Getenv("RABBITMQ_URL"),
+			LogFilePath: os.Getenv("LOG_FILE"),
 		},
 		Development:    os.Getenv("DEVELOPMENT") == "true",
 		SMTPConfig: gateway.SMTPConfig{
@@ -53,7 +51,10 @@ func main() {
 		},
 		CertFile: os.Getenv("CERT_FILE"),
 		KeyFile: os.Getenv("KEY_FILE"),
+		LOG_FILE: os.Getenv("LOG_FILE"),
 	}
+
+	logger := common.NewSimpleLogger(&common.LogConfig{FilePath: cfg.LOG_FILE})
 
 	// Создаем сервер
 	server, err := gateway.NewServer(cfg)
@@ -67,7 +68,6 @@ func main() {
 	if gatewayHost == "" {
 		gatewayHost = "localhost"
 	}
-	logger.Infof("Starting gateway server on host %s and port :%s\n", gatewayHost, port)
 
 	useHTTPS := cfg.UseHTTPS
 	httpsPort := os.Getenv("HTTPS_PORT")

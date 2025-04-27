@@ -28,10 +28,11 @@ type RabbitMQBroker struct {
 
 type RabbitMQConfig struct {
 	URL string
+	LogFilePath string
 }
 
 func NewRabbitMQBroker(config RabbitMQConfig) (*RabbitMQBroker, error) {
-	logger := common.NewSimpleLogger()
+	logger := common.NewSimpleLogger(&common.LogConfig{FilePath: config.LogFilePath})
 
 	// Используем URL напрямую, так как он уже содержит протокол amqp:// и учетные данные
 	rabbitUrl := config.URL

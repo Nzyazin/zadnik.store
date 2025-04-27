@@ -14,6 +14,7 @@ type Config struct {
 	JWTSecret         string
 	APIKey            string
 	RabbitMQ broker.RabbitMQConfig
+	LOG_FILE string
 }
 
 type DBConfig struct {
@@ -45,5 +46,6 @@ func GetConfig() (*Config, error) {
 		RabbitMQ: broker.RabbitMQConfig{
 			URL: os.Getenv("RABBITMQ_URL"),
 		},
+		LOG_FILE: os.Getenv("LOG_FILE"),
 	}, nil
 }

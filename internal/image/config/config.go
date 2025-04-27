@@ -11,6 +11,7 @@ type Config struct {
 	StoragePath string
 	ImageBaseURL string
 	RabbitMQURL string
+	LOG_FILE string
 }
 
 func LoadConfig() (*Config, error) {
@@ -27,5 +28,6 @@ func LoadConfig() (*Config, error) {
 		StoragePath: filepath.Join(projectDir, os.Getenv("STORAGE_PATH")),
 		ImageBaseURL: os.Getenv("IMAGE_BASE_URL"),
 		RabbitMQURL: os.Getenv("RABBITMQ_URL"),
+		LOG_FILE: os.Getenv("LOG_FILE"),
 	}, nil
 }

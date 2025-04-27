@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -40,6 +41,7 @@ type ServerConfig struct {
 	SMTPConfig SMTPConfig
 	CertFile string
 	KeyFile string
+	LOG_FILE string
 }
 
 type Server struct {
@@ -55,8 +57,35 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		cfg:    cfg,
 	}
 
+	logger := common.NewSimpleLogger(&common.LogConfig{FilePath: cfg.LOG_FILE})
+	s.router.Use(func(c *gin.Context) {
+		start := time.Now()
+		path := c.Request.URL.Path
+		raw := c.Request.URL.RawQuery
+		c.Next()
+		timestamp := time.Now()
+		latency := timestamp.Sub(start)
+		clientIP := c.ClientIP()
+		method := c.Request.Method
+		statusCode := c.Writer.Status()
+
+		if raw != "" {
+			path = path + "?" + raw
+		}
+
+		logMessage := fmt.Sprintf("%s | %3d | %13v | %15s | %-7s %s",
+			timestamp.Format("2006-01-02 15:04:05"),
+			statusCode,
+			latency,
+			clientIP,
+			method,
+			path,
+		)
+		logger.Infof(logMessage)
+	})
+
+
 	// Middleware
-	s.router.Use(gin.Logger())
 	s.router.Use(gin.Recovery())
 	s.router.Use(middleware.PrometheusMiddleware())
 
@@ -82,6 +111,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 	messageBroker, err := broker.NewRabbitMQBroker(
 		broker.RabbitMQConfig{
 			URL: cfg.RabbitMQ.URL,
+			LogFilePath: cfg.LOG_FILE,
 		},
 	)
 	if err != nil {
@@ -127,7 +157,7 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		cfg.SMTPConfig.Port,
 		cfg.SMTPConfig.From,
 		cfg.SMTPConfig.Password,
-		common.NewSimpleLogger(),
+		common.NewSimpleLogger(&common.LogConfig{FilePath: cfg.LOG_FILE}),
 	)
 
 	productServiceUrl := fmt.Sprintf("%s://%s", protocol, cfg.ProductServiceAddr)

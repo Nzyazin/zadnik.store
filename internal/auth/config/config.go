@@ -10,6 +10,7 @@ type Config struct {
 	DB                *DBConfig
 	AuthServiceAddress string
 	JWTSecret         string
+	LOG_FILE          string
 }
 
 type DBConfig struct {
@@ -37,5 +38,6 @@ func Load() (*Config, error) {
 		},
 		AuthServiceAddress: os.Getenv("AUTH_SERVICE_ADDRESS"),
 		JWTSecret:         os.Getenv("JWT_SECRET"),
+		LOG_FILE:          os.Getenv("LOG_FILE"),
 	}, nil
 }

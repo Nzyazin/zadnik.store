@@ -19,11 +19,12 @@ type App struct {
 }
 
 func NewApp(config *config.Config) (*App, error) {
-	logger := common.NewSimpleLogger()
+	logger := common.NewSimpleLogger(&common.LogConfig{FilePath: config.LOG_FILE})
 
 	messageBroker, err := broker.NewRabbitMQBroker(
 		broker.RabbitMQConfig{
 			URL: config.RabbitMQURL,
+			LogFilePath: config.LOG_FILE,
 		},
 	)
 	if err != nil {

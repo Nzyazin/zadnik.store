@@ -15,32 +15,23 @@ import (
 )
 
 func main() {
-	// Загружаем конфигурацию
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// Инициализируем логгер
-	logger := common.NewSimpleLogger()
+	logger := common.NewSimpleLogger(&common.LogConfig{FilePath: cfg.LOG_FILE})
 
-	// Подключаемся к базе данных
 	database, err := db.NewDatabase(cfg.DB)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer database.Close()
 
-	// Инициализируем репозитории
 	userRepo := postgres.NewUserRepository(database.DB)
-
-	// Инициализируем use case
 	authUseCase := usecase.NewAuthUseCase(userRepo, logger, cfg.JWTSecret)
-
-	// Инициализируем gRPC handler
 	authHandler := authgrpc.NewAuthHandler(authUseCase, logger)
 
-	// Создаем и запускаем gRPC сервер
 	listener, err := net.Listen("tcp", cfg.AuthServiceAddress)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
