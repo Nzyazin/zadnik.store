@@ -159,8 +159,10 @@ func NewServer(cfg *ServerConfig) (*Server, error) {
 		cfg.SMTPConfig.Password,
 		common.NewSimpleLogger(&common.LogConfig{FilePath: cfg.LOG_FILE}),
 	)
-
-	productServiceUrl := fmt.Sprintf("%s://%s", protocol, cfg.ProductServiceAddr)
+	productServiceUrl := cfg.ProductServiceAddr
+	if !strings.HasPrefix(productServiceUrl, "http://") && !strings.HasPrefix(productServiceUrl, "https://") {
+		productServiceUrl = fmt.Sprintf("%s://%s", protocol, cfg.ProductServiceAddr)
+	}
 	adminHandler := admin.NewHandler(authService, adminTemplates, productServiceUrl, cfg.ProductServiceAPIKey, messageBroker)
 	clientHandler := client.NewHandler(clientTemplates, productServiceUrl, cfg.ProductServiceAPIKey, emailSender)
 	clientHandler.RegisterRoutes(s.router)

@@ -197,7 +197,9 @@ run-image:
 # RabbitMQ commands
 .PHONY: rabbitmq-start rabbitmq-stop rabbitmq-restart rabbitmq-status
 
-
+setcap:
+	@echo "==> Setting capabilities for gateway binary..."
+	sudo setcap cap_net_bind_service=+ep ./bin/gateway
 
 rabbitmq-start:
 	@echo "==> Starting RabbitMQ..."
