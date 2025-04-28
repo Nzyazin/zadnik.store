@@ -1,8 +1,6 @@
-Современная микросервисная система управления интернет-магазином с административной панелью.
+# Zadnik Store
 
-__Database migrations written in Go. Use as [CLI](#cli-usage) or import as [library](#use-in-your-go-project).__
-
-### Бэкенд
+### Backend
 
 - Go 1.22.1
 - gRPC
@@ -10,12 +8,12 @@ __Database migrations written in Go. Use as [CLI](#cli-usage) or import as [libr
 - RabbitMQ
 - Docker
 
-### Фронтенд
+### Frontend
 
 - HTML/CSS/JavaScript
-- Шаблонизация Go
+- Go template
 
-## Databases
+### Structure of project
 
 ```
 zadnik.store/
@@ -54,6 +52,8 @@ zadnik.store/
 │       ├── images/
 │       ├── fonts/
 │       └── templates/
+├── logs/                  # Логи приложения
+│   └── app.log           # Файл логов
 └── web/                   # Исходники фронтенда
     ├── html-css-js-admin/ # Исходники админ-панели
     │   ├── assets/       # Исходные файлы
@@ -73,35 +73,21 @@ zadnik.store/
         └── tasks/
 ```
 
-## CLI usage
-
-* Simple wrapper around this library.
-* Handles ctrl+c (SIGINT) gracefully.
-* No config search paths, no config files, no magic ENV var injections.
-
-__[CLI Documentation](cmd/migrate)__
-
 ### Basic usage
 
 ```bash
 $ migrate -source file://path/to/migrations -database postgres://localhost:5432/database up 2
 
-### Требования
+### Requirements
 
 - Go 1.22.1+
 - Docker
-- Docker Compose
+- RabbitMQ
+- PostgreSQL
 
-### Запуск инфраструктуры
-
+### Frontend build
 ```bash
-# Запуск PostgreSQL и RabbitMQ
-docker-compose up -d
-```
-
-### Сборка фронтенда
-```bash
-# Сборка админ-панели
+# Build admin panel
 cd web/html-css-js-admin
 npm install
 npm run build  # Соберет в static/admin/
@@ -112,18 +98,28 @@ npm install
 npm run build  # Соберет в static/client/
 ```
 
-### Docker usage
+### Admin panel usage
 - 👤 Авторизация пользователей и администраторов
 - 📦 Управление товарами
   - Просмотр списка товаров
   - Добавление новых товаров
   - Редактирование существующих товаров
 - 🖼️ Управление изображениями
-- 🛒 Оформление заказов
+- Обработка заявок
 - 🎨 Современный адаптивный дизайн
 - 🚀 Микросервисная архитектура для масштабируемости
 
 ## 🧪 Тестирование
+
+В проекте используются два типа тестов (в настоящее время реализованы только для микросервиса авторизации):
+
+### Модульные тесты (Unit Tests)
+Проверяют отдельные компоненты в изоляции, используя моки для имитации зависимостей.
+Находятся в директориях `internal/auth/usecase` и проверяют бизнес-логику сервисов.
+
+### Интеграционные тесты (Integration Tests)
+Проверяют взаимодействие с реальными внешними системами (PostgreSQL).
+Находятся в директориях `internal/auth/repository/postgres` и требуют настройки тестовой базы данных `auth_test`.
 
 ```bash
 # Запуск всех тестов
@@ -131,57 +127,53 @@ make test
 
 # Запуск тестов для конкретного микросервиса
 make test-auth
-make test-gateway
-make test-image
-make test-product
-```
+make test-auth-unit      # Только модульные тесты авторизации
+make test-auth-integration # Только интеграционные тесты авторизации
+
 
 ## 📊 Мониторинг
 
 Проект интегрирован с Prometheus для мониторинга производительности и состояния микросервисов.
 
-## Getting started
+## 📜 Миграции
 
-Go to [getting started](GETTING_STARTED.md)
-
-## Tutorials
-
-* [CockroachDB](database/cockroachdb/TUTORIAL.md)
-* [PostgreSQL](database/postgres/TUTORIAL.md)
-
-(more tutorials to come)
-
-## Migration files
-
-Each migration has an up and down migration. [Why?](FAQ.md#why-two-separate-files-up-and-down-for-a-migration)
+Для управления миграциями базы данных используется утилита [golang-migrate](https://github.com/golang-migrate/migrate). Каждая миграция состоит из двух файлов: прямой (up) и обратной (down) миграции.
 
 ```bash
-1481574547_create_users_table.up.sql
-1481574547_create_users_table.down.sql
+# Формат файлов миграций
+1481574547_create_users_table.up.sql   # Создание таблицы
+1481574547_create_users_table.down.sql # Удаление таблицы
 ```
 
-[Best practices: How to write migrations.](MIGRATIONS.md)
+### Команды для работы с миграциями
 
-## Coming from another db migration tool?
+```bash
+# Создание базы данных
+make create-db SERVICE=auth     # Создание базы данных для авторизации
+make create-db SERVICE=product  # Создание базы данных для товаров
 
-Check out [migradaptor](https://github.com/musinit/migradaptor/).
-*Note: migradaptor is not affiliated or supported by this project*
+# Удаление базы данных
+make drop-db SERVICE=auth      # Удаление базы данных авторизации
+make drop-db SERVICE=product   # Удаление базы данных товаров
 
-## Versions
+# Создание новой миграции
+make migrate-create SERVICE=auth    # Создание миграции для авторизации
+make migrate-create SERVICE=product # Создание миграции для товаров
 
-Version | Supported? | Import | Notes
---------|------------|--------|------
-**master** | :white_check_mark: | `import "github.com/golang-migrate/migrate/v4"` | New features and bug fixes arrive here first |
-**v4** | :white_check_mark: | `import "github.com/golang-migrate/migrate/v4"` | Used for stable releases |
-**v3** | :x: | `import "github.com/golang-migrate/migrate"` (with package manager) or `import "gopkg.in/golang-migrate/migrate.v3"` (not recommended) | **DO NOT USE** - No longer supported |
+# Применение миграций
+make migrate-up SERVICE=auth     # Применение всех миграций для авторизации
+make migrate-up SERVICE=product  # Применение всех миграций для товаров
 
-## Development and Contributing
+# Откат миграций
+make migrate-down SERVICE=auth   # Откат последней миграции для авторизации
+make migrate-down SERVICE=product # Откат последней миграции для товаров
 
-Yes, please! [`Makefile`](Makefile) is your friend,
-read the [development guide](CONTRIBUTING.md).
+# Сброс состояния миграций
+make migrate-clean SERVICE=auth   # Сброс и повторное применение миграций для авторизации
+make migrate-clean SERVICE=product # Сброс и повторное применение миграций для товаров
 
-Also have a look at the [FAQ](FAQ.md).
+# Установка конкретной версии миграций
+make migrate-force SERVICE=auth VERSION=1  # Установка версии 1 для авторизации
+```
 
 ---
-
-MIT License © 2025 Zadnik

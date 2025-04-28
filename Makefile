@@ -285,3 +285,20 @@ stop-all-bin:
 generate-mocks: install-mockgen
 	@echo "==> Generating mocks..."
 	@mockgen -source=internal/auth/domain/user.go -destination=internal/auth/mocks/mock_repositories.go -package=mocks
+
+# Test commands
+.PHONY: test test-auth test-auth-unit test-auth-integration test-gateway test-image test-product
+
+test:
+	@echo "==> Running all tests..."
+	go test ./... -v
+
+test-auth: test-auth-unit test-auth-integration
+
+test-auth-unit:
+	@echo "==> Running auth unit tests..."
+	go test ./internal/auth/usecase/... -v
+
+test-auth-integration:
+	@echo "==> Running auth integration tests..."
+	go test ./internal/auth/repository/postgres/... -v

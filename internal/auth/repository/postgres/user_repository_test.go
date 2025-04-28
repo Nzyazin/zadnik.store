@@ -25,7 +25,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 	// Вставляем пользователя
 	var userID int64
 	err := db.QueryRow(
-		`INSERT INTO users (username, password, created_at, updated_at)
+		`INSERT INTO users (username, password_hash, created_at, updated_at)
 		VALUES ($1, $2, $3, $4) RETURNING id`,
 		user.Username, user.PasswordHash, user.CreatedAt, user.UpdatedAt,
 	).Scan(&userID)
@@ -63,7 +63,7 @@ func TestUserRepository_GetByUsername(t *testing.T) {
 
 	// Вставляем пользователя
 	_, err := db.Exec(
-		`INSERT INTO users (username, password, created_at, updated_at)
+		`INSERT INTO users (username, password_hash, created_at, updated_at)
 		VALUES ($1, $2, $3, $4)`,
 		user.Username, user.PasswordHash, user.CreatedAt, user.UpdatedAt,
 	)

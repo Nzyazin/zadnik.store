@@ -58,7 +58,7 @@ func TestAuthUseCase_Login(t *testing.T) {
 
 		// Проверяем результаты
 		assert.Error(t, err)
-		assert.Nil(t, tokens)
+		assert.Empty(t, tokens)
 		assert.Equal(t, domain.ErrInvalidCredentials, err)
 	})
 
@@ -73,7 +73,7 @@ func TestAuthUseCase_Login(t *testing.T) {
 
 		// Проверяем результаты
 		assert.Error(t, err)
-		assert.Nil(t, tokens)
+		assert.Empty(t, tokens)
 		assert.Equal(t, domain.ErrInvalidCredentials, err)
 	})
 }
