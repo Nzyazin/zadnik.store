@@ -192,6 +192,11 @@ func (s *Server) RunWithTLS(addr, certFile, keyFile string) error {
 }
 
 func RunHTTPRedirect(httpAddr, httpsHost string) *http.Server {
+	if strings.HasPrefix(httpsHost, "http://") {
+		httpsHost = httpsHost[len("http://"):]
+	} else if strings.HasPrefix(httpsHost, "https://") {
+		httpsHost = httpsHost[len("https://"):]
+	}
 	srv := &http.Server{
 		Addr: httpAddr,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
